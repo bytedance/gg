@@ -7,4 +7,7 @@ header:
     - '**/*.go'
     - '**/*.s'
 
+  paths-ignore:
+    - 'internal/constraints/constraints.go'
+
   comment: on-failure

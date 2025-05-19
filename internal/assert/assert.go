@@ -258,31 +258,28 @@ func False[T ~bool](t *testing.T, i T) bool {
 	return bool(i)
 }
 
-// Copied from https://github.com/stretchr/testify/blob/v1.7.0/assert/assertions.go#L1003
-//
-// didPanic returns true if the function passed to it panics. Otherwise, it returns false.
-func didPanic(f func()) (bool, any, string) {
-	didPanic := false
-	var message any
-	var stack string
+func checkPanic(f func()) (bool, any, string) {
+	var (
+		panicOccurred bool
+		panicMessage  any
+		stack         string
+	)
 	func() {
-
 		defer func() {
-			if message = recover(); message != nil {
-				didPanic = true
+			if recovered := recover(); recovered != nil {
+				panicOccurred = true
+				panicMessage = recovered
 				stack = string(debug.Stack())
 			}
 		}()
 
-		// call the target function
 		f()
-
 	}()
-
-	return didPanic, message, stack
+	return panicOccurred, panicMessage, stack
 }
+
 func Panic(t *testing.T, f func()) bool {
-	ok, _, _ := didPanic(f)
+	ok, _, _ := checkPanic(f)
 	if !ok {
 		// Ask *testing.T to skip current function when printing file and
 		// line information.
@@ -296,7 +293,7 @@ func Panic(t *testing.T, f func()) bool {
 }
 
 func NotPanic(t *testing.T, f func()) bool {
-	ok, e, stack := didPanic(f)
+	ok, e, stack := checkPanic(f)
 	if ok {
 		// Ask *testing.T to skip current function when printing file and
 		// line information.
