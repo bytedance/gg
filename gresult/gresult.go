@@ -25,7 +25,7 @@
 //
 // # JSON
 //
-// [R] implements [encoding/json.Marshaler] and [encoding/json.Ummarshaler], so
+// [R] implements [encoding/json.Marshaler] and [encoding/json.Unmarshaler], so
 // you can use it in JSON marshaling/unmarshaling.
 // See [gresult.R.MarshalJSON] and [gresult.R.UnmarshalJSON].
 package gresult

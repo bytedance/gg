@@ -24,7 +24,7 @@
 //
 // # JSON
 //
-// [O] implements [encoding/json.Marshaler] and [encoding/json.Ummarshaler], so
+// [O] implements [encoding/json.Marshaler] and [encoding/json.Unmarshaler], so
 // you can use it in JSON marshaling/unmarshaling.
 // See [goption.O.MarshalJSON] and [goption.O.UnmarshalJSON].
 package goption
