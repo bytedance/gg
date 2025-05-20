@@ -14,3 +14,7 @@ gen:
 	cd ./internal/stream && ./gen.sh
 	cd ./collection/skipmap && ./gen.sh
 	cd ./collection/skipset && ./gen.sh
+
+.PHONY: license
+license:
+	license-eye -c .licenserc.yaml header fix
