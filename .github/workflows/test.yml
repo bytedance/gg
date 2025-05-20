@@ -36,16 +36,18 @@ jobs:
         run: go mod tidy
 
       - name: Run unit tests
-        run: go test -v -race -coverprofile=coverage-${{ matrix.go-version }}.txt -covermode=atomic ./...
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Run benchmarks
-        if: matrix.go-version == '1.24.x'  # 仅在最新版本运行基准测试
+        if: matrix.go-version == '1.24.x'
         run: go test -v -bench=. -benchmem ./...
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
-          files: coverage-${{ matrix.go-version }}.txt
+          files: coverage.txt
+          flags: go-${{ matrix.go-version }},unittests
+          name: go-${{ matrix.go-version }}
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
