@@ -36,9 +36,9 @@ import (
 	"github.com/bytedance/gg/gcond"
 	"github.com/bytedance/gg/gresult"
 	"github.com/bytedance/gg/gvalue"
+	"github.com/bytedance/gg/internal/iter"
 	"github.com/bytedance/gg/internal/rtassert"
 	"github.com/bytedance/gg/internal/stream"
-	"github.com/bytedance/gg/iter"
 )
 
 var (

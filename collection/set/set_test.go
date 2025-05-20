@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/bytedance/gg/internal/assert"
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
 func TestLen(t *testing.T) {
@@ -99,13 +99,6 @@ func TestRemoveN(t *testing.T) {
 
 	s.RemoveN()
 	assert.Equal(t, 0, s.Len())
-}
-
-func TestIter(t *testing.T) {
-	assert.Equal(t, []int{},
-		iter.ToSlice((New[int]().Iter())))
-	assert.Equal(t, []int{1, 2, 3, 4},
-		iter.ToSlice(iter.Sort(New(1, 2, 3, 4).Iter())))
 }
 
 func TestRange(t *testing.T) {

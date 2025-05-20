@@ -16,8 +16,6 @@ package set
 
 import (
 	"fmt"
-
-	"github.com/bytedance/gg/iter"
 )
 
 func Example() {
@@ -48,21 +46,6 @@ func Example() {
 	// 11 is added as member
 	// member 11 and 12 are removed
 	// here are 2 members
-}
-
-func ExampleIter() {
-	s := New(5, 3, 2, 1, 4)
-
-	for _, v := range iter.ToSlice(iter.Sort(s.Iter())) {
-		fmt.Println(v)
-	}
-
-	// Output:
-	// 1
-	// 2
-	// 3
-	// 4
-	// 5
 }
 
 func ExampleSet_ContainsAny() {

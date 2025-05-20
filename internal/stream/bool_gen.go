@@ -18,7 +18,8 @@ package stream
 
 import (
 	"context"
-	"github.com/bytedance/gg/iter"
+
+	"github.com/bytedance/gg/internal/iter"
 )
 
 // Bool is a ~bool variant of Comparable.
@@ -26,67 +27,67 @@ type Bool[T ~bool] struct {
 	Comparable[T]
 }
 
-// FromIter wraps an [github.com/bytedance/gg/iter.Iter] to [Stream].
+// FromIter wraps an [github.com/bytedance/gg/internal/iter.Iter] to [Stream].
 func FromBoolIter[T ~bool](i iter.Iter[T]) Bool[T] {
 	return Bool[T]{FromComparableIter(i)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromSlice].
+// See function [github.com/bytedance/gg/internal/iter.FromSlice].
 func FromBoolSlice[T ~bool](s []T) Bool[T] {
 	return Bool[T]{FromComparableSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.StealSlice].
+// See function [github.com/bytedance/gg/internal/iter.StealSlice].
 func StealBoolSlice[T ~bool](s []T) Bool[T] {
 	return Bool[T]{StealComparableSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromMapValues].
+// See function [github.com/bytedance/gg/internal/iter.FromMapValues].
 func FromBoolMapValues[I comparable, T ~bool](m map[I]T) Bool[T] {
 	return Bool[T]{FromComparableMapValues(m)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromChan].
+// See function [github.com/bytedance/gg/internal/iter.FromChan].
 func FromBoolChan[T ~bool](ctx context.Context, ch <-chan T) Bool[T] {
 	return Bool[T]{FromComparableChan(ctx, ch)}
 }
 
-// See function [github.com/bytedance/gg/iter.Repeat].
+// See function [github.com/bytedance/gg/internal/iter.Repeat].
 func RepeatBool[T ~bool](v T) Bool[T] {
 	return Bool[T]{RepeatComparable(v)}
 }
 
-// See function [github.com/bytedance/gg/iter.MapInplace].
+// See function [github.com/bytedance/gg/internal/iter.MapInplace].
 func (s Bool[T]) Map(f func(T) T) Bool[T] {
 	return Bool[T]{s.Comparable.Map(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.FlatMap].
+// See function [github.com/bytedance/gg/internal/iter.FlatMap].
 func (s Bool[T]) FlatMap(f func(T) []T) Bool[T] {
 	return Bool[T]{s.Comparable.FlatMap(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Filter].
+// See function [github.com/bytedance/gg/internal/iter.Filter].
 func (s Bool[T]) Filter(f func(T) bool) Bool[T] {
 	return Bool[T]{s.Comparable.Filter(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Reverse].
+// See function [github.com/bytedance/gg/internal/iter.Reverse].
 func (s Bool[T]) Reverse() Bool[T] {
 	return Bool[T]{s.Comparable.Reverse()}
 }
 
-// See function [github.com/bytedance/gg/iter.Take].
+// See function [github.com/bytedance/gg/internal/iter.Take].
 func (s Bool[T]) Take(n int) Bool[T] {
 	return Bool[T]{s.Comparable.Take(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Drop].
+// See function [github.com/bytedance/gg/internal/iter.Drop].
 func (s Bool[T]) Drop(n int) Bool[T] {
 	return Bool[T]{s.Comparable.Drop(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Concat].
+// See function [github.com/bytedance/gg/internal/iter.Concat].
 func (s Bool[T]) Concat(ss ...Bool[T]) Bool[T] {
 	conv := func(c Bool[T]) Comparable[T] {
 		return c.Comparable
@@ -95,47 +96,47 @@ func (s Bool[T]) Concat(ss ...Bool[T]) Bool[T] {
 	return Bool[T]{s.Comparable.Concat(tmp...)}
 }
 
-// See function [github.com/bytedance/gg/iter.Zip].
+// See function [github.com/bytedance/gg/internal/iter.Zip].
 func (s Bool[T]) Zip(f func(T, T) T, another Bool[T]) Bool[T] {
 	return Bool[T]{s.Comparable.Zip(f, another.Comparable)}
 }
 
-// See function [github.com/bytedance/gg/iter.Intersperse].
+// See function [github.com/bytedance/gg/internal/iter.Intersperse].
 func (s Bool[T]) Intersperse(sep T) Bool[T] {
 	return Bool[T]{s.Comparable.Intersperse(sep)}
 }
 
-// See function [github.com/bytedance/gg/iter.Append].
+// See function [github.com/bytedance/gg/internal/iter.Append].
 func (s Bool[T]) Append(tail T) Bool[T] {
 	return Bool[T]{s.Comparable.Append(tail)}
 }
 
-// See function [github.com/bytedance/gg/iter.Prepend].
+// See function [github.com/bytedance/gg/internal/iter.Prepend].
 func (s Bool[T]) Prepend(head T) Bool[T] {
 	return Bool[T]{s.Comparable.Prepend(head)}
 }
 
-// See function [github.com/bytedance/gg/iter.TakeWhile].
+// See function [github.com/bytedance/gg/internal/iter.TakeWhile].
 func (s Bool[T]) TakeWhile(f func(T) bool) Bool[T] {
 	return Bool[T]{s.Comparable.TakeWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.DropWhile].
+// See function [github.com/bytedance/gg/internal/iter.DropWhile].
 func (s Bool[T]) DropWhile(f func(T) bool) Bool[T] {
 	return Bool[T]{s.Comparable.DropWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.SortBy].
+// See function [github.com/bytedance/gg/internal/iter.SortBy].
 func (s Bool[T]) SortBy(less func(T, T) bool) Bool[T] {
 	return Bool[T]{s.Comparable.SortBy(less)}
 }
 
-// See function [github.com/bytedance/gg/iter.Shuffle].
+// See function [github.com/bytedance/gg/internal/iter.Shuffle].
 func (s Bool[T]) Shuffle() Bool[T] {
 	return Bool[T]{s.Comparable.Shuffle()}
 }
 
-// See function [github.com/bytedance/gg/iter.FromMapKeys].
+// See function [github.com/bytedance/gg/internal/iter.FromMapKeys].
 func FromBoolMapKeys[T ~bool, I any](m map[T]I) Bool[T] {
 	return Bool[T]{FromMapKeys(m)}
 }

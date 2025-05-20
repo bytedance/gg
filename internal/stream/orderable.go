@@ -17,25 +17,25 @@ package stream
 import (
 	"github.com/bytedance/gg/collection/tuple"
 	"github.com/bytedance/gg/goption"
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
-// See function [github.com/bytedance/gg/iter.Max].
+// See function [github.com/bytedance/gg/internal/iter.Max].
 func (s Orderable[T]) Max() goption.O[T] {
 	return iter.Max(s.Iter)
 }
 
-// See function [github.com/bytedance/gg/iter.Min].
+// See function [github.com/bytedance/gg/internal/iter.Min].
 func (s Orderable[T]) Min() goption.O[T] {
 	return iter.Min(s.Iter)
 }
 
-// See function [github.com/bytedance/gg/iter.MinMax].
+// See function [github.com/bytedance/gg/internal/iter.MinMax].
 func (s Orderable[T]) MinMax() goption.O[tuple.T2[T, T]] {
 	return iter.MinMax(s.Iter)
 }
 
-// See function [github.com/bytedance/gg/iter.Sort].
+// See function [github.com/bytedance/gg/internal/iter.Sort].
 func (s Orderable[T]) Sort() Orderable[T] {
 	return FromOrderableIter(iter.Sort(s.Iter))
 }

@@ -19,7 +19,7 @@ package stream
 import (
 	"context"
 	"github.com/bytedance/gg/collection/tuple"
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
 // KV is a tuple.T2[K, V] variant of Stream.
@@ -27,47 +27,47 @@ type KV[K comparable, V any] struct {
 	Stream[tuple.T2[K, V]]
 }
 
-// FromIter wraps an [github.com/bytedance/gg/iter.Iter] to [Stream].
+// FromIter wraps an [github.com/bytedance/gg/internal/iter.Iter] to [Stream].
 func FromKVIter[K comparable, V any](i iter.Iter[tuple.T2[K, V]]) KV[K, V] {
 	return KV[K, V]{FromIter(i)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromSlice].
+// See function [github.com/bytedance/gg/internal/iter.FromSlice].
 func FromKVSlice[K comparable, V any](s []tuple.T2[K, V]) KV[K, V] {
 	return KV[K, V]{FromSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.StealSlice].
+// See function [github.com/bytedance/gg/internal/iter.StealSlice].
 func StealKVSlice[K comparable, V any](s []tuple.T2[K, V]) KV[K, V] {
 	return KV[K, V]{StealSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromChan].
+// See function [github.com/bytedance/gg/internal/iter.FromChan].
 func FromKVChan[K comparable, V any](ctx context.Context, ch <-chan tuple.T2[K, V]) KV[K, V] {
 	return KV[K, V]{FromChan(ctx, ch)}
 }
 
-// See function [github.com/bytedance/gg/iter.FlatMap].
+// See function [github.com/bytedance/gg/internal/iter.FlatMap].
 func (s KV[K, V]) FlatMap(f func(tuple.T2[K, V]) []tuple.T2[K, V]) KV[K, V] {
 	return KV[K, V]{s.Stream.FlatMap(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Reverse].
+// See function [github.com/bytedance/gg/internal/iter.Reverse].
 func (s KV[K, V]) Reverse() KV[K, V] {
 	return KV[K, V]{s.Stream.Reverse()}
 }
 
-// See function [github.com/bytedance/gg/iter.Take].
+// See function [github.com/bytedance/gg/internal/iter.Take].
 func (s KV[K, V]) Take(n int) KV[K, V] {
 	return KV[K, V]{s.Stream.Take(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Drop].
+// See function [github.com/bytedance/gg/internal/iter.Drop].
 func (s KV[K, V]) Drop(n int) KV[K, V] {
 	return KV[K, V]{s.Stream.Drop(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Concat].
+// See function [github.com/bytedance/gg/internal/iter.Concat].
 func (s KV[K, V]) Concat(ss ...KV[K, V]) KV[K, V] {
 	conv := func(c KV[K, V]) Stream[tuple.T2[K, V]] {
 		return c.Stream
@@ -76,7 +76,7 @@ func (s KV[K, V]) Concat(ss ...KV[K, V]) KV[K, V] {
 	return KV[K, V]{s.Stream.Concat(tmp...)}
 }
 
-// See function [github.com/bytedance/gg/iter.Shuffle].
+// See function [github.com/bytedance/gg/internal/iter.Shuffle].
 func (s KV[K, V]) Shuffle() KV[K, V] {
 	return KV[K, V]{s.Stream.Shuffle()}
 }

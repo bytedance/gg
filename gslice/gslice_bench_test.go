@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
 func BenchmarkMap10(b *testing.B) {

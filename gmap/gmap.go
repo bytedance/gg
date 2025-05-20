@@ -119,7 +119,7 @@ import (
 	"github.com/bytedance/gg/gslice"
 	"github.com/bytedance/gg/gvalue"
 	"github.com/bytedance/gg/internal/constraints"
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
 // Map applies function f to each key and value of map m.

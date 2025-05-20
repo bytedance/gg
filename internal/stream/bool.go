@@ -15,15 +15,15 @@
 package stream
 
 import (
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
-// See function [github.com/bytedance/gg/iter.And].
+// See function [github.com/bytedance/gg/internal/iter.And].
 func (s Bool[T]) And() bool {
 	return iter.And(s.Iter)
 }
 
-// See function [github.com/bytedance/gg/iter.Or].
+// See function [github.com/bytedance/gg/internal/iter.Or].
 func (s Bool[T]) Or() bool {
 	return iter.Or(s.Iter)
 }

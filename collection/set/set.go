@@ -43,7 +43,6 @@
 //
 // If you need fixed order iteration, you can:
 //
-//   - Use [set.Set.Iter] and use [github.com/bytedance/gg/iter.Sort] before iteration
 //   - Use [set.Set.ToSlice] and use [github.com/bytedance/gg/gslice.Sort] before iteration
 package set
 
@@ -55,7 +54,6 @@ import (
 	"github.com/bytedance/gg/gcond"
 	"github.com/bytedance/gg/internal/heapsort"
 	"github.com/bytedance/gg/internal/jsonbuilder"
-	"github.com/bytedance/gg/iter"
 )
 
 const (
@@ -154,14 +152,6 @@ func (s *Set[T]) ContainsAll(vs ...T) bool {
 		}
 	}
 	return true
-}
-
-// Iter creates an iterator of set.
-//
-// 💡 NOTE: The iteration order over sets is not specified and is not guaranteed
-// to be the same from one iteration to the next.
-func (s *Set[T]) Iter() iter.Iter[T] {
-	return iter.FromMapKeys(s.m)
 }
 
 // Range calls f sequentially for each member in the set.

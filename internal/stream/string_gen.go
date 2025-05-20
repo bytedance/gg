@@ -18,7 +18,8 @@ package stream
 
 import (
 	"context"
-	"github.com/bytedance/gg/iter"
+
+	"github.com/bytedance/gg/internal/iter"
 )
 
 // String is a ~string variant of Orderable.
@@ -26,67 +27,67 @@ type String[T ~string] struct {
 	Orderable[T]
 }
 
-// FromIter wraps an [github.com/bytedance/gg/iter.Iter] to [Stream].
+// FromIter wraps an [github.com/bytedance/gg/internal/iter.Iter] to [Stream].
 func FromStringIter[T ~string](i iter.Iter[T]) String[T] {
 	return String[T]{FromOrderableIter(i)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromSlice].
+// See function [github.com/bytedance/gg/internal/iter.FromSlice].
 func FromStringSlice[T ~string](s []T) String[T] {
 	return String[T]{FromOrderableSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.StealSlice].
+// See function [github.com/bytedance/gg/internal/iter.StealSlice].
 func StealStringSlice[T ~string](s []T) String[T] {
 	return String[T]{StealOrderableSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromMapValues].
+// See function [github.com/bytedance/gg/internal/iter.FromMapValues].
 func FromStringMapValues[I comparable, T ~string](m map[I]T) String[T] {
 	return String[T]{FromOrderableMapValues(m)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromChan].
+// See function [github.com/bytedance/gg/internal/iter.FromChan].
 func FromStringChan[T ~string](ctx context.Context, ch <-chan T) String[T] {
 	return String[T]{FromOrderableChan(ctx, ch)}
 }
 
-// See function [github.com/bytedance/gg/iter.Repeat].
+// See function [github.com/bytedance/gg/internal/iter.Repeat].
 func RepeatString[T ~string](v T) String[T] {
 	return String[T]{RepeatOrderable(v)}
 }
 
-// See function [github.com/bytedance/gg/iter.MapInplace].
+// See function [github.com/bytedance/gg/internal/iter.MapInplace].
 func (s String[T]) Map(f func(T) T) String[T] {
 	return String[T]{s.Orderable.Map(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.FlatMap].
+// See function [github.com/bytedance/gg/internal/iter.FlatMap].
 func (s String[T]) FlatMap(f func(T) []T) String[T] {
 	return String[T]{s.Orderable.FlatMap(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Filter].
+// See function [github.com/bytedance/gg/internal/iter.Filter].
 func (s String[T]) Filter(f func(T) bool) String[T] {
 	return String[T]{s.Orderable.Filter(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Reverse].
+// See function [github.com/bytedance/gg/internal/iter.Reverse].
 func (s String[T]) Reverse() String[T] {
 	return String[T]{s.Orderable.Reverse()}
 }
 
-// See function [github.com/bytedance/gg/iter.Take].
+// See function [github.com/bytedance/gg/internal/iter.Take].
 func (s String[T]) Take(n int) String[T] {
 	return String[T]{s.Orderable.Take(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Drop].
+// See function [github.com/bytedance/gg/internal/iter.Drop].
 func (s String[T]) Drop(n int) String[T] {
 	return String[T]{s.Orderable.Drop(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Concat].
+// See function [github.com/bytedance/gg/internal/iter.Concat].
 func (s String[T]) Concat(ss ...String[T]) String[T] {
 	conv := func(c String[T]) Orderable[T] {
 		return c.Orderable
@@ -95,72 +96,72 @@ func (s String[T]) Concat(ss ...String[T]) String[T] {
 	return String[T]{s.Orderable.Concat(tmp...)}
 }
 
-// See function [github.com/bytedance/gg/iter.Zip].
+// See function [github.com/bytedance/gg/internal/iter.Zip].
 func (s String[T]) Zip(f func(T, T) T, another String[T]) String[T] {
 	return String[T]{s.Orderable.Zip(f, another.Orderable)}
 }
 
-// See function [github.com/bytedance/gg/iter.Intersperse].
+// See function [github.com/bytedance/gg/internal/iter.Intersperse].
 func (s String[T]) Intersperse(sep T) String[T] {
 	return String[T]{s.Orderable.Intersperse(sep)}
 }
 
-// See function [github.com/bytedance/gg/iter.Append].
+// See function [github.com/bytedance/gg/internal/iter.Append].
 func (s String[T]) Append(tail T) String[T] {
 	return String[T]{s.Orderable.Append(tail)}
 }
 
-// See function [github.com/bytedance/gg/iter.Prepend].
+// See function [github.com/bytedance/gg/internal/iter.Prepend].
 func (s String[T]) Prepend(head T) String[T] {
 	return String[T]{s.Orderable.Prepend(head)}
 }
 
-// See function [github.com/bytedance/gg/iter.TakeWhile].
+// See function [github.com/bytedance/gg/internal/iter.TakeWhile].
 func (s String[T]) TakeWhile(f func(T) bool) String[T] {
 	return String[T]{s.Orderable.TakeWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.DropWhile].
+// See function [github.com/bytedance/gg/internal/iter.DropWhile].
 func (s String[T]) DropWhile(f func(T) bool) String[T] {
 	return String[T]{s.Orderable.DropWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.SortBy].
+// See function [github.com/bytedance/gg/internal/iter.SortBy].
 func (s String[T]) SortBy(less func(T, T) bool) String[T] {
 	return String[T]{s.Orderable.SortBy(less)}
 }
 
-// See function [github.com/bytedance/gg/iter.UniqBy].
+// See function [github.com/bytedance/gg/internal/iter.UniqBy].
 func (s String[T]) UniqBy(f func(T) any) String[T] {
 	return String[T]{s.Orderable.UniqBy(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Shuffle].
+// See function [github.com/bytedance/gg/internal/iter.Shuffle].
 func (s String[T]) Shuffle() String[T] {
 	return String[T]{s.Orderable.Shuffle()}
 }
 
-// See function [github.com/bytedance/gg/iter.FromMapKeys].
+// See function [github.com/bytedance/gg/internal/iter.FromMapKeys].
 func FromStringMapKeys[T ~string, I any](m map[T]I) String[T] {
 	return String[T]{FromOrderableMapKeys(m)}
 }
 
-// See function [github.com/bytedance/gg/iter.Uniq].
+// See function [github.com/bytedance/gg/internal/iter.Uniq].
 func (s String[T]) Uniq() String[T] {
 	return String[T]{s.Orderable.Uniq()}
 }
 
-// See function [github.com/bytedance/gg/iter.Remove].
+// See function [github.com/bytedance/gg/internal/iter.Remove].
 func (s String[T]) Remove(v T) String[T] {
 	return String[T]{s.Orderable.Remove(v)}
 }
 
-// See function [github.com/bytedance/gg/iter.RemoveN].
+// See function [github.com/bytedance/gg/internal/iter.RemoveN].
 func (s String[T]) RemoveN(v T, n int) String[T] {
 	return String[T]{s.Orderable.RemoveN(v, n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Sort].
+// See function [github.com/bytedance/gg/internal/iter.Sort].
 func (s String[T]) Sort() String[T] {
 	return String[T]{s.Orderable.Sort()}
 }

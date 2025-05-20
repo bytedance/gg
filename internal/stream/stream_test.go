@@ -27,7 +27,7 @@ import (
 	"github.com/bytedance/gg/gfunc"
 	"github.com/bytedance/gg/gvalue"
 	"github.com/bytedance/gg/internal/assert"
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
 // Filter zero value.

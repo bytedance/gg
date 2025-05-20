@@ -18,8 +18,9 @@ package stream
 
 import (
 	"context"
+
 	"github.com/bytedance/gg/internal/constraints"
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
 // Number is a constraints.Number variant of Orderable.
@@ -27,67 +28,67 @@ type Number[T constraints.Number] struct {
 	Orderable[T]
 }
 
-// FromIter wraps an [github.com/bytedance/gg/iter.Iter] to [Stream].
+// FromIter wraps an [github.com/bytedance/gg/internal/iter.Iter] to [Stream].
 func FromNumberIter[T constraints.Number](i iter.Iter[T]) Number[T] {
 	return Number[T]{FromOrderableIter(i)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromSlice].
+// See function [github.com/bytedance/gg/internal/iter.FromSlice].
 func FromNumberSlice[T constraints.Number](s []T) Number[T] {
 	return Number[T]{FromOrderableSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.StealSlice].
+// See function [github.com/bytedance/gg/internal/iter.StealSlice].
 func StealNumberSlice[T constraints.Number](s []T) Number[T] {
 	return Number[T]{StealOrderableSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromMapValues].
+// See function [github.com/bytedance/gg/internal/iter.FromMapValues].
 func FromNumberMapValues[I comparable, T constraints.Number](m map[I]T) Number[T] {
 	return Number[T]{FromOrderableMapValues(m)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromChan].
+// See function [github.com/bytedance/gg/internal/iter.FromChan].
 func FromNumberChan[T constraints.Number](ctx context.Context, ch <-chan T) Number[T] {
 	return Number[T]{FromOrderableChan(ctx, ch)}
 }
 
-// See function [github.com/bytedance/gg/iter.Repeat].
+// See function [github.com/bytedance/gg/internal/iter.Repeat].
 func RepeatNumber[T constraints.Number](v T) Number[T] {
 	return Number[T]{RepeatOrderable(v)}
 }
 
-// See function [github.com/bytedance/gg/iter.MapInplace].
+// See function [github.com/bytedance/gg/internal/iter.MapInplace].
 func (s Number[T]) Map(f func(T) T) Number[T] {
 	return Number[T]{s.Orderable.Map(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.FlatMap].
+// See function [github.com/bytedance/gg/internal/iter.FlatMap].
 func (s Number[T]) FlatMap(f func(T) []T) Number[T] {
 	return Number[T]{s.Orderable.FlatMap(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Filter].
+// See function [github.com/bytedance/gg/internal/iter.Filter].
 func (s Number[T]) Filter(f func(T) bool) Number[T] {
 	return Number[T]{s.Orderable.Filter(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Reverse].
+// See function [github.com/bytedance/gg/internal/iter.Reverse].
 func (s Number[T]) Reverse() Number[T] {
 	return Number[T]{s.Orderable.Reverse()}
 }
 
-// See function [github.com/bytedance/gg/iter.Take].
+// See function [github.com/bytedance/gg/internal/iter.Take].
 func (s Number[T]) Take(n int) Number[T] {
 	return Number[T]{s.Orderable.Take(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Drop].
+// See function [github.com/bytedance/gg/internal/iter.Drop].
 func (s Number[T]) Drop(n int) Number[T] {
 	return Number[T]{s.Orderable.Drop(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Concat].
+// See function [github.com/bytedance/gg/internal/iter.Concat].
 func (s Number[T]) Concat(ss ...Number[T]) Number[T] {
 	conv := func(c Number[T]) Orderable[T] {
 		return c.Orderable
@@ -96,72 +97,72 @@ func (s Number[T]) Concat(ss ...Number[T]) Number[T] {
 	return Number[T]{s.Orderable.Concat(tmp...)}
 }
 
-// See function [github.com/bytedance/gg/iter.Zip].
+// See function [github.com/bytedance/gg/internal/iter.Zip].
 func (s Number[T]) Zip(f func(T, T) T, another Number[T]) Number[T] {
 	return Number[T]{s.Orderable.Zip(f, another.Orderable)}
 }
 
-// See function [github.com/bytedance/gg/iter.Intersperse].
+// See function [github.com/bytedance/gg/internal/iter.Intersperse].
 func (s Number[T]) Intersperse(sep T) Number[T] {
 	return Number[T]{s.Orderable.Intersperse(sep)}
 }
 
-// See function [github.com/bytedance/gg/iter.Append].
+// See function [github.com/bytedance/gg/internal/iter.Append].
 func (s Number[T]) Append(tail T) Number[T] {
 	return Number[T]{s.Orderable.Append(tail)}
 }
 
-// See function [github.com/bytedance/gg/iter.Prepend].
+// See function [github.com/bytedance/gg/internal/iter.Prepend].
 func (s Number[T]) Prepend(head T) Number[T] {
 	return Number[T]{s.Orderable.Prepend(head)}
 }
 
-// See function [github.com/bytedance/gg/iter.TakeWhile].
+// See function [github.com/bytedance/gg/internal/iter.TakeWhile].
 func (s Number[T]) TakeWhile(f func(T) bool) Number[T] {
 	return Number[T]{s.Orderable.TakeWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.DropWhile].
+// See function [github.com/bytedance/gg/internal/iter.DropWhile].
 func (s Number[T]) DropWhile(f func(T) bool) Number[T] {
 	return Number[T]{s.Orderable.DropWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.SortBy].
+// See function [github.com/bytedance/gg/internal/iter.SortBy].
 func (s Number[T]) SortBy(less func(T, T) bool) Number[T] {
 	return Number[T]{s.Orderable.SortBy(less)}
 }
 
-// See function [github.com/bytedance/gg/iter.UniqBy].
+// See function [github.com/bytedance/gg/internal/iter.UniqBy].
 func (s Number[T]) UniqBy(f func(T) any) Number[T] {
 	return Number[T]{s.Orderable.UniqBy(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Shuffle].
+// See function [github.com/bytedance/gg/internal/iter.Shuffle].
 func (s Number[T]) Shuffle() Number[T] {
 	return Number[T]{s.Orderable.Shuffle()}
 }
 
-// See function [github.com/bytedance/gg/iter.FromMapKeys].
+// See function [github.com/bytedance/gg/internal/iter.FromMapKeys].
 func FromNumberMapKeys[T constraints.Number, I any](m map[T]I) Number[T] {
 	return Number[T]{FromOrderableMapKeys(m)}
 }
 
-// See function [github.com/bytedance/gg/iter.Uniq].
+// See function [github.com/bytedance/gg/internal/iter.Uniq].
 func (s Number[T]) Uniq() Number[T] {
 	return Number[T]{s.Orderable.Uniq()}
 }
 
-// See function [github.com/bytedance/gg/iter.Remove].
+// See function [github.com/bytedance/gg/internal/iter.Remove].
 func (s Number[T]) Remove(v T) Number[T] {
 	return Number[T]{s.Orderable.Remove(v)}
 }
 
-// See function [github.com/bytedance/gg/iter.RemoveN].
+// See function [github.com/bytedance/gg/internal/iter.RemoveN].
 func (s Number[T]) RemoveN(v T, n int) Number[T] {
 	return Number[T]{s.Orderable.RemoveN(v, n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Sort].
+// See function [github.com/bytedance/gg/internal/iter.Sort].
 func (s Number[T]) Sort() Number[T] {
 	return Number[T]{s.Orderable.Sort()}
 }

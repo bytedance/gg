@@ -18,7 +18,8 @@ package stream
 
 import (
 	"context"
-	"github.com/bytedance/gg/iter"
+
+	"github.com/bytedance/gg/internal/iter"
 )
 
 // Comparable is a comparable variant of Stream.
@@ -26,67 +27,67 @@ type Comparable[T comparable] struct {
 	Stream[T]
 }
 
-// FromIter wraps an [github.com/bytedance/gg/iter.Iter] to [Stream].
+// FromIter wraps an [github.com/bytedance/gg/internal/iter.Iter] to [Stream].
 func FromComparableIter[T comparable](i iter.Iter[T]) Comparable[T] {
 	return Comparable[T]{FromIter(i)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromSlice].
+// See function [github.com/bytedance/gg/internal/iter.FromSlice].
 func FromComparableSlice[T comparable](s []T) Comparable[T] {
 	return Comparable[T]{FromSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.StealSlice].
+// See function [github.com/bytedance/gg/internal/iter.StealSlice].
 func StealComparableSlice[T comparable](s []T) Comparable[T] {
 	return Comparable[T]{StealSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromMapValues].
+// See function [github.com/bytedance/gg/internal/iter.FromMapValues].
 func FromComparableMapValues[I comparable, T comparable](m map[I]T) Comparable[T] {
 	return Comparable[T]{FromMapValues(m)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromChan].
+// See function [github.com/bytedance/gg/internal/iter.FromChan].
 func FromComparableChan[T comparable](ctx context.Context, ch <-chan T) Comparable[T] {
 	return Comparable[T]{FromChan(ctx, ch)}
 }
 
-// See function [github.com/bytedance/gg/iter.Repeat].
+// See function [github.com/bytedance/gg/internal/iter.Repeat].
 func RepeatComparable[T comparable](v T) Comparable[T] {
 	return Comparable[T]{Repeat(v)}
 }
 
-// See function [github.com/bytedance/gg/iter.MapInplace].
+// See function [github.com/bytedance/gg/internal/iter.MapInplace].
 func (s Comparable[T]) Map(f func(T) T) Comparable[T] {
 	return Comparable[T]{s.Stream.Map(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.FlatMap].
+// See function [github.com/bytedance/gg/internal/iter.FlatMap].
 func (s Comparable[T]) FlatMap(f func(T) []T) Comparable[T] {
 	return Comparable[T]{s.Stream.FlatMap(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Filter].
+// See function [github.com/bytedance/gg/internal/iter.Filter].
 func (s Comparable[T]) Filter(f func(T) bool) Comparable[T] {
 	return Comparable[T]{s.Stream.Filter(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Reverse].
+// See function [github.com/bytedance/gg/internal/iter.Reverse].
 func (s Comparable[T]) Reverse() Comparable[T] {
 	return Comparable[T]{s.Stream.Reverse()}
 }
 
-// See function [github.com/bytedance/gg/iter.Take].
+// See function [github.com/bytedance/gg/internal/iter.Take].
 func (s Comparable[T]) Take(n int) Comparable[T] {
 	return Comparable[T]{s.Stream.Take(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Drop].
+// See function [github.com/bytedance/gg/internal/iter.Drop].
 func (s Comparable[T]) Drop(n int) Comparable[T] {
 	return Comparable[T]{s.Stream.Drop(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Concat].
+// See function [github.com/bytedance/gg/internal/iter.Concat].
 func (s Comparable[T]) Concat(ss ...Comparable[T]) Comparable[T] {
 	conv := func(c Comparable[T]) Stream[T] {
 		return c.Stream
@@ -95,47 +96,47 @@ func (s Comparable[T]) Concat(ss ...Comparable[T]) Comparable[T] {
 	return Comparable[T]{s.Stream.Concat(tmp...)}
 }
 
-// See function [github.com/bytedance/gg/iter.Zip].
+// See function [github.com/bytedance/gg/internal/iter.Zip].
 func (s Comparable[T]) Zip(f func(T, T) T, another Comparable[T]) Comparable[T] {
 	return Comparable[T]{s.Stream.Zip(f, another.Stream)}
 }
 
-// See function [github.com/bytedance/gg/iter.Intersperse].
+// See function [github.com/bytedance/gg/internal/iter.Intersperse].
 func (s Comparable[T]) Intersperse(sep T) Comparable[T] {
 	return Comparable[T]{s.Stream.Intersperse(sep)}
 }
 
-// See function [github.com/bytedance/gg/iter.Append].
+// See function [github.com/bytedance/gg/internal/iter.Append].
 func (s Comparable[T]) Append(tail T) Comparable[T] {
 	return Comparable[T]{s.Stream.Append(tail)}
 }
 
-// See function [github.com/bytedance/gg/iter.Prepend].
+// See function [github.com/bytedance/gg/internal/iter.Prepend].
 func (s Comparable[T]) Prepend(head T) Comparable[T] {
 	return Comparable[T]{s.Stream.Prepend(head)}
 }
 
-// See function [github.com/bytedance/gg/iter.TakeWhile].
+// See function [github.com/bytedance/gg/internal/iter.TakeWhile].
 func (s Comparable[T]) TakeWhile(f func(T) bool) Comparable[T] {
 	return Comparable[T]{s.Stream.TakeWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.DropWhile].
+// See function [github.com/bytedance/gg/internal/iter.DropWhile].
 func (s Comparable[T]) DropWhile(f func(T) bool) Comparable[T] {
 	return Comparable[T]{s.Stream.DropWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.SortBy].
+// See function [github.com/bytedance/gg/internal/iter.SortBy].
 func (s Comparable[T]) SortBy(less func(T, T) bool) Comparable[T] {
 	return Comparable[T]{s.Stream.SortBy(less)}
 }
 
-// See function [github.com/bytedance/gg/iter.UniqBy].
+// See function [github.com/bytedance/gg/internal/iter.UniqBy].
 func (s Comparable[T]) UniqBy(f func(T) any) Comparable[T] {
 	return Comparable[T]{s.Stream.UniqBy(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Shuffle].
+// See function [github.com/bytedance/gg/internal/iter.Shuffle].
 func (s Comparable[T]) Shuffle() Comparable[T] {
 	return Comparable[T]{s.Stream.Shuffle()}
 }

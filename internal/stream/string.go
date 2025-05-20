@@ -15,10 +15,10 @@
 package stream
 
 import (
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
-// See function [github.com/bytedance/gg/iter.Join].
+// See function [github.com/bytedance/gg/internal/iter.Join].
 func (s String[T]) Join(sep T) T {
 	return iter.Join(sep, s.Iter)
 }

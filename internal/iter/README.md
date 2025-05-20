@@ -3,7 +3,7 @@
 
 * **Import Path**
 
-    `import "github.com/bytedance/gg/iter"`
+    `import "github.com/bytedance/gg/internal/iter"`
 
 
 Package *iter* provides definition of generic iterator `Iter` and high-order functions
@@ -25,7 +25,7 @@ This packages is greatly inspired by Haskell.
 ## Quick Start
 
 
-1. Import `"github.com/bytedance/gg/iter"`.
+1. Import `"github.com/bytedance/gg/internal/iter"`.
 2. Use `FromSlice` source to create a iterator of int slice.
 3. Use `Filter` operation to filter the zero values.
 4. Use `Map` operation to convert int to string.
@@ -38,7 +38,7 @@ import (
         "fmt"
 
         "github.com/bytedance/gg/gvalue"
-        "github.com/bytedance/gg/iter"
+        "github.com/bytedance/gg/internal/iter"
 )
 
 func main() {
@@ -112,7 +112,7 @@ As we see, operations are functions. We have to nest function calls when we have
 multiple operations to be applied (as we do in [Quick Start](#quick-start)).
 
 `Method chaining` is a convenient style for simplifying nested calls.
-[stream - Stream Processing](../internal/stream/README.md) provides a series of iterator wrappers with method
+[stream - Stream Processing](../stream/README.md) provides a series of iterator wrappers with method
 chaining support.
 
 ### Operating Custom Data
@@ -174,7 +174,7 @@ fmt.Println(s)
 
 ### Partial Application
 
-[partial - Partial Application](../gfunc/README.md) implements [Partial Application](https://en.wikipedia.org/wiki/Partial_application)
+[partial - Partial Application](../../gfunc/README.md) implements [Partial Application](https://en.wikipedia.org/wiki/Partial_application)
 which can simplify our use of higher-order functions:
 
 ```go

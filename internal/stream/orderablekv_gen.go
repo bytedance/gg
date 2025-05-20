@@ -18,9 +18,10 @@ package stream
 
 import (
 	"context"
+
 	"github.com/bytedance/gg/collection/tuple"
 	"github.com/bytedance/gg/internal/constraints"
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
 // OrderableKV is a tuple.T2[K, V] variant of KV.
@@ -28,47 +29,47 @@ type OrderableKV[K constraints.Ordered, V any] struct {
 	KV[K, V]
 }
 
-// FromIter wraps an [github.com/bytedance/gg/iter.Iter] to [Stream].
+// FromIter wraps an [github.com/bytedance/gg/internal/iter.Iter] to [Stream].
 func FromOrderableKVIter[K constraints.Ordered, V any](i iter.Iter[tuple.T2[K, V]]) OrderableKV[K, V] {
 	return OrderableKV[K, V]{FromKVIter(i)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromSlice].
+// See function [github.com/bytedance/gg/internal/iter.FromSlice].
 func FromOrderableKVSlice[K constraints.Ordered, V any](s []tuple.T2[K, V]) OrderableKV[K, V] {
 	return OrderableKV[K, V]{FromKVSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.StealSlice].
+// See function [github.com/bytedance/gg/internal/iter.StealSlice].
 func StealOrderableKVSlice[K constraints.Ordered, V any](s []tuple.T2[K, V]) OrderableKV[K, V] {
 	return OrderableKV[K, V]{StealKVSlice(s)}
 }
 
-// See function [github.com/bytedance/gg/iter.FromChan].
+// See function [github.com/bytedance/gg/internal/iter.FromChan].
 func FromOrderableKVChan[K constraints.Ordered, V any](ctx context.Context, ch <-chan tuple.T2[K, V]) OrderableKV[K, V] {
 	return OrderableKV[K, V]{FromKVChan(ctx, ch)}
 }
 
-// See function [github.com/bytedance/gg/iter.FlatMap].
+// See function [github.com/bytedance/gg/internal/iter.FlatMap].
 func (s OrderableKV[K, V]) FlatMap(f func(tuple.T2[K, V]) []tuple.T2[K, V]) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.FlatMap(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Reverse].
+// See function [github.com/bytedance/gg/internal/iter.Reverse].
 func (s OrderableKV[K, V]) Reverse() OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Reverse()}
 }
 
-// See function [github.com/bytedance/gg/iter.Take].
+// See function [github.com/bytedance/gg/internal/iter.Take].
 func (s OrderableKV[K, V]) Take(n int) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Take(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Drop].
+// See function [github.com/bytedance/gg/internal/iter.Drop].
 func (s OrderableKV[K, V]) Drop(n int) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Drop(n)}
 }
 
-// See function [github.com/bytedance/gg/iter.Concat].
+// See function [github.com/bytedance/gg/internal/iter.Concat].
 func (s OrderableKV[K, V]) Concat(ss ...OrderableKV[K, V]) OrderableKV[K, V] {
 	conv := func(c OrderableKV[K, V]) KV[K, V] {
 		return c.KV
@@ -77,62 +78,62 @@ func (s OrderableKV[K, V]) Concat(ss ...OrderableKV[K, V]) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Concat(tmp...)}
 }
 
-// See function [github.com/bytedance/gg/iter.Shuffle].
+// See function [github.com/bytedance/gg/internal/iter.Shuffle].
 func (s OrderableKV[K, V]) Shuffle() OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Shuffle()}
 }
 
-// See function [github.com/bytedance/gg/iter.Repeat].
+// See function [github.com/bytedance/gg/internal/iter.Repeat].
 func RepeatOrderableKV[K constraints.Ordered, V any](k K, v V) OrderableKV[K, V] {
 	return OrderableKV[K, V]{RepeatKV(k, v)}
 }
 
-// See function [github.com/bytedance/gg/iter.MapInplace].
+// See function [github.com/bytedance/gg/internal/iter.MapInplace].
 func (s OrderableKV[K, V]) Map(f func(k K, v V) (K, V)) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Map(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Filter].
+// See function [github.com/bytedance/gg/internal/iter.Filter].
 func (s OrderableKV[K, V]) Filter(f func(K, V) bool) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Filter(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.Zip].
+// See function [github.com/bytedance/gg/internal/iter.Zip].
 func (s OrderableKV[K, V]) Zip(f func(K, V, K, V) (K, V), another OrderableKV[K, V]) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Zip(f, another.KV)}
 }
 
-// See function [github.com/bytedance/gg/iter.Intersperse].
+// See function [github.com/bytedance/gg/internal/iter.Intersperse].
 func (s OrderableKV[K, V]) Intersperse(sepK K, sepV V) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Intersperse(sepK, sepV)}
 }
 
-// See function [github.com/bytedance/gg/iter.Append].
+// See function [github.com/bytedance/gg/internal/iter.Append].
 func (s OrderableKV[K, V]) Append(tailK K, tailV V) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Append(tailK, tailV)}
 }
 
-// See function [github.com/bytedance/gg/iter.Prepend].
+// See function [github.com/bytedance/gg/internal/iter.Prepend].
 func (s OrderableKV[K, V]) Prepend(tailK K, tailV V) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.Prepend(tailK, tailV)}
 }
 
-// See function [github.com/bytedance/gg/iter.TakeWhile].
+// See function [github.com/bytedance/gg/internal/iter.TakeWhile].
 func (s OrderableKV[K, V]) TakeWhile(f func(K, V) bool) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.TakeWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.DropWhile].
+// See function [github.com/bytedance/gg/internal/iter.DropWhile].
 func (s OrderableKV[K, V]) DropWhile(f func(K, V) bool) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.DropWhile(f)}
 }
 
-// See function [github.com/bytedance/gg/iter.SortBy].
+// See function [github.com/bytedance/gg/internal/iter.SortBy].
 func (s OrderableKV[K, V]) SortBy(less func(K, V, K, V) bool) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.SortBy(less)}
 }
 
-// See function [github.com/bytedance/gg/iter.UniqBy].
+// See function [github.com/bytedance/gg/internal/iter.UniqBy].
 func (s OrderableKV[K, V]) UniqBy(f func(K, V) any) OrderableKV[K, V] {
 	return OrderableKV[K, V]{s.KV.UniqBy(f)}
 }

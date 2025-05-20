@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/bytedance/gg/internal/assert"
-	"github.com/bytedance/gg/iter"
+	"github.com/bytedance/gg/internal/iter"
 )
 
 func BenchmarkStringJoin(b *testing.B) {

@@ -99,8 +99,8 @@ import (
 	"github.com/bytedance/gg/gresult"
 	"github.com/bytedance/gg/gvalue"
 	"github.com/bytedance/gg/internal/constraints"
+	"github.com/bytedance/gg/internal/iter"
 	"github.com/bytedance/gg/internal/rtassert"
-	"github.com/bytedance/gg/iter"
 )
 
 // Map applies function f to each element of slice s with type F.
