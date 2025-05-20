@@ -1403,6 +1403,11 @@ func Concat[T any](ss ...[]T) []T {
 	return Flatten(ss)
 }
 
+// Merge is alias of [Concat].
+func Merge[T any](ss ...[]T) []T {
+	return Flatten(ss)
+}
+
 // Compact removes all zero values from given slice s, returns a newly allocated slice.
 //
 // 🚀 EXAMPLE:
