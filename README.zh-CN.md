@@ -1,5 +1,10 @@
 # gg：Go 泛型基础库
 
+[![GoDoc](https://godoc.org/github.com/bytedance/gg?status.svg)](https://godoc.org/github.com/bytedance/gg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bytedance/gg)](https://goreportcard.com/report/github.com/bytedance/gg)
+[![Go Coverage](https://codecov.io/gh/bytedance/gg/branch/main/graph/badge.svg)](https://codecov.io/gh/bytedance/gg)
+[![License](https://img.shields.io/github/license/bytedance/gg)](https://github.com/bytedance/gg/blob/main/LICENSE)
+
 [English](README.md) | 简体中文
 
 🔥`bytedance/gg` 是字节跳动开发的 Go 语言泛型基础库，基于 Go 1.18+ 泛型特性，提供高效、类型安全且丰富的泛型数据结构与工具函数。

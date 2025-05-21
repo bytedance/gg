@@ -1,5 +1,10 @@
 # gg: Go Generics
 
+[![GoDoc](https://godoc.org/github.com/bytedance/gg?status.svg)](https://godoc.org/github.com/bytedance/gg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bytedance/gg)](https://goreportcard.com/report/github.com/bytedance/gg)
+[![Go Coverage](https://codecov.io/gh/bytedance/gg/branch/main/graph/badge.svg)](https://codecov.io/gh/bytedance/gg)
+[![License](https://img.shields.io/github/license/bytedance/gg)](https://github.com/bytedance/gg/blob/main/LICENSE)
+
 English | [简体中文](README.zh-CN.md)
 
 🔥`bytedance-gg` is a basic library of generics for Go language developed by ByteDance. It is based on the Go 1.18+ generic features and provides efficient, type-safe and rich generic data structures and tool functions.
