@@ -1,5 +1,9 @@
 # gg: Go Generics
 
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ByteDance/gg/test.yml)](https://github.com/bytedance/gg/actions/workflows/test.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/ByteDance/gg)](https://app.codecov.io/gh/bytedance/gg/)
+[![godoc](https://pkg.go.dev/badge/github.com/ByteDance/gg)](https://pkg.go.dev/github.com/bytedance/gg)
+
 English | [简体中文](README.zh-CN.md)
 
 🔥`bytedance-gg` is a basic library of generics for Go language developed by ByteDance. It is based on the Go 1.18+ generic features and provides efficient, type-safe and rich generic data structures and tool functions.
@@ -293,7 +297,7 @@ gslice.First([]int{1, 2, 3, 4, 5}).Value()
 // 1
 gslice.Get([]int{1, 2, 3, 4, 5}, 1).Value()
 // 2
-gslice.Get([]int{1, 2, 3, 4, 5}, -1).Value() // 负索引
+gslice.Get([]int{1, 2, 3, 4, 5}, -1).Value() // negative indexing
 // 5
 ```
 
