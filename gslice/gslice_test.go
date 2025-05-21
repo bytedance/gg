@@ -607,32 +607,22 @@ func TestTypeAssert(t *testing.T) {
 	})
 }
 
-func TestEqual(t *testing.T) {
+func TestEqualStrict(t *testing.T) {
 	assert.True(t, Equal[int](nil, nil))
 	assert.True(t, Equal([]int{}, []int{}))
-	assert.True(t, Equal([]int{}, nil))
-	assert.True(t, Equal(nil, []int{}))
+	assert.False(t, Equal([]int{}, nil))
+	assert.False(t, Equal(nil, []int{}))
 	assert.True(t, Equal([]int{1, 2, 3}, []int{1, 2, 3}))
 	assert.False(t, Equal([]int{1, 2, 3}, []int{1, 2, 3, 4}))
 	assert.False(t, Equal([]int{1, 2, 3}, []int{1, 2, 4}))
 }
 
-func TestEqualStrict(t *testing.T) {
-	assert.True(t, EqualStrict[int](nil, nil))
-	assert.True(t, EqualStrict([]int{}, []int{}))
-	assert.False(t, EqualStrict([]int{}, nil))
-	assert.False(t, EqualStrict(nil, []int{}))
-	assert.True(t, EqualStrict([]int{1, 2, 3}, []int{1, 2, 3}))
-	assert.False(t, EqualStrict([]int{1, 2, 3}, []int{1, 2, 3, 4}))
-	assert.False(t, EqualStrict([]int{1, 2, 3}, []int{1, 2, 4}))
-}
-
-func TestEqualBy(t *testing.T) {
+func TestEqualStrictBy(t *testing.T) {
 	eq := gvalue.Equal[int]
 	assert.True(t, EqualBy(nil, nil, eq))
 	assert.True(t, EqualBy([]int{}, []int{}, eq))
-	assert.True(t, EqualBy([]int{}, nil, eq))
-	assert.True(t, EqualBy(nil, []int{}, eq))
+	assert.False(t, EqualBy([]int{}, nil, eq))
+	assert.False(t, EqualBy(nil, []int{}, eq))
 	assert.True(t, EqualBy([]int{1, 2, 3}, []int{1, 2, 3}, eq))
 	assert.False(t, EqualBy([]int{1, 2, 3}, []int{1, 2, 3, 4}, eq))
 	assert.False(t, EqualBy([]int{1, 2, 3}, []int{1, 2, 4}, eq))
@@ -641,32 +631,11 @@ func TestEqualBy(t *testing.T) {
 	eqAny := func(a, b any) bool { return a == b }
 	assert.True(t, EqualBy(nil, nil, eqAny))
 	assert.True(t, EqualBy([]any{}, []any{}, eqAny))
-	assert.True(t, EqualBy([]any{}, nil, eqAny))
-	assert.True(t, EqualBy(nil, []any{}, eqAny))
+	assert.False(t, EqualBy([]any{}, nil, eqAny))
+	assert.False(t, EqualBy(nil, []any{}, eqAny))
 	assert.True(t, EqualBy([]any{1, 2, 3}, []any{1, 2, 3}, eqAny))
 	assert.False(t, EqualBy([]any{1, 2, 3}, []any{1, 2, 3, 4}, eqAny))
 	assert.False(t, EqualBy([]any{1, 2, 3}, []any{1, 2, 4}, eqAny))
-}
-
-func TestEqualStrictBy(t *testing.T) {
-	eq := gvalue.Equal[int]
-	assert.True(t, EqualStrictBy(nil, nil, eq))
-	assert.True(t, EqualStrictBy([]int{}, []int{}, eq))
-	assert.False(t, EqualStrictBy([]int{}, nil, eq))
-	assert.False(t, EqualStrictBy(nil, []int{}, eq))
-	assert.True(t, EqualStrictBy([]int{1, 2, 3}, []int{1, 2, 3}, eq))
-	assert.False(t, EqualStrictBy([]int{1, 2, 3}, []int{1, 2, 3, 4}, eq))
-	assert.False(t, EqualStrictBy([]int{1, 2, 3}, []int{1, 2, 4}, eq))
-
-	// Test any type.
-	eqAny := func(a, b any) bool { return a == b }
-	assert.True(t, EqualStrictBy(nil, nil, eqAny))
-	assert.True(t, EqualStrictBy([]any{}, []any{}, eqAny))
-	assert.False(t, EqualStrictBy([]any{}, nil, eqAny))
-	assert.False(t, EqualStrictBy(nil, []any{}, eqAny))
-	assert.True(t, EqualStrictBy([]any{1, 2, 3}, []any{1, 2, 3}, eqAny))
-	assert.False(t, EqualStrictBy([]any{1, 2, 3}, []any{1, 2, 3, 4}, eqAny))
-	assert.False(t, EqualStrictBy([]any{1, 2, 3}, []any{1, 2, 4}, eqAny))
 }
 
 func TestToMapValues(t *testing.T) {

@@ -550,7 +550,7 @@ func TestLoadAndDelete(t *testing.T) {
 	}
 }
 
-func TestEqual(t *testing.T) {
+func TestEqualStrict(t *testing.T) {
 	assert.True(t, Equal(
 		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
 		map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
@@ -566,33 +566,12 @@ func TestEqual(t *testing.T) {
 	assert.False(t, Equal(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil))
 	assert.False(t, Equal(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
 	assert.True(t, Equal(map[int]int{}, map[int]int{}))
-	assert.True(t, Equal(nil, map[int]int{}))
-	assert.True(t, Equal(map[int]int{}, nil))
+	assert.False(t, Equal(nil, map[int]int{}))
+	assert.False(t, Equal(map[int]int{}, nil))
 	assert.True(t, Equal[int, int](nil, nil))
 }
 
-func TestEqualStrict(t *testing.T) {
-	assert.True(t, EqualStrict(
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
-	assert.False(t, EqualStrict(
-		map[int]int{1: 1, 2: 2, 3: 3},
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
-	assert.False(t, EqualStrict(
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
-		map[int]int{1: 1, 2: 2, 3: 3}))
-	assert.False(t, EqualStrict(
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 5}))
-	assert.False(t, EqualStrict(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil))
-	assert.False(t, EqualStrict(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
-	assert.True(t, EqualStrict(map[int]int{}, map[int]int{}))
-	assert.False(t, EqualStrict(nil, map[int]int{}))
-	assert.False(t, EqualStrict(map[int]int{}, nil))
-	assert.True(t, EqualStrict[int, int](nil, nil))
-}
-
-func TestEqualBy(t *testing.T) {
+func TestEqualStrictBy(t *testing.T) {
 	eq := gvalue.Equal[int]
 	assert.True(t, EqualBy(
 		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
@@ -609,39 +588,12 @@ func TestEqualBy(t *testing.T) {
 	assert.False(t, EqualBy(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil, eq))
 	assert.False(t, EqualBy(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, eq))
 	assert.True(t, EqualBy(map[int]int{}, map[int]int{}, eq))
-	assert.True(t, EqualBy(nil, map[int]int{}, eq))
-	assert.True(t, EqualBy(map[int]int{}, nil, eq))
+	assert.False(t, EqualBy(nil, map[int]int{}, eq))
+	assert.False(t, EqualBy(map[int]int{}, nil, eq))
 	assert.True(t, EqualBy[int](nil, nil, eq))
 
 	anyEq := func(v1, v2 any) bool { return v1 == v2 }
 	assert.True(t, EqualBy(
-		map[int]any{1: 1, 2: 2, 3: 3, 4: 4},
-		map[int]any{1: 1, 2: 2, 3: 3, 4: 4}, anyEq))
-}
-
-func TestEqualStrictBy(t *testing.T) {
-	eq := gvalue.Equal[int]
-	assert.True(t, EqualStrictBy(
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, eq))
-	assert.False(t, EqualStrictBy(
-		map[int]int{1: 1, 2: 2, 3: 3},
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, eq))
-	assert.False(t, EqualStrictBy(
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
-		map[int]int{1: 1, 2: 2, 3: 3}, eq))
-	assert.False(t, EqualStrictBy(
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
-		map[int]int{1: 1, 2: 2, 3: 3, 4: 5}, eq))
-	assert.False(t, EqualStrictBy(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil, eq))
-	assert.False(t, EqualStrictBy(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, eq))
-	assert.True(t, EqualStrictBy(map[int]int{}, map[int]int{}, eq))
-	assert.False(t, EqualStrictBy(nil, map[int]int{}, eq))
-	assert.False(t, EqualStrictBy(map[int]int{}, nil, eq))
-	assert.True(t, EqualStrictBy[int](nil, nil, eq))
-
-	anyEq := func(v1, v2 any) bool { return v1 == v2 }
-	assert.True(t, EqualStrictBy(
 		map[int]any{1: 1, 2: 2, 3: 3, 4: 4},
 		map[int]any{1: 1, 2: 2, 3: 3, 4: 4}, anyEq))
 }

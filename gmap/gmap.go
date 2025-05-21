@@ -66,7 +66,7 @@
 //
 // Predicates:
 //
-//   - [Equal], [EqualStrict]
+//   - [Equal]
 //
 // # Interface type satisfies comparable constraint after Go1.20 and later
 //
@@ -1134,22 +1134,21 @@ func InvertGroup[K, V comparable](m map[K]V) map[V][]K {
 }
 
 // Equal reports whether two maps contain the same key/value pairs.
-// Values are compared using ==.
-//
-// 💡 NOTE: Equal does NOT distinguish between nil and empty maps
-// (which means Equal(map[int]int{}, nil) returns true), use [EqualStrict] if necessary.
+// values are compared using ==.
 //
 // 🚀 EXAMPLE:
 //
 //	Equal(map[int]int{1: 1, 2: 2}, map[int]int{1: 1, 2: 2}) ⏩ true
 //	Equal(map[int]int{1: 1}, map[int]int{1: 1, 2: 2})       ⏩ false
 //	Equal(map[int]int{}, map[int]int{})                     ⏩ true
-//	Equal(map[int]int{}, nil)                               ⏩ true
+//	Equal(map[int]int{}, nil)                               ⏩ false
 func Equal[K, V comparable](m1, m2 map[K]V) bool {
 	if len(m1) != len(m2) {
 		return false
 	}
-
+	if (m1 == nil) != (m2 == nil) {
+		return false
+	}
 	for k, v1 := range m1 {
 		if v2, ok := m2[k]; !ok || v1 != v2 {
 			return false
@@ -1159,11 +1158,7 @@ func Equal[K, V comparable](m1, m2 map[K]V) bool {
 }
 
 // EqualBy reports whether two maps contain the same key/value pairs.
-// Values are compared using function eq.
-//
-// 💡 NOTE: EqualBy does NOT distinguish between nil and empty maps
-// (which means Equal(map[int]int{}, nil, gvalue.Equal[int]) returns true),
-// use [EqualStrictBy] if necessary.
+// values are compared using function eq.
 //
 // 🚀 EXAMPLE:
 //
@@ -1171,51 +1166,20 @@ func Equal[K, V comparable](m1, m2 map[K]V) bool {
 //	EqualBy(map[int]int{1: 1, 2: 2}, map[int]int{1: 1, 2: 2}, eq) ⏩ true
 //	EqualBy(map[int]int{1: 1}, map[int]int{1: 1, 2: 2}, eq)       ⏩ false
 //	EqualBy(map[int]int{}, map[int]int{}, eq)                     ⏩ true
-//	EqualBy(map[int]int{}, nil, eq)                               ⏩ true
+//	EqualBy(map[int]int{}, nil, eq)                               ⏩ false
 func EqualBy[K comparable, V any](m1, m2 map[K]V, eq func(v1, v2 V) bool) bool {
 	if len(m1) != len(m2) {
 		return false
 	}
-
+	if (m1 == nil) != (m2 == nil) {
+		return false
+	}
 	for k, v1 := range m1 {
 		if v2, ok := m2[k]; !ok || !eq(v1, v2) {
 			return false
 		}
 	}
 	return true
-}
-
-// EqualStrict is a variant of [Equal], which can distinguish between nil and empty maps.
-//
-// 🚀 EXAMPLE:
-//
-//	EqualStrict(map[int]int{1: 1, 2: 2}, map[int]int{1: 1, 2: 2}) ⏩ true
-//	EqualStrict(map[int]int{1: 1}, map[int]int{1: 1, 2: 2})       ⏩ false
-//	EqualStrict(map[int]int{}, map[int]int{})                     ⏩ true
-//	EqualStrict(map[int]int{}, nil)                               ⏩ false
-func EqualStrict[K, V comparable](m1, m2 map[K]V) bool {
-	if (m1 == nil && m2 != nil) || (m1 != nil && m2 == nil) {
-		return false
-	}
-	return Equal(m1, m2)
-}
-
-// EqualStrictBy is a variant of [EqualBy], which can distinguish between nil and empty maps.
-//
-// 🚀 EXAMPLE:
-//
-//	eq := gvalue.Equal[int]
-//	EqualStrictBy(map[int]int{1: 1, 2: 2}, map[int]int{1: 1, 2: 2}, eq) ⏩ true
-//	EqualStrictBy(map[int]int{1: 1}, map[int]int{1: 1, 2: 2}, eq)       ⏩ false
-//	EqualStrictBy(map[int]int{}, map[int]int{}, eq)                     ⏩ true
-//	EqualStrictBy(map[int]int{}, nil, eq)                               ⏩ false
-func EqualStrictBy[K comparable, V any](m1, m2 map[K]V, eq func(v1, v2 V) bool) bool {
-	if m1 == nil && m2 != nil {
-		return false
-	} else if m1 != nil && m2 == nil {
-		return false
-	}
-	return EqualBy(m1, m2, eq)
 }
 
 // Clone returns a shallow copy of map.

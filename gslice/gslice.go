@@ -75,7 +75,7 @@
 //
 // Predicates:
 //
-//   - [Equal], [EqualStrict]
+//   - [Equal]
 //
 // # Negative index
 //
@@ -1012,17 +1012,17 @@ func ForEachIndexed[T any](s []T, f func(i int, v T)) {
 
 // Equal returns whether two slices are equal.
 //
-// 💡 NOTE: Equal does NOT distinguish between nil and empty slices
-// (which means Equal([]int{}, nil) returns true), use [EqualStrict] if necessary.
-//
 // 🚀 EXAMPLE:
 //
 //	Equal([]int{1, 2, 3}, []int{1, 2, 3})    ⏩ true
 //	Equal([]int{1, 2, 3}, []int{1, 2, 3, 4}) ⏩ false
 //	Equal([]int{}, []int{})                  ⏩ true
-//	Equal([]int{}, nil)                      ⏩ true
+//	Equal([]int{}, nil)                      ⏩ false
 func Equal[T comparable](s1, s2 []T) bool {
 	if len(s1) != len(s2) {
+		return false
+	}
+	if (s1 == nil) != (s2 == nil) {
 		return false
 	}
 	for i := range s1 {
@@ -1035,19 +1035,18 @@ func Equal[T comparable](s1, s2 []T) bool {
 
 // EqualBy returns whether two slices are equal by function eq.
 //
-// 💡 NOTE: EqualBy does NOT distinguish between nil and empty slices
-// (which means Equal([]int{}, nil, gvalue.Equal[int]) returns true),
-// use [EqualStrictBy] if necessary.
-//
 // 🚀 EXAMPLE:
 //
 //	eq := gvalue.Equal[int]
 //	EqualBy([]int{1, 2, 3}, []int{1, 2, 3}, eq)    ⏩ true
 //	EqualBy([]int{1, 2, 3}, []int{1, 2, 3, 4}, eq) ⏩ false
 //	EqualBy([]int{}, []int{}, eq)                  ⏩ true
-//	EqualBy([]int{}, nil, eq)                      ⏩ true
+//	EqualBy([]int{}, nil, eq)                      ⏩ false
 func EqualBy[T any](s1, s2 []T, eq func(T, T) bool) bool {
 	if len(s1) != len(s2) {
+		return false
+	}
+	if (s1 == nil) != (s2 == nil) {
 		return false
 	}
 	for i := range s1 {
@@ -1056,37 +1055,6 @@ func EqualBy[T any](s1, s2 []T, eq func(T, T) bool) bool {
 		}
 	}
 	return true
-}
-
-// EqualStrict is a variant of [Equal], which can distinguish between nil and empty slices.
-//
-// 🚀 EXAMPLE:
-//
-//	EqualStrict([]int{1, 2, 3}, []int{1, 2, 3})    ⏩ true
-//	EqualStrict([]int{1, 2, 3}, []int{1, 2, 3, 4}) ⏩ false
-//	EqualStrict([]int{}, []int{})                  ⏩ true
-//	EqualStrict([]int{}, nil)                      ⏩ false
-func EqualStrict[T comparable](s1, s2 []T) bool {
-	if (s1 == nil && s2 != nil) || s1 != nil && s2 == nil {
-		return false
-	}
-	return Equal(s1, s2)
-}
-
-// EqualStrictBy is a variant of [EqualBy], which can distinguish between nil and empty slices.
-//
-// 🚀 EXAMPLE:
-//
-//	eq := gvalue.Equal[int]
-//	EqualStrictBy([]int{1, 2, 3}, []int{1, 2, 3}, eq)    ⏩ true
-//	EqualStrictBy([]int{1, 2, 3}, []int{1, 2, 3, 4}, eq) ⏩ false
-//	EqualStrictBy([]int{}, []int{}, eq)                  ⏩ true
-//	EqualStrictBy([]int{}, nil, eq)                      ⏩ false
-func EqualStrictBy[T any](s1, s2 []T, eq func(T, T) bool) bool {
-	if (s1 == nil && s2 != nil) || s1 != nil && s2 == nil {
-		return false
-	}
-	return EqualBy(s1, s2, eq)
 }
 
 // ToMap collects elements of slice to map, both map keys and values are produced
