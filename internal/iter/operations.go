@@ -1183,7 +1183,7 @@ type chunkIter[T any] struct {
 
 func (i *chunkIter[T]) Next(n int) [][]T {
 	var next [][]T
-	for n == ALL || n != 0 {
+	for n != 0 {
 		v := i.i.Next(i.n)
 		if len(v) == 0 {
 			break
