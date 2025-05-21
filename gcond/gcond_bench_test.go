@@ -12,25 +12,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tuple
+package gcond
 
-import "fmt"
+import (
+	"testing"
+)
 
-func Example() {
-	addr := Make2("localhost", 8080)
-	fmt.Printf("%s:%d\n", addr.First, addr.Second) // localhost:8080
+func BenchmarkIf(b *testing.B) {
+	cond := true
 
-	s := Zip2([]string{"red", "green", "blue"}, []int{14, 15, 16})
-	for _, v := range s {
-		fmt.Printf("%s:%d\n", v.First, v.Second)
-	}
+	b.Run("Baseline", func(b *testing.B) {
+		var v int
+		for i := 0; i < b.N; i++ {
+			if cond {
+				v = 1
+			} else {
+				v = 2
+			}
+		}
+		if v != 1 {
+			b.FailNow()
+		}
+	})
 
-	fmt.Println(s.Unzip()) // ["red", "green", "blue"] [14, 15, 16]
+	b.Run("If", func(b *testing.B) {
+		var v int
+		for i := 0; i < b.N; i++ {
+			v = If(cond, 1, 2)
+		}
+		if v != 1 {
+			b.FailNow()
+		}
+	})
 
-	// Output:
-	// localhost:8080
-	// red:14
-	// green:15
-	// blue:16
-	// [red green blue] [14 15 16]
+	b.Run("IfLazy", func(b *testing.B) {
+		var v int
+		for i := 0; i < b.N; i++ {
+			v = IfLazy(cond, func() int { return 1 }, func() int { return 2 })
+		}
+		if v != 1 {
+			b.FailNow()
+		}
+	})
 }

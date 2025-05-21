@@ -12,38 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package set
+package gfunc
 
 import (
 	"fmt"
+
+	"github.com/bytedance/gg/gvalue"
 )
 
 func Example() {
-	s := New(10, 10, 12, 15)
-	fmt.Println(s.Len())                      // 3
-	fmt.Println(s.Add(10))                    // false
-	fmt.Println(s.Add(11))                    // true
-	fmt.Println(s.Remove(11) && s.Remove(12)) // true
-
-	fmt.Println(s.ContainsAny(10, 15)) // true
-	fmt.Println(s.ContainsAny(11, 12)) // false
-	fmt.Println(s.ContainsAny())       // false
-	fmt.Println(s.ContainsAll(10, 15)) // true
-	fmt.Println(s.ContainsAll(10, 11)) // false
-	fmt.Println(s.ContainsAll())       // true
-
-	fmt.Println(len(s.ToSlice())) // 2
+	add := Partial2(gvalue.Add[int]) // Cast f to "partial application"-able function
+	add1 := add.Partial(1)           // Bind argument a to 1
+	fmt.Println(add1(0))             // 0 + 1 = 1
+	fmt.Println(add1(1))             // add1 can be reused, 1 + 1 = 2
+	add1n2 := add1.PartialR(2)       // Bind argument b to 2, all arguments are fixed
+	fmt.Println(add1n2())            // 1 + 2 = 3
 
 	// Output:
-	// 3
-	// false
-	// true
-	// true
-	// true
-	// false
-	// false
-	// true
-	// false
-	// true
+	// 1
 	// 2
+	// 3
 }

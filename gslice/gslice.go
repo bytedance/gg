@@ -25,17 +25,19 @@
 //
 // # Operations
 //
+// High-order functions:
+//
+//   - [Map], [FlatMap]
+//   - [Filter], [Reject], [FilterMap]
+//   - [Reduce], [Fold]
+//   - [All], [Any]
+//
 // CRUD operations:
 //
 //   - [Insert], [Remove]
 //   - [Get], [First], [Last]
 //   - [Index], [Find]
 //   - [Contains], [ContainsAny], [ContainsAll]
-//
-// Set operations:
-//
-//   - [Union], [Intersect], [Diff]
-//   - [Uniq], [Dup]
 //
 // Partition operations:
 //
@@ -49,7 +51,16 @@
 //
 //   - [Max], [Min], [MinMax]
 //   - [Sum], [Avg]
-//   - [Sort], [Shuffle], [Reverse]
+//
+// Convert to Map:
+//
+//   - [ToMap], [ToMapValues]
+//   - [GroupBy]
+//
+// Set operations:
+//
+//   - [Union], [Intersect], [Diff]
+//   - [Uniq], [Dup]
 //
 // Re-order operations:
 //
@@ -65,18 +76,6 @@
 // Predicates:
 //
 //   - [Equal], [EqualStrict]
-//   - [All], [Any]
-//
-// High-order functions:
-//
-//   - [Map], [FlatMap]
-//   - [Filter], [Reject], [FilterMap]
-//   - [Reduce], [Fold]
-//
-// Convert to Map:
-//
-//   - [ToMap], [ToMapValues]
-//   - [GroupBy]
 //
 // # Negative index
 //

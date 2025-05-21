@@ -34,15 +34,16 @@
 //   - [ToSlice]
 //   - [ToOrderedSlice]
 //
+// High-order functions:
+//
+//   - [Map]
+//   - [Filter], [Reject], [FilterMap]
+//
 // CRUD operations:
 //
 //   - [Load], [LoadAll], [LoadSome], [LoadAny]
 //   - [LoadOrStore], [LoadAndDelete]
 //   - [Contains], [ContainsAny], [ContainsAll]
-//
-// Set operations:
-//
-//   - [Union], [Intersect], [Diff]
 //
 // Partition operations:
 //
@@ -53,6 +54,11 @@
 //   - [Max], [Min], [MinMax]
 //   - [Sum], [Avg]
 //
+// Set operations:
+//
+//   - [Union], [Intersect], [Diff]
+//   - [UnionBy], [IntersectBy]
+//
 // Type casting/assertion/conversion:
 //
 //   - [TypeAssert]
@@ -61,11 +67,6 @@
 // Predicates:
 //
 //   - [Equal], [EqualStrict]
-//
-// High-order functions:
-//
-//   - [Map]
-//   - [Filter], [Reject], [FilterMap]
 //
 // # Interface type satisfies comparable constraint after Go1.20 and later
 //
@@ -1009,7 +1010,7 @@ func LoadItemBy[K comparable, V any](m map[K]V, f func(K, V) bool) goption.O[tup
 //
 //	m := map[int]string{1: "1", 2: "2", 3: "3"}
 //	LoadAll(m, 1, 2) ⏩ []string{"1", "2"}
-//	LoadAll(m, 1, 4) ⏩ nil
+//	LoadAll(m, 1, 4) ⏩ []
 func LoadAll[K comparable, V any](m map[K]V, ks ...K) []V {
 	if m == nil || len(m) == 0 || len(ks) == 0 {
 		return nil

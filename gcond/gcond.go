@@ -15,10 +15,6 @@
 // Package gcond helps users choose values according to various conditions in one line.
 package gcond
 
-import (
-	"github.com/bytedance/gg/gvalue"
-)
-
 // If returns onTrue when cond is true, otherwise returns onFalse.
 // It is used as a replacement of ternary conditional operator (:?) in many other
 // programming languages.
@@ -102,7 +98,6 @@ func Switch[R any, T comparable](variable T) *switchBuilder[R, T] {
 	return &switchBuilder[R, T]{
 		variable: variable,
 		matched:  false,
-		result:   gvalue.Zero[R](),
 	}
 }
 

@@ -6,7 +6,7 @@ Package *gfunc* provides operations of functions.
 
     `import "github.com/bytedance/gg/gfunc"`
 
-Package *partial* implements [Partial Application](https://en.wikipedia.org/wiki/Partial_application) of functions.
+Package *gfunc* implements [Partial Application](https://en.wikipedia.org/wiki/Partial_application) of functions.
 
 Partial Application refers to the process of fixing a number of arguments to a function,
 producing another function of smaller arity.

@@ -15,27 +15,10 @@
 package gfunc
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/bytedance/gg/internal/assert"
 )
-
-func Example() {
-	f := func(a, b int) int {
-		return a + b
-	}
-	add := Partial2(f)        // Cast f to "partial application"-able function
-	add1 := add.Partial(1)    // Bind argument a to 1
-	fmt.Println(add1(0))      // 0 + 1 = 1
-	fmt.Println(add1(1))      // add1 can be reused, 1 + 1 = 2
-	add1n2 := add1.Partial(2) // Bind argument b to 2, all arguments are fixed
-	fmt.Println(add1n2())     // 1 + 2 = 3
-	// Output:
-	// 1
-	// 2
-	// 3
-}
 
 func TestPartialFunc2(t *testing.T) {
 	add := Partial2(func(a, b int) int {

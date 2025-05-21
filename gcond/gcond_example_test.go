@@ -12,38 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package set
+package gcond
 
 import (
 	"fmt"
 )
 
 func Example() {
-	s := New(10, 10, 12, 15)
-	fmt.Println(s.Len())                      // 3
-	fmt.Println(s.Add(10))                    // false
-	fmt.Println(s.Add(11))                    // true
-	fmt.Println(s.Remove(11) && s.Remove(12)) // true
+	fmt.Println(If(true, 1, 2)) // 1
+	var a *struct{ A int }
+	getA := func() int { return a.A }
+	get1 := func() int { return 1 }
+	fmt.Println(IfLazy(a != nil, getA, get1)) // 1
+	fmt.Println(IfLazyL(a != nil, getA, 1))   // 1
+	fmt.Println(IfLazyR(a == nil, 1, getA))   // 1
 
-	fmt.Println(s.ContainsAny(10, 15)) // true
-	fmt.Println(s.ContainsAny(11, 12)) // false
-	fmt.Println(s.ContainsAny())       // false
-	fmt.Println(s.ContainsAll(10, 15)) // true
-	fmt.Println(s.ContainsAll(10, 11)) // false
-	fmt.Println(s.ContainsAll())       // true
-
-	fmt.Println(len(s.ToSlice())) // 2
+	fmt.Println(Switch[string](3).
+		Case(1, "1").
+		CaseLazy(2, func() string { return "3" }).
+		When(3, 4).Then("3/4").
+		When(5, 6).ThenLazy(func() string { return "5/6" }).
+		Default("other")) // 3/4
 
 	// Output:
-	// 3
-	// false
-	// true
-	// true
-	// true
-	// false
-	// false
-	// true
-	// false
-	// true
-	// 2
+	// 1
+	// 1
+	// 1
+	// 1
+	// 3/4
 }

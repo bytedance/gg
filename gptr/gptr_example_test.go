@@ -12,38 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package set
+package gptr
 
 import (
 	"fmt"
+	"strconv"
 )
 
 func Example() {
-	s := New(10, 10, 12, 15)
-	fmt.Println(s.Len())                      // 3
-	fmt.Println(s.Add(10))                    // false
-	fmt.Println(s.Add(11))                    // true
-	fmt.Println(s.Remove(11) && s.Remove(12)) // true
+	a := Of(1)
+	fmt.Println(Indirect(a)) // 1
 
-	fmt.Println(s.ContainsAny(10, 15)) // true
-	fmt.Println(s.ContainsAny(11, 12)) // false
-	fmt.Println(s.ContainsAny())       // false
-	fmt.Println(s.ContainsAll(10, 15)) // true
-	fmt.Println(s.ContainsAll(10, 11)) // false
-	fmt.Println(s.ContainsAll())       // true
+	b := OfNotZero(1)
+	fmt.Println(IsNotNil(b))                    // true
+	fmt.Println(IndirectOr(b, 2))               // 1
+	fmt.Println(Indirect(Map(b, strconv.Itoa))) // "1"
 
-	fmt.Println(len(s.ToSlice())) // 2
+	c := OfNotZero(0)
+	fmt.Println(c)                // nil
+	fmt.Println(IsNil(c))         // true
+	fmt.Println(IndirectOr(c, 2)) // 2
 
 	// Output:
-	// 3
-	// false
+	// 1
 	// true
-	// true
-	// true
-	// false
-	// false
-	// true
-	// false
+	// 1
+	// 1
+	// <nil>
 	// true
 	// 2
 }

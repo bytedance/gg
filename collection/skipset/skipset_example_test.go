@@ -12,38 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package set
+package skipset
 
 import (
 	"fmt"
+	"sync"
 )
 
 func Example() {
-	s := New(10, 10, 12, 15)
-	fmt.Println(s.Len())                      // 3
-	fmt.Println(s.Add(10))                    // false
-	fmt.Println(s.Add(11))                    // true
-	fmt.Println(s.Remove(11) && s.Remove(12)) // true
+	s := New[int]()
+	fmt.Println(s.Add(10)) // true
+	fmt.Println(s.Add(10)) // false
+	fmt.Println(s.Add(11)) // true
+	fmt.Println(s.Add(12)) // true
+	fmt.Println(s.Len())   // 3
 
-	fmt.Println(s.ContainsAny(10, 15)) // true
-	fmt.Println(s.ContainsAny(11, 12)) // false
-	fmt.Println(s.ContainsAny())       // false
-	fmt.Println(s.ContainsAll(10, 15)) // true
-	fmt.Println(s.ContainsAll(10, 11)) // false
-	fmt.Println(s.ContainsAll())       // true
+	fmt.Println(s.Contains(10)) // true
+	fmt.Println(s.Remove(10))   // true
+	fmt.Println(s.Contains(10)) // false
 
-	fmt.Println(len(s.ToSlice())) // 2
+	fmt.Println(s.ToSlice()) // [11, 12]
+
+	var wg sync.WaitGroup
+	wg.Add(1000)
+	for i := 0; i < 1000; i++ {
+		i := i
+		go func() {
+			defer wg.Done()
+			s.Add(i)
+		}()
+	}
+	wg.Wait()
+	fmt.Println(s.Len()) // 1000
 
 	// Output:
+	// true
+	// false
+	// true
+	// true
 	// 3
-	// false
-	// true
 	// true
 	// true
 	// false
-	// false
-	// true
-	// false
-	// true
-	// 2
+	// [11 12]
+	// 1000
 }
