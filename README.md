@@ -29,10 +29,10 @@ go get github.com/bytedance/gg
 
 ## 🔎 Table of contents
 
-- [Generic Functional Programming](#Generic Functional Programming)
+- [Generic Functional Programming](#-generic-functional-programming)
     - [goption](#goption)：Option type, simplifying the processing of `(T, bool)`
     - [gresult](#gresult)：Result type, simplifying the processing of `(T, error)`
-- [Generic Data Processing](#Generic Data Processing)
+- [Generic Data Processing](#-generic-data-processing)
     - [gcond](#gcond)：Conditional operation
     - [gvalue](#gvalue)：Processing value `T`
     - [gptr](#gptr)：Processing pointer `*T`
@@ -41,11 +41,11 @@ go get github.com/bytedance/gg
     - [gfunc](#gfunc)：Processing function `func`
     - [gconv](#gconv)：Data type conversion
     - [gson](#gson)：Processing `JSON`
-- [Generic Data Structures](#Generic Data Structures)
+- [Generic Data Structures](#-generic-data-structures)
     - [tuple](#tuple)：The implementation of tuples provides the definition of 2 to 10 tuples
     - [set](#set)：The implementation of the collection is based on `map[T]struct{}`
-    - [skipset](#skipset)：High-performance concurrent set based on skiplist are ~15 times faster than sync.Map
-    - [skipmap](#skipmap)：High-performance concurrent map implemented based on skiplist, ~10 times faster than sync.Map
+    - [skipset](#skipset)：High-performance concurrent set based on skiplist are ~15 times faster than `sync.Map`
+    - [skipmap](#skipmap)：High-performance concurrent map implemented based on skiplist, ~10 times faster than `sync.Map`
 
 ## ✨ Generic Functional Programming
 
