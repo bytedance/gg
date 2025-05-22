@@ -80,5 +80,12 @@ func TestRange(t *testing.T) {
 	sm.Range(f)
 	assert.Equal(t, len("kvk1v1k2v2"), len(str))
 	assert.Equal(t, 3, count)
+}
 
+func TestToMap(t *testing.T) {
+	sm := Map[string, string]{}
+	sm.Store("k", "v")
+	sm.Store("k1", "v1")
+	sm.Store("k2", "v2")
+	assert.Equal(t, map[string]string{"k": "v", "k1": "v1", "k2": "v2"}, sm.ToMap())
 }
