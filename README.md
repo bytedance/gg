@@ -298,7 +298,7 @@ gslice.First([]int{1, 2, 3, 4, 5}).Value()
 // 1
 gslice.Get([]int{1, 2, 3, 4, 5}, 1).Value()
 // 2
-gslice.Get([]int{1, 2, 3, 4, 5}, -1).Value() // 负索引
+gslice.Get([]int{1, 2, 3, 4, 5}, -1).Value() // Access element with negative index
 // 5
 ```
 
@@ -498,15 +498,14 @@ import (
 Example1：Partial Application
 
 ```go
-add := Partial2(gvalue.Add[int]) // 将 Add 转化为偏函数
-add1 := add.Partial(1)           // 绑定第一个参数为 1
+add := Partial2(gvalue.Add[int]) // convert the Add function into a partial function
+add1 := add.Partial(1)           // Bind (i.e., "freeze") the first argument to 1
 add1(0)                          // 0 + 1 = 1
 // 1
-add1(1)                          // add1 可以重复使用, 1 + 1 = 2
+add1(1)                          // Reuse the partially applied function: 1 + 1 = 2
 // 2
-add1n2 := add1.PartialR(2)       // 绑定最后一个参数为 2，所有参数都为固定值
+add1n2 := add1.PartialR(2)       // Bind the remaining (rightmost) argument to 2; all arguments are now fixed
 add1n2()                         // 1 + 2 = 3
-// 3
 ```
 
 ### gconv
@@ -619,7 +618,7 @@ fmt.Println(s.Unzip())
 
 ### set
 
-集合的实现，基于 map[T]struct{}
+Set implementation based on `map[T]struct{}`
 
 Usage
 
