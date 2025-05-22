@@ -19,7 +19,7 @@ import (
 	"strconv"
 
 	"github.com/bytedance/gg/gslice"
-	"github.com/bytedance/gg/gson"
+	"github.com/bytedance/gg/stdwrap/gson"
 )
 
 func Example() {

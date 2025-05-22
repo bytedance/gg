@@ -50,11 +50,6 @@ func (sm *Map[K, V]) Store(key K, value V) {
 	sm.m.Store(key, value)
 }
 
-// Clear wraps [sync.Map.Clear].
-func (sm *Map[K, V]) Clear() {
-	sm.m.Clear()
-}
-
 // LoadOrStore wraps [sync.Map.LoadOrStore].
 func (sm *Map[K, V]) LoadOrStore(key K, value V) (V, bool) {
 	v, loaded := sm.m.LoadOrStore(key, value)
