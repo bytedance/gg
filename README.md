@@ -7,13 +7,13 @@
 
 English | [简体中文](README.zh-CN.md)
 
-🔥`bytedance-gg` is a basic library of generics for Go language developed by ByteDance. It is based on the Go 1.18+ generic features and provides efficient, type-safe and rich generic data structures and tool functions.
+🔥`bytedance/gg` is a basic library of generics for Go language developed by ByteDance. It is based on the Go 1.18+ generic features and provides efficient, type-safe and rich generic data structures and tool functions.
 
 ❓**Why this name?**
 
 Take the first letter of **G**o **G**enerics, short and simple.
 
-❓Why choose gg?
+❓**Why choose gg?**
 
 - Stable and reliable: It is a necessary tool library for ByteDance R&D team, and it has 1w+ repository references inside.
 - Easy to use: With the design principle of simplicity and self-consistent, subcontracted according to functions, modular, semantic intuitive and unified, and low learning cost.
@@ -42,10 +42,10 @@ go get github.com/bytedance/gg
     - [gconv](#gconv)：Data type conversion
     - [gson](#gson)：Processing `JSON`
 - [Generic Data Structures](#-generic-data-structures)
-    - [tuple](#tuple)：The implementation of tuples provides the definition of 2 to 10 tuples
-    - [set](#set)：The implementation of the collection is based on `map[T]struct{}`
-    - [skipset](#skipset)：High-performance concurrent set based on skiplist are ~15 times faster than `sync.Map`
-    - [skipmap](#skipmap)：High-performance concurrent map implemented based on skiplist, ~10 times faster than `sync.Map`
+    - [tuple](#tuple)：Implementation of tuple provides definition of generic n-ary tuples
+    - [set](#set)：Implementation of set based on `map[T]struct{}`
+    - [skipset](#skipset)：High-performance, scalable, concurrent-safe set based on skip-list, up to 15x faster than the built-in `sync.Map` below Go 1.24
+    - [skipmap](#skipmap)：High-performance, scalable, concurrent-safe map based on skip-list, up to 10x faster than the built-in `sync.Map` below Go 1.24
 
 ## ✨ Generic Functional Programming
 
@@ -660,7 +660,9 @@ len(s.ToSlice())
 
 ### skipset
 
-High-performance concurrent sets based on skiplist are ~15 times faster than sync.Map
+High-performance, scalable, concurrent-safe set based on skip-list, up to 15x faster than the built-in `sync.Map` below Go 1.24
+
+⚠️ NOTICE: Go 1.24 or later, please consider using the std `sync.Map`, which has better performance compared to `skipset` in about 90% of use cases.
 
 Usage
 
@@ -711,9 +713,9 @@ s.Len()
 
 ### skipmap
 
-High-performance concurrent hash list implemented based on skiplist, ~10 times faster than `sync.Map` below Go 1.23.
+High-performance, scalable, concurrent-safe map based on skip-list, up to 10x faster than the built-in `sync.Map` below Go 1.24
 
-After Go 1.24, please consider using the std `sync.Map`, which has better performance compared to skipmap in about 90% of use cases.
+⚠️ Go 1.24 or later, please consider using the std `sync.Map`, which has better performance compared to `skipmap` in about 90% of use cases.
 
 Usage
 

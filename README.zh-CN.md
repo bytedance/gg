@@ -44,8 +44,8 @@ go get github.com/bytedance/gg
 - [泛型数据结构](#-泛型数据结构)
   - [tuple](#tuple)：元组的实现，提供了 2～10 元组的定义
   - [set](#set)：集合的实现，基于 `map[T]struct{}`
-  - [skipset](#skipset)：基于 skiplist 实现的高性能并发集合，比 `sync.Map` 快 ~15 倍
-  - [skipmap](#skipmap)：基于 skiplist 实现的高性能并发散列表，比 `sync.Map` 快 ~10 倍
+  - [skipset](#skipset)：基于 skiplist 实现的高性能并发集合，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~15 倍
+  - [skipmap](#skipmap)：基于 skiplist 实现的高性能并发散列表，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~10 倍
 
 ## ✨ 泛型函数式编程
 
@@ -661,7 +661,9 @@ len(s.ToSlice())
 
 ### skipset
 
-基于 skiplist 实现的高性能并发集合，比 sync.Map 快 ~15 倍
+基于 skiplist 实现的高性能并发集合，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~15 倍
+
+⚠️ 注意：Go 1.24 及更高版本，建议使用标准库 `sync.Map`，在约 90% 的使用场景中，其性能优于 `skipset`
 
 引用
 
@@ -712,7 +714,9 @@ s.Len()
 
 ### skipmap
 
-基于 skiplist 实现的高性能并发散列表，比 sync.Map 快 ~10 倍
+基于 skiplist 实现的高性能并发散列表，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~15 倍
+
+⚠️ 注意：Go 1.24 及更高版本，建议使用标准库 `sync.Map`，在约 90% 的使用场景中，其性能优于 `skipmap`
 
 引用
 
