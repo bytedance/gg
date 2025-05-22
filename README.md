@@ -711,7 +711,9 @@ s.Len()
 
 ### skipmap
 
-High-performance concurrent hash list implemented based on skiplist, ~10 times faster than sync.Map
+High-performance concurrent hash list implemented based on skiplist, ~10 times faster than `sync.Map` below Go 1.23.
+
+After Go 1.24, please consider using the std `sync.Map`, which has better performance compared to skipmap in about 90% of use cases.
 
 Usage
 
