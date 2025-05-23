@@ -40,7 +40,9 @@ go get github.com/bytedance/gg
   - [gmap](#gmap)：处理散列表 `map[K]V`
   - [gfunc](#gfunc)：处理函数 `func`
   - [gconv](#gconv)：数据类型转换
-  - [gson](#gson)：处理 `JSON`
+- [泛型标准库封装](#-泛型标准库封装)
+  - [gsync](#gsync)：封装 `sync` 标准库
+  - [gson](#gson)：封装 `encoding/json` 标准库
 - [泛型数据结构](#-泛型数据结构)
   - [tuple](#tuple)：元组的实现，提供了 2～10 元组的定义
   - [set](#set)：集合的实现，基于 `map[T]struct{}`
@@ -547,9 +549,65 @@ gconv.ToE[int]("x")
 // 0 strconv.ParseInt: parsing "x": invalid syntax
 ```
 
+## ✨ 泛型标准库封装
+
+### gsync
+
+封装 `sync` 标准库
+
+引用：
+
+```go
+import (
+    "github.com/bytedance/gg/stdwrap/gsync"
+)
+```
+
+示例1：`gsync.Map` 封装了 `sync.Map`
+
+```go
+sm := gsync.Map[string, int]{}
+sm.Store("k", 1)
+sm.Load("k")
+// 1 true
+sm.LoadO("k").Value()
+// 1
+sm.Store("k", 2)
+sm.Load("k")
+// 2 true
+sm.LoadAndDelete("k")
+// 2 true
+sm.Load("k")
+// 0 false
+sm.LoadOrStore("k", 3)
+// 3 false
+sm.Load("k")
+// 3 true
+sm.ToMap()
+// {"k":3}
+```
+
+示例2：`gsync.Pool` 封装了 `sync.Pool`
+
+```go
+pool := Pool[*int]{
+    New: func() *int {
+        i := 1
+        return &i
+    },
+}
+a := pool.Get()
+*a
+// 1
+*a = 2
+pool.Put(a)
+*pool.Get()
+// 可能的结果: 1 或 2
+```
+
 ### gson
 
-处理 `JSON`
+封装 `encoding/json` 标准库
 
 引用：
 
