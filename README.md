@@ -30,17 +30,19 @@ go get github.com/bytedance/gg
 ## 🔎 Table of contents
 
 - [Generic Functional Programming](#-generic-functional-programming)
-    - [goption](#goption)：Option type, simplifying the processing of `(T, bool)`
-    - [gresult](#gresult)：Result type, simplifying the processing of `(T, error)`
+  - [goption](#goption)：Option type, simplifying the processing of `(T, bool)`
+  - [gresult](#gresult)：Result type, simplifying the processing of `(T, error)`
 - [Generic Data Processing](#-generic-data-processing)
-    - [gcond](#gcond)：Conditional operation
-    - [gvalue](#gvalue)：Processing value `T`
-    - [gptr](#gptr)：Processing pointer `*T`
-    - [gslice](#gslice)：Process slice `[]T`
-    - [gmap](#gmap)：Processing map `map[K]V`
-    - [gfunc](#gfunc)：Processing function `func`
-    - [gconv](#gconv)：Data type conversion
-    - [gson](#gson)：Processing `JSON`
+  - [gcond](#gcond)：Conditional operation
+  - [gvalue](#gvalue)：Processing value `T`
+  - [gptr](#gptr)：Processing pointer `*T`
+  - [gslice](#gslice)：Processing slice `[]T`
+  - [gmap](#gmap)：Processing map `map[K]V`
+  - [gfunc](#gfunc)：Processing function `func`
+  - [gconv](#gconv)：Data type conversion
+- [Generic Standard Wrapper](#-generic-standard-wrapper)
+  - [gsync](#gsync)：Wrap `sync`
+  - [gson](#gson)：Wrap `encoding/json`
 - [Generic Data Structures](#-generic-data-structures)
     - [tuple](#tuple)：Implementation of tuple provides definition of generic n-ary tuples
     - [set](#set)：Implementation of set based on `map[T]struct{}`
@@ -145,7 +147,7 @@ gcond.Switch[string](3).
     CaseLazy(2, func() string { return "3" }).
     When(3, 4).Then("3/4").
     When(5, 6).ThenLazy(func() string { return "5/6" }).
-    Default("other"))
+    Default("other")
 // 3/4
 ```
 
@@ -255,7 +257,7 @@ gptr.IndirectOr(c, 2)
 
 ### gslice
 
-Process slice `[]T`
+Processing slice `[]T`
 
 Usage：
 
@@ -450,9 +452,9 @@ Example4：Partion Operation
 
 ```go
 Chunk(map[int]int{1: 2, 2: 3, 3: 4, 4: 5, 5: 6}, 2)
-// possible output: [{1:2, 2:3}, {3:4, 4:5}, {5:6}]
+// possible result: [{1:2, 2:3}, {3:4, 4:5}, {5:6}]
 Divide(map[int]int{1: 2, 2: 3, 3: 4, 4: 5, 5: 6}, 2)
-// possible output: [{1:2, 2:3, 3:4}, {4:5, 5:6}]
+// possible result: [{1:2, 2:3, 3:4}, {4:5, 5:6}]
 ```
 
 Example5：Math Operation
@@ -546,9 +548,65 @@ gconv.ToE[int]("x")
 // 0 strconv.ParseInt: parsing "x": invalid syntax
 ```
 
+## ✨ Generic Standard Wrapper
+
+### gsync
+
+Wrap `sync`
+
+Usage：
+
+```go
+import (
+    "github.com/bytedance/gg/stdwrap/gsync"
+)
+```
+
+Example1：`gsync.Map` wraps `sync.Map`
+
+```go
+sm := gsync.Map[string, int]{}
+sm.Store("k", 1)
+sm.Load("k")
+// 1 true
+sm.LoadO("k").Value()
+// 1
+sm.Store("k", 2)
+sm.Load("k")
+// 2 true
+sm.LoadAndDelete("k")
+// 2 true
+sm.Load("k")
+// 0 false
+sm.LoadOrStore("k", 3)
+// 3 false
+sm.Load("k")
+// 3 true
+sm.ToMap()
+// {"k":3}
+```
+
+Example2：`gsync.Pool` wraps `sync.Pool`
+
+```go
+pool := Pool[*int]{
+    New: func() *int {
+        i := 1
+        return &i
+    },
+}
+a := pool.Get()
+*a
+// 1
+*a = 2
+pool.Put(a)
+*pool.Get()
+// possible result: 1 or 2
+```
+
 ### gson
 
-Processing `JSON`
+Wrap `encoding/json`
 
 Usage：
 
@@ -587,7 +645,7 @@ gson.Unmarshal[testStruct](`{"name":"test","age":10}`)
 
 ### tuple
 
-The implementation of tuples provides the definition of 2 to 10 tuples
+Implementation of tuple provides definition of generic n-ary tuples
 
 Usage
 
@@ -612,13 +670,13 @@ for _, v := range s {
 // green:15
 // blue:16
 
-fmt.Println(s.Unzip())
+s.Unzip()
 // ["red", "green", "blue"] [14, 15, 16]
 ```
 
 ### set
 
-Set implementation based on `map[T]struct{}`
+Implementation of set based on `map[T]struct{}`
 
 Usage
 
