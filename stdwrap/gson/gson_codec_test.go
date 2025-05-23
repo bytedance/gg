@@ -17,139 +17,133 @@ var codecs = map[string]Codec{
 	//"sonic.Fastest":     sonic.ConfigFastest,
 }
 
-func TestValidWithCodec(t *testing.T) {
-
+func TestValidWith(t *testing.T) {
 	for name, codec := range codecs {
 		t.Run(name, func(t *testing.T) {
-			assert.True(t, ValidWithCodec(validJSONString, codec))
-			assert.True(t, ValidWithCodec(validJSONBytes, codec))
-			assert.True(t, ValidWithCodec(validJSONMyString, codec))
-			assert.True(t, ValidWithCodec(validJSONMyBytes, codec))
+			assert.True(t, ValidWith(codec, validJSONString))
+			assert.True(t, ValidWith(codec, validJSONBytes))
+			assert.True(t, ValidWith(codec, validJSONMyString))
+			assert.True(t, ValidWith(codec, validJSONMyBytes))
 
-			assert.False(t, ValidWithCodec(invalidJSONString, codec))
-			assert.False(t, ValidWithCodec(invalidJSONBytes, codec))
-			assert.False(t, ValidWithCodec(invalidJSONMyString, codec))
-			assert.False(t, ValidWithCodec(invalidJSONMyBytes, codec))
+			assert.False(t, ValidWith(codec, invalidJSONString))
+			assert.False(t, ValidWith(codec, invalidJSONBytes))
+			assert.False(t, ValidWith(codec, invalidJSONMyString))
+			assert.False(t, ValidWith(codec, invalidJSONMyBytes))
 		})
 	}
-
 }
 
-func TestMarshalWithCodec(t *testing.T) {
+func TestMarshalWith(t *testing.T) {
 	expected := []byte(`{"name":"test","age":10}`)
 	for name, codec := range codecs {
 		t.Run(name, func(t *testing.T) {
-			got, err := MarshalWithCodec(testcase, codec)
+			got, err := MarshalWith(codec, testcase)
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		})
 	}
 }
 
-func TestMarshalIndentWithCodec(t *testing.T) {
+func TestMarshalIndentWith(t *testing.T) {
 	expected := []byte("{\n  \"name\": \"test\",\n  \"age\": 10\n}")
 	for name, codec := range codecs {
 		t.Run(name, func(t *testing.T) {
-			got, err := MarshalIndentWithCodec(testcase, "", "  ", codec)
+			got, err := MarshalIndentWith(codec, testcase, "", "  ")
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		})
 	}
 }
 
-func TestMarshalStringWithCodec(t *testing.T) {
+func TestMarshalToStringWith(t *testing.T) {
 	expected := `{"name":"test","age":10}`
 	for name, codec := range codecs {
 		t.Run(name, func(t *testing.T) {
-			got, err := MarshalStringWithCodec(testStruct{Name: "test", Age: 10}, codec)
+			got, err := MarshalToStringWith(codec, testStruct{Name: "test", Age: 10})
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		})
 	}
 }
 
-func TestToStringWithCodec(t *testing.T) {
+func TestToStringWith(t *testing.T) {
 	expected := `{"name":"test","age":10}`
 	for name, codec := range codecs {
 		t.Run(name, func(t *testing.T) {
-			got := ToStringWithCodec(testStruct{Name: "test", Age: 10}, codec)
+			got := ToStringWith(codec, testStruct{Name: "test", Age: 10})
 			assert.Equal(t, expected, got)
 		})
 	}
 }
 
-func TestToStringIndentWithCodec(t *testing.T) {
+func TestToStringIndentWith(t *testing.T) {
 	expected := `{
   "name": "test",
   "age": 10
 }`
 	for name, codec := range codecs {
 		t.Run(name, func(t *testing.T) {
-			got := ToStringIndentWithCodec(testStruct{Name: "test", Age: 10}, "", "  ", codec)
+			got := ToStringIndentWith(codec, testStruct{Name: "test", Age: 10}, "", "  ")
 			assert.Equal(t, expected, got)
 		})
 	}
 }
 
-func TestUnmarshalWithCodec(t *testing.T) {
-
-	//UnmarshalWithCodec[testStruct](``,  sonic.ConfigFastest)
-
+func TestUnmarshalWith(t *testing.T) {
 	for _, codec := range codecs {
 		{
-			got, err := UnmarshalWithCodec[testStruct](``, codec)
+			got, err := UnmarshalWith[testStruct](codec, ``)
 			expected := testStruct{}
 			assert.NotNil(t, err)
 			assert.Equal(t, expected, got)
 		}
 		{
-			got, err := UnmarshalWithCodec[testStruct]([]byte(``), codec)
+			got, err := UnmarshalWith[testStruct](codec, []byte(``))
 			expected := testStruct{}
 			assert.NotNil(t, err)
 			assert.Equal(t, expected, got)
 		}
 		{
-			got, err := UnmarshalWithCodec[testStruct](`{"name":"test","age":10}`, codec)
+			got, err := UnmarshalWith[testStruct](codec, `{"name":"test","age":10}`)
 			expected := testStruct{Name: "test", Age: 10}
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		}
 		{
-			got, err := UnmarshalWithCodec[testStruct]([]byte(`{"name":"test","age":10}`), codec)
+			got, err := UnmarshalWith[testStruct](codec, []byte(`{"name":"test","age":10}`))
 			expected := testStruct{Name: "test", Age: 10}
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		}
 		{
-			got, err := UnmarshalWithCodec[*testStruct](`{"name":"test","age":10}`, codec)
+			got, err := UnmarshalWith[*testStruct](codec, `{"name":"test","age":10}`)
 			expected := &testStruct{Name: "test", Age: 10}
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		}
 		{
-			got, err := UnmarshalWithCodec[*testStruct]([]byte(`{"name":"test","age":10}`), codec)
+			got, err := UnmarshalWith[*testStruct](codec, []byte(`{"name":"test","age":10}`))
 			expected := &testStruct{Name: "test", Age: 10}
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		}
 		{
-			got, err := UnmarshalWithCodec[map[string]any](`{"name":"test","age":10}`, codec)
+			got, err := UnmarshalWith[map[string]any](codec, `{"name":"test","age":10}`)
 			expected := map[string]any{"name": "test", "age": float64(10)}
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		}
 		{
-			got, err := UnmarshalWithCodec[[]int32](`[1,2, 3]`, codec)
+			got, err := UnmarshalWith[[]int32](codec, `[1,2, 3]`)
 			expected := []int32{1, 2, 3}
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		}
 		{
-			got, err := UnmarshalWithCodec[*set.Set[int32]](`[1,2, 3]`, codec)
+			got, err := UnmarshalWith[*set.Set[int32]](codec, `[1,2, 3]`)
 			expected := set.New[int32](1, 2, 3)
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		}
 	}
-
 }

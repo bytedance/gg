@@ -21,17 +21,18 @@
 // You can implement this interface for various formats such as JSON, YAML, or MsgPack, Avro.
 //
 // For example:
+//
 //   - Use [encoding/json] for JSONCodec
-//   - Use [github.com/bytedance/sonic] for JSONCodec
-//   - Use [github.com/json-iterator/go] for JSONCodec
+//   - Use [github.com/bytedance/sonic] for high-performance JSONCodec
+//   - Use [github.com/json-iterator/go] for customizable JSONCodec
 //   - Use [github.com/vmihailenco/msgpack/v5] for MsgpackCodec
 //
 // # Supported Operations
 //
-//   - Validation: [ValidWithCodec]
-//   - Marshal to []byte: [MarshalWithCodec], [MarshalIndentWithCodec]
-//   - Marshal to string: [MarshalStringWithCodec], [ToStringWithCodec], [ToStringIndentWithCodec]
-//   - Unmarshal to object: [UnmarshalWithCodec]
+//   - Validation: [ValidWith]
+//   - Marshal to []byte: [MarshalWith], [MarshalIndentWith]
+//   - Marshal to string: [MarshalToStringWith], [ToStringWith], [ToStringIndentWith]
+//   - Unmarshal to object: [UnmarshalWith]
 package gson
 
 import (
@@ -48,69 +49,60 @@ type Codec interface {
 	Valid(data []byte) bool
 }
 
-// ValidWithCodec reports whether data is a valid JSON encoding using the provided codec
-func ValidWithCodec[V ~[]byte | ~string](v V, codec Codec) bool {
+// ValidWith reports whether the input data is valid according to the given codec.
+func ValidWith[V ~[]byte | ~string](codec Codec, v V) bool {
 	return codec.Valid([]byte(v))
 }
 
-// MarshalWithCodec marshals the value v using the provided codec.
+// MarshalWith marshals the value v into bytes using the provided codec.
 //
 // 🚀 Example:
 //
-//	MarshalWithCodec(`{"name":"test","age":10}`, codec)  ⏩  []byte("{\"name\":\"test\",\"age\":10}")
+//	MarshalWith(codec, map[string]any{"name": "test", "age": 10}) ⏩  []byte("{\"name\":\"test\",\"age\":10}")
 //
-// 💡 HINT: For high-performance JSON serialization, see [github.com/json-iterator/go] or [github.com/bytedance/sonic] implementations,
-// such as JsonStdCodec, jsoniter.ConfigDefault, or sonic.ConfigDefault.
-func MarshalWithCodec[T any](v T, codec Codec) ([]byte, error) {
+// 💡 HINT: For high-performance JSON serialization, see [github.com/json-iterator/go] or [github.com/bytedance/sonic].
+// Common implementations include JsonStdCodec, jsoniter.ConfigDefault, and sonic.ConfigDefault.
+func MarshalWith[T any](codec Codec, v T) ([]byte, error) {
 	return codec.Marshal(v)
 }
 
-// MarshalIndentWithCodec marshals v with indent and prefix, using the provided codec
-func MarshalIndentWithCodec[T any](v T, prefix, indent string, codec Codec) ([]byte, error) {
+// MarshalIndentWith marshals the value v into indented bytes using the provided codec.
+func MarshalIndentWith[T any](codec Codec, v T, prefix, indent string) ([]byte, error) {
 	return codec.MarshalIndent(v, prefix, indent)
 }
 
-// MarshalStringWithCodec marshals the value v using the provided codec.
+// MarshalToStringWith marshals the value v into a JSON string using the provided codec.
 //
 // 🚀 Example:
 //
-//	MarshalStringWithCodec(`{"name":"test","age":10}`, codec)  ⏩  "{\"name\":\"test\",\"age\":10}"
+//	MarshalToStringWith(codec, map[string]any{"name": "test", "age": 10}) ⏩  "{\"name\":\"test\",\"age\":10}"
 //
-// 💡 HINT: For high-performance JSON serialization, see [github.com/json-iterator/go] or [github.com/bytedance/sonic] implementations,
-// such as JsonStdCodec, jsoniter.ConfigDefault, or sonic.ConfigDefault.
-func MarshalStringWithCodec[V any](v V, codec Codec) (string, error) {
+// 💡 HINT: For high-performance JSON serialization, see [github.com/json-iterator/go] or [github.com/bytedance/sonic].
+func MarshalToStringWith[T any](codec Codec, v T) (string, error) {
 	data, err := codec.Marshal(v)
 	return conv.BytesToString(data), err
 }
 
-// ToStringWithCodec returns the JSON-encoded string of v using the provided codec, and ignores error.
-//
-// 🚀 Example:
-//
-//	ToStringWithCodec(`{"name":"test","age":10}`, codec)  ⏩  "{\"name\":\"test\",\"age\":10}"
-//
-// 💡 HINT: For high-performance JSON serialization, see [github.com/json-iterator/go] or [github.com/bytedance/sonic] implementations,
-// such as JsonStdCodec, jsoniter.ConfigDefault, or sonic.ConfigDefault.
-func ToStringWithCodec[V any](v V, codec Codec) string {
+// ToStringWith returns the marshaled string representation of v using the codec, ignoring errors.
+func ToStringWith[T any](codec Codec, v T) string {
 	data, _ := codec.Marshal(v)
 	return conv.BytesToString(data)
 }
 
-// ToStringIndentWithCodec returns the JSON-encoded string with indent and prefix of v using the provided codec, and ignores error.
-func ToStringIndentWithCodec[V any](v V, prefix, indent string, codec Codec) string {
+// ToStringIndentWith returns the indented string representation of v using the codec, ignoring errors.
+func ToStringIndentWith[T any](codec Codec, v T, prefix, indent string) string {
 	data, _ := codec.MarshalIndent(v, prefix, indent)
 	return conv.BytesToString(data)
 }
 
-// UnmarshalWithCodec unmarshals the input data v into a value of type T using the provided codec.
+// UnmarshalWith unmarshals the input data v into a value of type T using the provided codec.
 //
 // 🚀 Example:
 //
-//	UnmarshalWithCodec[User](`{"name":"test","age":10}`, codec) ⏩  User{Name: "test", Age: 10}
+//	UnmarshalWith[User](codec, `{"name":"test","age":10}`) ⏩  User{Name: "test", Age: 10}
 //
 // 💡 HINT: For high-performance JSON decoding, see [github.com/json-iterator/go] or [github.com/bytedance/sonic].
-// Compatible implementations include JsonStdCodec, jsoniter.ConfigDefault, and sonic.ConfigDefault.
-func UnmarshalWithCodec[T any, V ~[]byte | ~string](v V, codec Codec) (T, error) {
+func UnmarshalWith[T any, V ~[]byte | ~string](codec Codec, v V) (T, error) {
 	var t T
 	err := codec.Unmarshal([]byte(v), &t)
 	return t, err
