@@ -42,6 +42,7 @@ go get github.com/bytedance/gg
   - [gconv](#gconv)：Data type conversion
 - [Generic Standard Wrapper](#-generic-standard-wrapper)
   - [gsync](#gsync)：Wrap `sync`
+    - [gatomic](#gatomic)：Wrap `sync/gatomic`
   - [gson](#gson)：Wrap `encoding/json`
 - [Generic Data Structures](#-generic-data-structures)
     - [tuple](#tuple)：Implementation of tuple provides definition of generic n-ary tuples
@@ -602,6 +603,41 @@ a := pool.Get()
 pool.Put(a)
 *pool.Get()
 // possible result: 1 or 2
+```
+
+#### gatomic
+
+Wrap `sync/atomic`
+
+Usage：
+
+```go
+import (
+    "github.com/bytedance/gg/stdwrap/gsync/gatomic"
+)
+```
+
+Example：
+
+```go
+var v Value[int]
+v.Load()
+// 0
+v.Store(1)
+v.Load()
+// 1
+v.Swap(2)
+// 1
+v.Load()
+// 2
+v.CompareAndSwap(1, 3)
+// false
+v.Load()
+// 2
+v.CompareAndSwap(2, 3)
+// true
+v.Load()
+// 3
 ```
 
 ### gson
