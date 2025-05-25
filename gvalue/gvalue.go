@@ -41,11 +41,30 @@ import (
 //
 // The zero value is:
 //
-//   - 0	for numeric types,
+//   - 0 for numeric types,
 //   - false for the boolean type
 //   - "" (the empty string) for strings
 //   - nil for reference/pointer type
 func Zero[T any]() (v T) {
+	return
+}
+
+// Or returns the first non-zero value of inputs.
+// If all values are zero, return the zero value of type.
+//
+// 🚀 EXAMPLE:
+//
+//	Or(false, true)  ⏩ true
+//	Or(0, 1, 2)      ⏩ 1
+//	Or("", "1", "2") ⏩ "1"
+//	Or(0, 0, 0)      ⏩ 0
+//	Or("", "", "")   ⏩ ""
+func Or[T comparable](vals ...T) (v T) {
+	for _, val := range vals {
+		if val != v {
+			return val
+		}
+	}
 	return
 }
 

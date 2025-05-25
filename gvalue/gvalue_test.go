@@ -33,6 +33,15 @@ func TestZero(t *testing.T) {
 	assert.Zero(t, Zero[*interface{}]())
 }
 
+func TestOr(t *testing.T) {
+	assert.True(t, Or(false, false, true))
+	assert.Equal(t, 1, Or(0, 1, 2))
+	assert.Equal(t, "1", Or("", "1", "2"))
+	assert.Equal(t, 0, Or(0, 0, 0))
+	assert.Equal(t, "", Or("", "", ""))
+	assert.Equal(t, 0, Or[int]())
+}
+
 func TestMin(t *testing.T) {
 	assert.Equal(t, 1, Min(1, 2))
 	assert.Equal(t, 2, Min(2))
