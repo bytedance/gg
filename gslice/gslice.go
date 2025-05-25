@@ -1506,6 +1506,34 @@ func Of[T any](v ...T) []T {
 	return v
 }
 
+// RangeWithStep returns a slice of numbers from start (inclusive) to stop (exclusive)
+// by step.
+// If the interval does not exist, RangeWithStep returns an empty slice.
+// If the step is positive, the returned slice is in ascending order.
+// If the step is negative, the returned slice is in descending order.
+//
+// 🚀 EXAMPLE:
+//
+//	RangeWithStep(0, 0, 2)     ⏩ []int{}
+//	RangeWithStep(0, -5, -1)   ⏩ []int{0, -1, -2, -3, -4}
+//	RangeWithStep(0, 5, 2)     ⏩ []int{0, 2, 4}
+//	RangeWithStep(0, 5, 3)     ⏩ []int{0, 3}
+//	RangeWithStep(0.5, 2, 0.5) ⏩ []float64{0.5, 1, 1.5}
+func RangeWithStep[I constraints.Number](start, stop, step I) []I {
+	return iter.ToSlice(iter.RangeWithStep(start, stop, step))
+}
+
+// Range is a variant of RangeWithStep, with predefined step 1.
+//
+// 🚀 EXAMPLE:
+//
+//	Range(0, 0)    ⏩ []int{}
+//	Range(0, -5)   ⏩ []int{}
+//	Range(0, 5)    ⏩ []int{0, 1, 2, 3, 4}
+func Range[I constraints.Number](start, stop I) []I {
+	return iter.ToSlice(iter.Range(start, stop))
+}
+
 // RemoveIndex removes the element at index i from slice s and returns a newly allocated slice.
 // If s[i] does not exist or is invalid, this function just clone the original slice.
 // [Negative index] is supported.
