@@ -2,7 +2,7 @@ default: test
 
 .PHONY: test
 test:
-	go test ./... -coverprofile=cover.out
+	go test -v -race -coverprofile=cover.out -covermode=atomic ./...
 	go tool cover -html=cover.out
 
 .PHONY: bench

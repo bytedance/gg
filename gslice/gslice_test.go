@@ -1025,6 +1025,10 @@ func TestConcat(t *testing.T) {
 	assert.Equal(t, []int{0, 1, 2, 3, 4}, Concat([]int{0}, []int{1, 2}, []int{3, 4}))
 }
 
+func TestMerge(t *testing.T) {
+	assert.Equal(t, []int{0, 1, 2, 3, 4}, Merge([]int{0}, []int{1, 2}, []int{3, 4}))
+}
+
 func TestCompact(t *testing.T) {
 	assert.Equal(t, []int{}, Compact[int](nil))
 	assert.Equal(t, []int{}, Compact([]int{}))
