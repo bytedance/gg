@@ -187,10 +187,10 @@ func testIntSet(t *testing.T, newset func() anyskipset[int], asc bool) {
 			} else if r != 999 {
 				l.Remove(int(fastrand.Uint32n(smallRndN)) + 1)
 			} else {
-				pre := gcond.If(asc, 0, 256)
+				pre := gcond.If(asc, 0, 257)
 				l.Range(func(score int) bool {
 					if (asc && score <= pre) || (!asc && pre <= score) {
-						panic("invalid content")
+						panic(fmt.Sprintf("invalid content, pre %d, score %d", pre, score))
 					}
 					pre = score
 					return true

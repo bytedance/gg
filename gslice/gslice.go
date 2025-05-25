@@ -786,8 +786,13 @@ func FlatMap[F, T any](s []F, f func(F) []T) []T {
 //	First([]int{})           ⏩ goption.Nil[int]()
 //
 // 💡 HINT: Use [Get] to access element at any index.
+//
+// 💡 AKA: Head
 func First[T any](s []T) goption.O[T] {
-	return iter.Head(iter.StealSlice(s))
+	if len(s) == 0 {
+		return goption.Nil[T]()
+	}
+	return goption.OK(s[0])
 }
 
 // Get returns the possible element at index n.
@@ -823,6 +828,8 @@ func Get[T any, I constraints.Integer](s []T, n I) goption.O[T] {
 //	Last([]int{})           ⏩ goption.Nil[int]()
 //
 // 💡 HINT: Use [Get] to access element at any index.
+//
+// 💡 AKA: Tail
 func Last[T any](s []T) goption.O[T] {
 	if len(s) == 0 {
 		return goption.Nil[T]()
@@ -1226,30 +1233,38 @@ func IndexRevBy[T any](s []T, f func(T) bool) goption.O[int] {
 	return goption.Nil[int]()
 }
 
-// Take returns the first n elements of slices s, or slice itself if n > len(s).
+// Take returns the first n elements of slices s if 0 <= n <= len(s), or slice itself if n > len(s).
+// If -len(s) <= n < 0, returns the last -n elements of slice s, or slice itself if n < -len(s).
 //
 // 🚀 EXAMPLE:
 //
 //	s := []int{1, 2, 3, 4, 5}
-//	Take(s, 0)  ⏩ []int{}
-//	Take(s, 3)  ⏩ []int{1, 2, 3}
-//	Take(s, 10) ⏩ []int{1, 2, 3, 4, 5}
-//
-// ⚠️ WARNING: Panic when n < 0.
+//	Take(s, 0)   ⏩ []int{}
+//	Take(s, 3)   ⏩ []int{1, 2, 3}
+//	Take(s, 10)  ⏩ []int{1, 2, 3, 4, 5}
+//	Take(s, -1)  ⏩ []int{5}
+//	Take(s, -3)  ⏩ []int{3, 4, 5}
+//	Take(s, -10) ⏩ []int{1, 2, 3, 4, 5}
 //
 // 💡 HINT: This function returns sub-slices of original slice,
 // if you modify the sub-slices, the original slice is modified too.
 // Use [TakeClone] to prevent this.
-func Take[T any, S ~[]T](s S, n int) S {
-	rtassert.MustNotNeg(n)
-	if n > len(s) {
-		n = len(s)
+func Take[T any, I constraints.Integer, S ~[]T](s S, n I) S {
+	startIdx, endIdx := 0, int(n)
+	if n < 0 {
+		endIdx = len(s)
+		startIdx, _ = normalizeIndex(s, n)
+		if startIdx < 0 {
+			startIdx = 0
+		}
+	} else if endIdx > len(s) {
+		endIdx = len(s)
 	}
-	return s[:n]
+	return s[startIdx:endIdx]
 }
 
 // TakeClone is variant of [Take].
-func TakeClone[T any, S ~[]T](s S, n int) S {
+func TakeClone[T any, I constraints.Integer, S ~[]T](s S, n I) S {
 	return Clone(Take(s, n))
 }
 
