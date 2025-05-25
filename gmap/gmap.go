@@ -259,8 +259,8 @@ func TryMapValues[K comparable, V1, V2 any](m map[K]V1, f func(V1) (V2, error)) 
 //   - Use [FilterKeys] if you only need to filter the keys.
 //   - Use [FilterValues] if you only need to filter the values.
 //   - Use [FilterMap] if you also want to modify the keys/values during filtering.
-func Filter[K comparable, V any](m map[K]V, f func(K, V) bool) map[K]V {
-	r := make(map[K]V, len(m)/2)
+func Filter[K comparable, V any, M ~map[K]V](m M, f func(K, V) bool) M {
+	r := make(M, len(m)/2)
 	for k, v := range m {
 		if f(k, v) {
 			r[k] = v
@@ -277,8 +277,8 @@ func Filter[K comparable, V any](m map[K]V, f func(K, V) bool) map[K]V {
 //	m := map[int]int{1: 1, 2: 2, 3: 2, 4: 3}
 //	pred := func(k int) bool { return k%2 == 0 }
 //	FilterKeys(m, pred) ⏩ map[int]int{2: 2, 4: 3}
-func FilterKeys[K comparable, V any](m map[K]V, f func(K) bool) map[K]V {
-	r := make(map[K]V, len(m)/2)
+func FilterKeys[K comparable, V any, M ~map[K]V](m M, f func(K) bool) M {
+	r := make(M, len(m)/2)
 	for k, v := range m {
 		if f(k) {
 			r[k] = v
@@ -295,8 +295,8 @@ func FilterKeys[K comparable, V any](m map[K]V, f func(K) bool) map[K]V {
 //	m := map[int]int{1: 1, 2: 2, 3: 3, 4: 4}
 //	keys := []int{1, 3, 5}
 //	FilterByKeys(m, keys) ⏩ map[int]int{1: 1, 3: 3}
-func FilterByKeys[K comparable, V any](m map[K]V, keys ...K) map[K]V {
-	r := make(map[K]V, gvalue.Min(len(keys), len(m)))
+func FilterByKeys[K comparable, V any, M ~map[K]V](m M, keys ...K) M {
+	r := make(M, gvalue.Min(len(keys), len(m)))
 	for _, key := range keys {
 		if v, ok := m[key]; ok {
 			r[key] = v
@@ -313,8 +313,8 @@ func FilterByKeys[K comparable, V any](m map[K]V, keys ...K) map[K]V {
 //	m := map[int]int{1: 1, 2: 2, 3: 2, 4: 3}
 //	pred := func(v int) bool { return v%2 == 0 }
 //	FilterValues(m, pred) ⏩ map[int]int{2: 2, 3: 2}
-func FilterValues[K comparable, V any](m map[K]V, f func(V) bool) map[K]V {
-	r := make(map[K]V, len(m)/2)
+func FilterValues[K comparable, V any, M ~map[K]V](m M, f func(V) bool) M {
+	r := make(M, len(m)/2)
 	for k, v := range m {
 		if f(v) {
 			r[k] = v
@@ -331,8 +331,8 @@ func FilterValues[K comparable, V any](m map[K]V, f func(V) bool) map[K]V {
 //	m := map[int]int{1: 10, 2: 20, 3: 10, 4: 30}
 //	values := []int{10, 30}
 //	FilterByValues(m, values) ⏩ map[int]int{1: 10, 3: 10, 4: 30}
-func FilterByValues[K, V comparable](m map[K]V, values ...V) map[K]V {
-	r := make(map[K]V, gvalue.Min(len(values), len(m)))
+func FilterByValues[K, V comparable, M ~map[K]V](m M, values ...V) M {
+	r := make(M, gvalue.Min(len(values), len(m)))
 	for k, v := range m {
 		if gslice.Contains(values, v) {
 			r[k] = v
@@ -354,8 +354,8 @@ func FilterByValues[K, V comparable](m map[K]V, values ...V) map[K]V {
 //
 //   - Use [RejectKeys] if you only need to reject the keys.
 //   - Use [RejectValues] if you only need to reject the values.
-func Reject[K comparable, V any](m map[K]V, f func(K, V) bool) map[K]V {
-	r := make(map[K]V, len(m)/2)
+func Reject[K comparable, V any, M ~map[K]V](m M, f func(K, V) bool) M {
+	r := make(M, len(m)/2)
 	for k, v := range m {
 		if !f(k, v) {
 			r[k] = v
@@ -372,8 +372,8 @@ func Reject[K comparable, V any](m map[K]V, f func(K, V) bool) map[K]V {
 //	m := map[int]int{1: 1, 2: 2, 3: 2, 4: 3}
 //	pred := func(k int) bool { return k%2 != 0 }
 //	RejectKeys(m, pred) ⏩ map[int]int{2: 2, 4: 3}
-func RejectKeys[K comparable, V any](m map[K]V, f func(K) bool) map[K]V {
-	r := make(map[K]V, len(m)/2)
+func RejectKeys[K comparable, V any, M ~map[K]V](m M, f func(K) bool) M {
+	r := make(M, len(m)/2)
 	for k, v := range m {
 		if !f(k) {
 			r[k] = v
@@ -390,7 +390,7 @@ func RejectKeys[K comparable, V any](m map[K]V, f func(K) bool) map[K]V {
 //	m := map[int]int{1: 1, 2: 2, 3: 3, 4: 4}
 //	keys := []int{1, 3}
 //	RejectByKeys(m, keys) ⏩ map[int]int{2: 2, 4: 4}
-func RejectByKeys[K comparable, V any](m map[K]V, keys ...K) map[K]V {
+func RejectByKeys[K comparable, V any, M ~map[K]V](m M, keys ...K) M {
 	r := Clone(m)
 	for _, key := range keys {
 		delete(r, key)
@@ -406,8 +406,8 @@ func RejectByKeys[K comparable, V any](m map[K]V, keys ...K) map[K]V {
 //	 m := map[int]int{1: 1, 2: 2, 3: 2, 4: 3}
 //	 pred := func(v int) bool { return v%2 != 0 }
 //		RejectValues(m, pred) ⏩ map[int]int{2: 2, 3: 2}
-func RejectValues[K comparable, V any](m map[K]V, f func(V) bool) map[K]V {
-	r := make(map[K]V, len(m)/2)
+func RejectValues[K comparable, V any, M ~map[K]V](m M, f func(V) bool) M {
+	r := make(M, len(m)/2)
 	for k, v := range m {
 		if !f(v) {
 			r[k] = v
@@ -424,8 +424,8 @@ func RejectValues[K comparable, V any](m map[K]V, f func(V) bool) map[K]V {
 //	m := map[int]int{1: 10, 2: 20, 3: 10, 4: 30}
 //	values := []int{10, 30}
 //	RejectByValues(m, values) ⏩ map[int]int{2: 20}
-func RejectByValues[K, V comparable](m map[K]V, values ...V) map[K]V {
-	r := make(map[K]V, len(m)/2)
+func RejectByValues[K, V comparable, M ~map[K]V](m M, values ...V) M {
+	r := make(M, len(m)/2)
 	for k, v := range m {
 		if !gslice.Contains(values, v) {
 			r[k] = v
@@ -626,7 +626,7 @@ func OrderedItems[K constraints.Ordered, V any](m map[K]V) tuple.S2[K, V] {
 }
 
 // Merge is alias of [Union].
-func Merge[K comparable, V any](ms ...map[K]V) map[K]V {
+func Merge[K comparable, V any, M ~map[K]V](ms ...M) M {
 	return Union(ms...)
 }
 
@@ -649,10 +649,10 @@ func Merge[K comparable, V any](ms ...map[K]V) map[K]V {
 // set data structure
 //
 // 💡 AKA: Merge, Concat, Combine
-func Union[K comparable, V any](ms ...map[K]V) map[K]V {
+func Union[K comparable, V any, M ~map[K]V](ms ...M) M {
 	// Fastpath: no map or only one map given.
 	if len(ms) == 0 {
-		return make(map[K]V)
+		return make(M)
 	}
 	if len(ms) == 1 {
 		return cloneWithoutNilCheck(ms[0])
@@ -662,7 +662,7 @@ func Union[K comparable, V any](ms ...map[K]V) map[K]V {
 	for _, m := range ms {
 		maxLen = gvalue.Max(maxLen, len(m))
 	}
-	ret := make(map[K]V, maxLen)
+	ret := make(M, maxLen)
 	// Fastpath: all maps are empty.
 	if maxLen == 0 {
 		return ret
@@ -701,7 +701,7 @@ func UnionBy[K comparable, V any, M ~map[K]V](ms []M, onConflict ConflictFunc[K,
 	for _, m := range ms {
 		maxLen = gvalue.Max(maxLen, len(m))
 	}
-	ret := make(map[K]V, maxLen)
+	ret := make(M, maxLen)
 	// Fastpath: all maps are empty.
 	if maxLen == 0 {
 		return ret
@@ -735,14 +735,14 @@ func UnionBy[K comparable, V any, M ~map[K]V](ms []M, onConflict ConflictFunc[K,
 // set data structure
 //
 // TODO: Value type of againsts can be diff from m.
-func Diff[K comparable, V any](m map[K]V, againsts ...map[K]V) map[K]V {
+func Diff[K comparable, V any, M ~map[K]V](m M, againsts ...M) M {
 	if len(m) == 0 {
-		return make(map[K]V)
+		return make(M)
 	}
 	if len(againsts) == 0 {
 		return cloneWithoutNilCheck(m)
 	}
-	ret := make(map[K]V, len(m)/2)
+	ret := make(M, len(m)/2)
 	for k, v := range m {
 		var found bool
 		for _, a := range againsts {
@@ -775,10 +775,10 @@ func Diff[K comparable, V any](m map[K]V, againsts ...map[K]V) map[K]V {
 //
 // 💡 HINT: Use [github.com/bytedance/gg/collection/set.Set] if you need a
 // set data structure
-func Intersect[K comparable, V any](ms ...map[K]V) map[K]V {
+func Intersect[K comparable, V any, M ~map[K]V](ms ...M) M {
 	// Fastpath: no map or only one map given.
 	if len(ms) == 0 {
-		return make(map[K]V)
+		return make(M)
 	}
 	if len(ms) == 1 {
 		return cloneWithoutNilCheck(ms[0])
@@ -788,7 +788,7 @@ func Intersect[K comparable, V any](ms ...map[K]V) map[K]V {
 	for _, m := range ms[1:] {
 		minLen = gvalue.Min(minLen, len(m))
 	}
-	ret := make(map[K]V, minLen)
+	ret := make(M, minLen)
 	// Fastpath: all maps are empty.
 	if minLen == 0 {
 		return ret
@@ -831,7 +831,7 @@ func IntersectBy[K comparable, V any, M ~map[K]V](ms []M, onConflict ConflictFun
 	for _, m := range ms[1:] {
 		minLen = gvalue.Min(minLen, len(m))
 	}
-	ret := make(map[K]V, minLen)
+	ret := make(M, minLen)
 	// Fastpath: all maps are empty.
 	if minLen == 0 {
 		return ret
@@ -1141,12 +1141,9 @@ func InvertGroup[K, V comparable](m map[K]V) map[V][]K {
 //	Equal(map[int]int{1: 1, 2: 2}, map[int]int{1: 1, 2: 2}) ⏩ true
 //	Equal(map[int]int{1: 1}, map[int]int{1: 1, 2: 2})       ⏩ false
 //	Equal(map[int]int{}, map[int]int{})                     ⏩ true
-//	Equal(map[int]int{}, nil)                               ⏩ false
+//	Equal(map[int]int{}, nil)                               ⏩ true
 func Equal[K, V comparable](m1, m2 map[K]V) bool {
 	if len(m1) != len(m2) {
-		return false
-	}
-	if (m1 == nil) != (m2 == nil) {
 		return false
 	}
 	for k, v1 := range m1 {
@@ -1166,12 +1163,9 @@ func Equal[K, V comparable](m1, m2 map[K]V) bool {
 //	EqualBy(map[int]int{1: 1, 2: 2}, map[int]int{1: 1, 2: 2}, eq) ⏩ true
 //	EqualBy(map[int]int{1: 1}, map[int]int{1: 1, 2: 2}, eq)       ⏩ false
 //	EqualBy(map[int]int{}, map[int]int{}, eq)                     ⏩ true
-//	EqualBy(map[int]int{}, nil, eq)                               ⏩ false
+//	EqualBy(map[int]int{}, nil, eq)                               ⏩ true
 func EqualBy[K comparable, V any](m1, m2 map[K]V, eq func(v1, v2 V) bool) bool {
 	if len(m1) != len(m2) {
-		return false
-	}
-	if (m1 == nil) != (m2 == nil) {
 		return false
 	}
 	for k, v1 := range m1 {
@@ -1407,9 +1401,9 @@ func MinMaxBy[K comparable, V any](m map[K]V, less func(V, V) bool) goption.O[tu
 // The last chunk will be shorter if n does not evenly divide the length of the map.
 //
 // ⚠️ WARNING: The values in chunks will be in an indeterminate order.
-func Chunk[K comparable, V any](m map[K]V, size int) []map[K]V {
+func Chunk[K comparable, V any, M ~map[K]V](m M, size int) []M {
 	return iter.ToSlice(
-		iter.Map(func(s []tuple.T2[K, V]) map[K]V { return iter.KVToMap(iter.StealSlice(s)) },
+		iter.Map(func(s []tuple.T2[K, V]) M { return iter.KVToMap(iter.StealSlice(s)) },
 			iter.Chunk(size,
 				iter.FromMap(m))))
 }
@@ -1420,9 +1414,9 @@ func Chunk[K comparable, V any](m map[K]V, size int) []map[K]V {
 // of the slice.
 //
 // ⚠️ WARNING: The values in chunks will be in an indeterminate order.
-func Divide[K comparable, V any](m map[K]V, n int) []map[K]V {
+func Divide[K comparable, V any, M ~map[K]V](m M, n int) []M {
 	return iter.ToSlice(
-		iter.Map(func(s []tuple.T2[K, V]) map[K]V { return iter.KVToMap(iter.StealSlice(s)) },
+		iter.Map(func(s []tuple.T2[K, V]) M { return iter.KVToMap(iter.StealSlice(s)) },
 			iter.Divide(n,
 				iter.FromMap(m))))
 }
@@ -1519,7 +1513,7 @@ func Len[K comparable, V any](m map[K]V) int {
 //	Compact(m) ⏩ map[int]string{1: "foo", 3: "bar"}
 //
 // 💡 HINT: See [github.com/bytedance/gg/gvalue.Zero] for details of zero value.
-func Compact[K, V comparable](m map[K]V) map[K]V {
+func Compact[K, V comparable, M ~map[K]V](m M) M {
 	return FilterValues(m, gvalue.IsNotZero[V])
 }
 

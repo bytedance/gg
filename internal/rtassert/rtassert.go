@@ -23,7 +23,13 @@ import (
 
 func MustNotNeg[T constraints.Number](n T) {
 	if n < 0 {
-		panic(fmt.Errorf("number must not be negative: %v", n))
+		panic(fmt.Errorf("must not be negative: %v", n))
+	}
+}
+
+func MustLessThan[T constraints.Ordered](x, y T) {
+	if x < y {
+		panic(fmt.Errorf("must not be less than %v", y))
 	}
 }
 
