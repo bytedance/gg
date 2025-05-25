@@ -937,9 +937,9 @@ func TestTake(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, Take([]int{1, 2, 3, 4, 5}, 3))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, Take([]int{1, 2, 3, 4, 5}, 5))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, Take([]int{1, 2, 3, 4, 5}, 10))
-	assert.Panic(t, func() {
-		Take([]int{1, 2, 3, 4, 5}, -1)
-	})
+	assert.Equal(t, []int{5}, Take([]int{1, 2, 3, 4, 5}, -1))
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, Take([]int{1, 2, 3, 4, 5}, -5))
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, Take([]int{1, 2, 3, 4, 5}, -10))
 	{
 		s1 := []int{1, 2, 3, 4, 5}
 		s2 := Take(s1, 3)
@@ -953,9 +953,9 @@ func TestTakeClone(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, TakeClone([]int{1, 2, 3, 4, 5}, 3))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, TakeClone([]int{1, 2, 3, 4, 5}, 5))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, TakeClone([]int{1, 2, 3, 4, 5}, 10))
-	assert.Panic(t, func() {
-		TakeClone([]int{1, 2, 3, 4, 5}, -1)
-	})
+	assert.Equal(t, []int{5}, TakeClone([]int{1, 2, 3, 4, 5}, -1))
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, TakeClone([]int{1, 2, 3, 4, 5}, -5))
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, TakeClone([]int{1, 2, 3, 4, 5}, -10))
 	{
 		s1 := []int{1, 2, 3, 4, 5}
 		s2 := TakeClone(s1, 3)
@@ -1230,11 +1230,6 @@ func TestSlice(t *testing.T) {
 		{in: []string{"byte", "dance", "is", "best", "company"}, start: 0, end: 0, expected: []string{}},
 		{in: []string{"byte", "dance", "is", "best", "company"}, start: 0, end: 1, expected: []string{"byte"}},
 	}
-	shouldPanicTbl := []struct {
-		in    []int
-		start int
-		end   int
-	}{}
 	t.Run("SliceRange", func(t *testing.T) {
 		t.Parallel()
 		for _, col := range intTbl {
@@ -1244,11 +1239,6 @@ func TestSlice(t *testing.T) {
 		for _, col := range stringTbl {
 			out := Slice(col.in, col.start, col.end)
 			assert.Equal(t, col.expected, out)
-		}
-		for _, col := range shouldPanicTbl {
-			assert.Panic(t, func() {
-				_ = Slice(col.in, col.start, col.end)
-			})
 		}
 		// TestModify
 		s := []int{1, 2, 3, 4, 5}
@@ -1267,11 +1257,6 @@ func TestSlice(t *testing.T) {
 			out := SliceClone(col.in, col.start, col.end)
 			assert.Equal(t, col.expected, out)
 			assert.False(t, overlaps(col.in, out))
-		}
-		for _, col := range shouldPanicTbl {
-			assert.Panic(t, func() {
-				_ = SliceClone(col.in, col.start, col.end)
-			})
 		}
 
 		// TestModifyClone

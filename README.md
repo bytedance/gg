@@ -298,8 +298,14 @@ gslice.Get([]int{1, 2, 3, 4, 5}, -1).Value() // Access element with negative ind
 Example3：Partion Operation
 
 ```go
+Range(1, 5)
+// [1, 2, 3, 4]
+RangeWithStep(5, 1, -2)
+// [5, 3]
 gslice.Take([]int{1, 2, 3, 4, 5}, 2)
 // [1, 2]
+Take([]int{1, 2, 3, 4, 5}, -2)
+// [4, 5]
 gslice.Slice([]int{1, 2, 3, 4, 5}, 1, 3)
 // [2, 3]
 gslice.Chunk([]int{1, 2, 3, 4, 5}, 2)

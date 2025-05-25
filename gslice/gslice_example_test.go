@@ -42,7 +42,10 @@ func Example() {
 	fmt.Println(Get([]int{1, 2, 3, 4, 5}, -1).Value())      //  5
 
 	// Partion operation
+	fmt.Println(Range(1, 5))                             // [1, 2, 3, 4]
+	fmt.Println(RangeWithStep(5, 1, -2))                 // [5, 3]
 	fmt.Println(Take([]int{1, 2, 3, 4, 5}, 2))           // [1, 2]
+	fmt.Println(Take([]int{1, 2, 3, 4, 5}, -2))          // [4, 5]
 	fmt.Println(Slice([]int{1, 2, 3, 4, 5}, 1, 3))       // [2, 3]
 	fmt.Println(Chunk([]int{1, 2, 3, 4, 5}, 2))          // [[1, 2] [3, 4] [5]]
 	fmt.Println(Divide([]int{1, 2, 3, 4, 5}, 2))         // [[1, 2, 3] [4, 5]]
@@ -100,7 +103,10 @@ func Example() {
 	// 1
 	// 2
 	// 5
+	// [1 2 3 4]
+	// [5 3]
 	// [1 2]
+	// [4 5]
 	// [2 3]
 	// [[1 2] [3 4] [5]]
 	// [[1 2 3] [4 5]]
