@@ -36,7 +36,7 @@ jobs:
         run: go mod tidy
 
       - name: Run unit tests
-        run: go test -v -race -coverprofile=coverage.txt ./...
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Run benchmarks
         if: matrix.go-version == '1.24.x'

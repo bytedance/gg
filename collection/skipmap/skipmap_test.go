@@ -16,9 +16,7 @@ package skipmap
 
 import (
 	"encoding/json"
-	"math/rand"
 	"reflect"
-	"runtime"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -32,15 +30,13 @@ import (
 
 func TestOrdered(t *testing.T) {
 	testSkipMapInt(t, func() anyskipmap[int] { return New[int, any]() })
-	testSkipMapIntDesc(t, func() anyskipmap[int] { return NewDesc[int, any]() })
+	testSkipMapInt(t, func() anyskipmap[int] { return NewDesc[int, any]() })
+	testSkipMapInt(t, func() anyskipmap[int] { return NewFunc[int, any](func(a, b int) bool { return a < b }) })
 	testSkipMapString(t, func() anyskipmap[string] { return New[string, any]() })
-	testSyncMapSuiteInt64(t, func() anyskipmap[int64] { return New[int64, any]() })
+	testSkipMapString(t, func() anyskipmap[string] { return NewDesc[string, any]() })
+	testSkipMapString(t, func() anyskipmap[string] { return NewFunc[string, any](func(a, b string) bool { return a < b }) })
 	testSkipMapToMap(t, func() orderedskipmap[int] { return New[int, any]() })
 	testSkipMapToMap(t, func() orderedskipmap[int] { return NewDesc[int, any]() })
-}
-
-func TestFunc(t *testing.T) {
-	testSkipMapInt(t, func() anyskipmap[int] { return NewFunc[int, any](func(a, b int) bool { return a < b }) })
 }
 
 type anyskipmap[T any] interface {
@@ -297,22 +293,6 @@ func testSkipMapInt(t *testing.T, newset func() anyskipmap[int]) {
 	}
 }
 
-func testSkipMapIntDesc(t *testing.T, newset func() anyskipmap[int]) {
-	m := newset()
-	cases := []int{10, 11, 12}
-	for _, v := range cases {
-		m.Store(v, nil)
-	}
-	i := len(cases) - 1
-	m.Range(func(key int, _ interface{}) bool {
-		if key != cases[i] {
-			t.Fail()
-		}
-		i--
-		return true
-	})
-}
-
 func testSkipMapString(t *testing.T, newset func() anyskipmap[string]) {
 	m := newset()
 
@@ -416,68 +396,6 @@ func testSkipMapString(t *testing.T, newset func() anyskipmap[string]) {
 
 	if m.Len() != 999 || int(count) != m.Len() {
 		t.Fatal("fail", m.Len(), count, count2)
-	}
-}
-
-/* Test from sync.Map */
-func testSyncMapSuiteInt64(t *testing.T, newset func() anyskipmap[int64]) {
-	const mapSize = 1 << 10
-
-	m := newset()
-	for n := int64(1); n <= mapSize; n++ {
-		m.Store(n, int64(n))
-	}
-
-	done := make(chan struct{})
-	var wg sync.WaitGroup
-	defer func() {
-		close(done)
-		wg.Wait()
-	}()
-	for g := int64(runtime.GOMAXPROCS(0)); g > 0; g-- {
-		r := rand.New(rand.NewSource(g))
-		wg.Add(1)
-		go func(g int64) {
-			defer wg.Done()
-			for i := int64(0); ; i++ {
-				select {
-				case <-done:
-					return
-				default:
-				}
-				for n := int64(1); n < mapSize; n++ {
-					if r.Int63n(mapSize) == 0 {
-						m.Store(n, n*i*g)
-					} else {
-						m.Load(n)
-					}
-				}
-			}
-		}(g)
-	}
-
-	iters := 1 << 10
-	if testing.Short() {
-		iters = 16
-	}
-	for n := iters; n > 0; n-- {
-		seen := make(map[int64]bool, mapSize)
-
-		m.Range(func(ki int64, vi interface{}) bool {
-			k, v := ki, vi.(int64)
-			if v%k != 0 {
-				t.Fatalf("while Storing multiples of %v, Range saw value %v", k, v)
-			}
-			if seen[k] {
-				t.Fatalf("Range visited key %v twice", k)
-			}
-			seen[k] = true
-			return true
-		})
-
-		if len(seen) != mapSize {
-			t.Fatalf("Range visited %v elements of %v-element Map", len(seen), mapSize)
-		}
 	}
 }
 

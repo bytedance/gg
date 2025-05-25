@@ -109,18 +109,24 @@ func TestSwitchWhen(t *testing.T) {
 	v1 := Switch[string](1).
 		When(1, 2).Then("1").
 		When(3, 4).ThenLazy(func() string { return "3" }).
-		Default("5")
+		DefaultLazy(func() string {
+			return "5"
+		})
 	assert.Equal(t, v1, "1")
 
 	v2 := Switch[string](4).
 		When(1, 2).Then("1").
 		When(3, 4).ThenLazy(func() string { return "3" }).
-		Default("5")
+		DefaultLazy(func() string {
+			return "5"
+		})
 	assert.Equal(t, v2, "3")
 
 	v3 := Switch[string](10).
 		When(1, 2).Then("1").
 		When(3, 4).ThenLazy(func() string { return "3" }).
-		Default("5")
+		DefaultLazy(func() string {
+			return "5"
+		})
 	assert.Equal(t, v3, "5")
 }

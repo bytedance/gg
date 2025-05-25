@@ -383,6 +383,19 @@ func TestFoldValues(t *testing.T) {
 		foldValues(map[int]int{}, gvalue.Add[int], 2))
 }
 
+func TestReduce(t *testing.T) {
+	assert.Equal(t,
+		goption.OK(tuple.Make2(3, 6)),
+		reduce(map[int]int{1: 2, 2: 4}, func(t tuple.T2[int, int], x int, y int) tuple.T2[int, int] {
+			return tuple.Make2(t.First+x, t.Second+y)
+		}))
+	assert.Equal(t,
+		goption.Nil[tuple.T2[int, int]](),
+		reduce(map[int]int{}, func(t tuple.T2[int, int], x int, y int) tuple.T2[int, int] {
+			return tuple.Make2(t.First+x, t.Second+y)
+		}))
+}
+
 func TestReduceKeys(t *testing.T) {
 	assert.Equal(t,
 		goption.OK(3),
@@ -934,6 +947,11 @@ func TestTypeAssert(t *testing.T) {
 	assert.Panic(t, func() {
 		TypeAssert[float64](map[int]int{1: 1, 2: 2})
 	})
+}
+
+func TestLen(t *testing.T) {
+	assert.Equal(t, 0, Len(map[int]int{}))
+	assert.Equal(t, 2, Len(map[int]int{1: 1, 2: 2}))
 }
 
 func TestUnion(t *testing.T) {

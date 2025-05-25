@@ -24,6 +24,7 @@ func Example() {
 	fmt.Println(s.Add(10))                    // false
 	fmt.Println(s.Add(11))                    // true
 	fmt.Println(s.Remove(11) && s.Remove(12)) // true
+	fmt.Println(s)                            // set[10 15]
 
 	fmt.Println(s.ContainsAny(10, 15)) // true
 	fmt.Println(s.ContainsAny(11, 12)) // false
@@ -39,6 +40,7 @@ func Example() {
 	// false
 	// true
 	// true
+	// set[10 15]
 	// true
 	// false
 	// false

@@ -273,6 +273,9 @@ func (s *Set[T]) IsSuperset(other *Set[T]) bool {
 	return true
 }
 
+// String implements [fmt.Stringer].
+//
+// Experimental: This API is experimental and may change in the future.
 func (s *Set[T]) String() string {
 	members := make([]string, 0, len(s.m))
 	for m := range s.m {
