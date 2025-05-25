@@ -18,11 +18,6 @@ import (
 	"fmt"
 )
 
-var once = Once(func() int {
-	fmt.Println("once")
-	return 0
-})
-
 func Example() {
 	// Zero value
 	a := Zero[int]()
@@ -48,11 +43,6 @@ func Example() {
 	fmt.Println(TypeAssert[int](any(1))) // 1
 	fmt.Println(TryAssert[int](any(1)))  // 1 true
 
-	// Once
-	once() // "once"
-	once() // (no output)
-	once() // (no output)
-
 	// Output:
 	// 0
 	// true
@@ -68,5 +58,4 @@ func Example() {
 	// true
 	// 1
 	// 1 true
-	// once
 }
