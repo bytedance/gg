@@ -29,8 +29,9 @@ func Example() {
 	fmt.Println(a)         // 0
 	fmt.Println(IsZero(a)) // true
 	b := Zero[*int]()
-	fmt.Println(b)        // nil
-	fmt.Println(IsNil(b)) // true
+	fmt.Println(b)           // nil
+	fmt.Println(IsNil(b))    // true
+	fmt.Println(Or(0, 1, 2)) // 1
 
 	// Math operation
 	fmt.Println(Max(1, 2, 3))    // 3
@@ -57,6 +58,7 @@ func Example() {
 	// true
 	// <nil>
 	// true
+	// 1
 	// 3
 	// 1
 	// 1 3

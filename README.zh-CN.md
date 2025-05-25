@@ -174,6 +174,8 @@ b := gvalue.Zero[*int]()
 // nil
 gvalue.IsNil(b)
 // true
+Or(0, 1, 2)
+// 1
 ```
 
 示例2：数学运算
