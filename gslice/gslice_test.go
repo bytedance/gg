@@ -35,6 +35,12 @@ func TestMap(t *testing.T) {
 		Map([]int{1, 2, 3}, strconv.Itoa))
 }
 
+func TestTryMap(t *testing.T) {
+	assert.Equal(t, TryMap(Of("1", "2", "3"), strconv.Atoi), gresult.OK(Of(1, 2, 3)))
+	assert.Equal(t, TryMap(nil, strconv.Atoi), gresult.OK(([]int{})))
+	assert.Equal(t, TryMap(Of("1", "2", "a"), strconv.Atoi).Err().Error(), "strconv.Atoi: parsing \"a\": invalid syntax")
+}
+
 func TestFilter(t *testing.T) {
 	assert.Equal(t,
 		[]int{},
@@ -95,6 +101,29 @@ func TestReject(t *testing.T) {
 	assert.Equal(t,
 		[]int{0},
 		Reject([]int{0, 1, 2, 3}, gvalue.IsNotZero[int]))
+}
+
+func TestPartition(t *testing.T) {
+	{
+		filter, reject := Partition([]int(nil), gvalue.IsZero[int])
+		assert.Equal(t, []int{}, filter)
+		assert.Equal(t, []int{}, reject)
+	}
+	{
+		filter, reject := Partition([]int{}, gvalue.IsZero[int])
+		assert.Equal(t, []int{}, filter)
+		assert.Equal(t, []int{}, reject)
+	}
+	{
+		filter, reject := Partition([]int{0, 1, 2, 3}, gvalue.IsNotZero[int])
+		assert.Equal(t, []int{1, 2, 3}, filter)
+		assert.Equal(t, []int{0}, reject)
+	}
+	{
+		filter, reject := Partition([]int{0, 1, 2, 3}, gvalue.IsZero[int])
+		assert.Equal(t, []int{0}, filter)
+		assert.Equal(t, []int{1, 2, 3}, reject)
+	}
 }
 
 func TestReduce(t *testing.T) {
@@ -1268,10 +1297,23 @@ func TestOf(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, Of(1, 2, 3))
 }
 
-func TestTryMap(t *testing.T) {
-	assert.Equal(t, TryMap(Of("1", "2", "3"), strconv.Atoi), gresult.OK(Of(1, 2, 3)))
-	assert.Equal(t, TryMap(nil, strconv.Atoi), gresult.OK(([]int{})))
-	assert.Equal(t, TryMap(Of("1", "2", "a"), strconv.Atoi).Err().Error(), "strconv.Atoi: parsing \"a\": invalid syntax")
+func TestRangeWithStep(t *testing.T) {
+	assert.Equal(t, []int{}, RangeWithStep(0, 0, 2))
+	assert.Equal(t, []int{}, RangeWithStep(0, -1, 2))
+	assert.Equal(t, []int{0}, RangeWithStep(0, 1, 2))
+	assert.Equal(t, []int{0, -1, -2, -3, -4}, RangeWithStep(0, -5, -1))
+	assert.Equal(t, []int{0, 2, 4}, RangeWithStep(0, 5, 2))
+	assert.Equal(t, []int{0, 3}, RangeWithStep(0, 5, 3))
+
+	assert.Equal(t, []float64{0.5, 1, 1.5}, RangeWithStep(0.5, 2.0, 0.5))
+}
+
+func TestRange(t *testing.T) {
+	assert.Equal(t, []int{}, Range(0, 0))
+	assert.Equal(t, []int{}, Range(0, -1))
+	assert.Equal(t, []int{0}, Range(0, 1))
+	assert.Equal(t, []int{-2, -1}, Range(-2, 0))
+	assert.Equal(t, []int{0, 1, 2, 3, 4}, Range(0, 5))
 }
 
 func TestRemoveIndex(t *testing.T) {
@@ -1417,27 +1459,4 @@ func overlaps[E any](a, b []E) bool {
 	}
 	return uintptr(unsafe.Pointer(&a[0])) <= uintptr(unsafe.Pointer(&b[len(b)-1]))+(elemSize-1) &&
 		uintptr(unsafe.Pointer(&b[0])) <= uintptr(unsafe.Pointer(&a[len(a)-1]))+(elemSize-1)
-}
-
-func TestPartition(t *testing.T) {
-	{
-		filter, reject := Partition([]int(nil), gvalue.IsZero[int])
-		assert.Equal(t, []int{}, filter)
-		assert.Equal(t, []int{}, reject)
-	}
-	{
-		filter, reject := Partition([]int{}, gvalue.IsZero[int])
-		assert.Equal(t, []int{}, filter)
-		assert.Equal(t, []int{}, reject)
-	}
-	{
-		filter, reject := Partition([]int{0, 1, 2, 3}, gvalue.IsNotZero[int])
-		assert.Equal(t, []int{1, 2, 3}, filter)
-		assert.Equal(t, []int{0}, reject)
-	}
-	{
-		filter, reject := Partition([]int{0, 1, 2, 3}, gvalue.IsZero[int])
-		assert.Equal(t, []int{0}, filter)
-		assert.Equal(t, []int{1, 2, 3}, reject)
-	}
 }
