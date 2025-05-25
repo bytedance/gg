@@ -31,7 +31,6 @@
 package gvalue
 
 import (
-	"sync"
 	"unsafe"
 
 	"github.com/bytedance/gg/internal/constraints"
@@ -235,47 +234,4 @@ func GreaterEqual[T constraints.Ordered](x, y T) bool {
 // Between returns true when v is within [min, max], otherwise false.
 func Between[T constraints.Ordered](v, min, max T) bool {
 	return v >= min && v <= max
-}
-
-// Once returns a function as value getter.
-// Value is returned by function f, and f is invoked only once when returned
-// function is firstly called.
-//
-// This function can be used to lazily initialize a value, as replacement of
-// the packages-level init function. For example:
-//
-//	var DB *sql.DB
-//
-//	func init() {
-//		// 💡 NOTE: DB is initialized here.
-//		DB, _ = sql.Open("mysql", "user:password@/dbname")
-//	}
-//
-//	func main() {
-//		DB.Query(...)
-//	}
-//
-// Can be rewritten to:
-//
-//	var DB = Once(func () *sql.DB {
-//		return gresult.Of(sql.Open("mysql", "user:password@/dbname")).Value()
-//	})
-//
-//	func main() {
-//		// 💡 NOTE: DB is *LAZILY* initialized here.
-//		DB().Query(...)
-//	}
-//
-// 💡 HINT:
-//
-//   - See also https://github.com/golang/go/issues/56102
-func Once[T any](f func() T) func() T {
-	var (
-		once sync.Once
-		v    T
-	)
-	return func() T {
-		once.Do(func() { v = f() })
-		return v
-	}
 }

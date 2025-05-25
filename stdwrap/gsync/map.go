@@ -14,9 +14,10 @@
 
 // Package gsync provides generics wrappers of [sync] package.
 //
-// Currently, we provide these wrappers: [Map], [Pool].
-// If you want to initialize value with [sync.Once],
-// we recommend [github.com/bytedance/gg/gvalue.Once].
+// Currently, we provide these wrappers:
+// - [Map]
+// - [Pool]
+// - [OnceFunc], [OnceValue], [OnceValues]
 package gsync
 
 import (

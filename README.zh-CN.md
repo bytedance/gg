@@ -211,18 +211,6 @@ gvalue.TryAssert[int](any(1))
 // 1 true
 ```
 
-示例5：Once
-
-```go
-once := gvalue.Once(func() {
-    fmt.Println("once")
-})
-once()
-// "once"
-once()
-// (no output)
-```
-
 ### gptr
 
 处理指针 `*T`
@@ -606,6 +594,31 @@ a := pool.Get()
 pool.Put(a)
 *pool.Get()
 // 可能的结果: 1 或 2
+```
+
+示例3：`gsync.OnceXXX` 封装了 `sync.Once`
+
+```go
+onceFunc := OnceFunc(func() { fmt.Println("OnceFunc") })
+onceFunc()
+// "OnceFunc"
+onceFunc()
+// (no output)
+onceFunc()
+// (no output)
+
+i := 1
+onceValue := OnceValue(func() int { i++; return i })
+onceValue()
+// 2
+onceValue()
+// 2
+
+onceValues := OnceValues(func() (int, error) { i++; return i, nil })
+onceValues()
+// 3 nil
+onceValues()
+// 3 nil
 ```
 
 #### gatomic
