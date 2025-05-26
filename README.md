@@ -42,7 +42,6 @@ go get github.com/bytedance/gg
   - [gconv](#gconv)：Data type conversion
 - [Generic Standard Wrapper](#-generic-standard-wrapper)
   - [gsync](#gsync)：Wrap `sync`
-    - [gatomic](#gatomic)：Wrap `sync/gatomic`
   - [gson](#gson)：Wrap `encoding/json`
 - [Generic Data Structures](#-generic-data-structures)
     - [tuple](#tuple)：Implementation of tuple provides definition of generic n-ary tuples
@@ -298,13 +297,13 @@ gslice.Get([]int{1, 2, 3, 4, 5}, -1).Value() // Access element with negative ind
 Example3：Partion Operation
 
 ```go
-Range(1, 5)
+gslice.Range(1, 5)
 // [1, 2, 3, 4]
-RangeWithStep(5, 1, -2)
+gslice.RangeWithStep(5, 1, -2)
 // [5, 3]
 gslice.Take([]int{1, 2, 3, 4, 5}, 2)
 // [1, 2]
-Take([]int{1, 2, 3, 4, 5}, -2)
+gslice.Take([]int{1, 2, 3, 4, 5}, -2)
 // [4, 5]
 gslice.Slice([]int{1, 2, 3, 4, 5}, 1, 3)
 // [2, 3]
@@ -605,7 +604,7 @@ Example3：`gsync.OnceXXX` wraps `sync.Once`
 
 
 ```go
-onceFunc := OnceFunc(func() { fmt.Println("OnceFunc") })
+onceFunc := gsync.OnceFunc(func() { fmt.Println("OnceFunc") })
 onceFunc()
 // "OnceFunc"
 onceFunc()
@@ -614,52 +613,17 @@ onceFunc()
 // (no output)
 
 i := 1
-onceValue := OnceValue(func() int { i++; return i })
+onceValue := gsync.OnceValue(func() int { i++; return i })
 onceValue()
 // 2
 onceValue()
 // 2
 
-onceValues := OnceValues(func() (int, error) { i++; return i, nil })
+onceValues := gsync.OnceValues(func() (int, error) { i++; return i, nil })
 onceValues()
 // 3 nil
 onceValues()
 // 3 nil
-```
-
-#### gatomic
-
-Wrap `sync/atomic`
-
-Usage：
-
-```go
-import (
-    "github.com/bytedance/gg/stdwrap/gsync/gatomic"
-)
-```
-
-Example：
-
-```go
-var v Value[int]
-v.Load()
-// 0
-v.Store(1)
-v.Load()
-// 1
-v.Swap(2)
-// 1
-v.Load()
-// 2
-v.CompareAndSwap(1, 3)
-// false
-v.Load()
-// 2
-v.CompareAndSwap(2, 3)
-// true
-v.Load()
-// 3
 ```
 
 ### gson
