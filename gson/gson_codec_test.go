@@ -15,18 +15,39 @@
 package gson
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/bytedance/gg/collection/set"
 	"github.com/bytedance/gg/internal/assert"
 )
 
-var codecs = map[string]Codec{
-	"stdlib": JsonStdCodec,
-	//"sonic.Default":     sonic.ConfigDefault,
+// default json std lib
+type stdCodec struct{}
+
+var JsonStdCodec FullCodec = stdCodec{}
+
+func (stdCodec) Marshal(v any) ([]byte, error) {
+	return json.Marshal(v)
+}
+
+func (stdCodec) MarshalIndent(v any, prefix, indent string) ([]byte, error) {
+	return json.MarshalIndent(v, prefix, indent)
+}
+
+func (stdCodec) Unmarshal(data []byte, out any) error {
+	return json.Unmarshal(data, out)
+}
+
+func (stdCodec) Valid(data []byte) bool {
+	return json.Valid(data)
+}
+
+var codecs = map[string]FullCodec{
+	"stdlib": JsonStdCodec, //"sonic.Default":     sonic.ConfigDefault,
 	//"sonic.Std":         sonic.ConfigStd,
 	//"json_iter.Default": jsoniter.ConfigDefault,
-	//"json_iter.Compat":  jsoniter.ConfigCompatibleByStandardLibrary,
+	//"json_iter.Compat":  jsoniter.ConfigCompatibleWithStandardLibrary,
 	//"json_iter.Fastest": jsoniter.ConfigFastest,
 	//"sonic.Fastest":     sonic.ConfigFastest,
 }
@@ -73,7 +94,7 @@ func TestMarshalToStringBy(t *testing.T) {
 	expected := `{"name":"test","age":10}`
 	for name, codec := range codecs {
 		t.Run(name, func(t *testing.T) {
-			got, err := MarshalToStringBy(codec, testStruct{Name: "test", Age: 10})
+			got, err := MarshalStringBy(codec, testStruct{Name: "test", Age: 10})
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
 		})
