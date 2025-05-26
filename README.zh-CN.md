@@ -42,7 +42,6 @@ go get github.com/bytedance/gg
   - [gconv](#gconv)：数据类型转换
 - [泛型标准库封装](#-泛型标准库封装)
   - [gsync](#gsync)：封装 `sync` 标准库
-    - [gatomic](#gatomic)：封装 `sync/atomic` 标准库
   - [gson](#gson)：封装 `encoding/json` 标准库
 - [泛型数据结构](#-泛型数据结构)
   - [tuple](#tuple)：元组的实现，提供了 2～10 元组的定义
@@ -298,13 +297,13 @@ gslice.Get([]int{1, 2, 3, 4, 5}, -1).Value() // 负索引
 示例3：分块操作
 
 ```go
-Range(1, 5)
+gslice.Range(1, 5)
 // [1, 2, 3, 4]
-RangeWithStep(5, 1, -2)
+gslice.RangeWithStep(5, 1, -2)
 // [5, 3]
 gslice.Take([]int{1, 2, 3, 4, 5}, 2)
 // [1, 2]
-Take([]int{1, 2, 3, 4, 5}, -2)
+gslice.Take([]int{1, 2, 3, 4, 5}, -2)
 // [4, 5]
 gslice.Slice([]int{1, 2, 3, 4, 5}, 1, 3)
 // [2, 3]
@@ -605,7 +604,7 @@ pool.Put(a)
 示例3：`gsync.OnceXXX` 封装了 `sync.Once`
 
 ```go
-onceFunc := OnceFunc(func() { fmt.Println("OnceFunc") })
+onceFunc := gsync.OnceFunc(func() { fmt.Println("OnceFunc") })
 onceFunc()
 // "OnceFunc"
 onceFunc()
@@ -614,52 +613,17 @@ onceFunc()
 // (no output)
 
 i := 1
-onceValue := OnceValue(func() int { i++; return i })
+onceValue := gsync.OnceValue(func() int { i++; return i })
 onceValue()
 // 2
 onceValue()
 // 2
 
-onceValues := OnceValues(func() (int, error) { i++; return i, nil })
+onceValues := gsync.OnceValues(func() (int, error) { i++; return i, nil })
 onceValues()
 // 3 nil
 onceValues()
 // 3 nil
-```
-
-#### gatomic
-
-封装 `sync/atomic` 标准库
-
-引用：
-
-```go
-import (
-    "github.com/bytedance/gg/stdwrap/gsync/gatomic"
-)
-```
-
-示例：
-
-```go
-var v Value[int]
-v.Load()
-// 0
-v.Store(1)
-v.Load()
-// 1
-v.Swap(2)
-// 1
-v.Load()
-// 2
-v.CompareAndSwap(1, 3)
-// false
-v.Load()
-// 2
-v.CompareAndSwap(2, 3)
-// true
-v.Load()
-// 3
 ```
 
 ### gson
