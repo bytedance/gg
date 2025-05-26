@@ -173,7 +173,7 @@ b := gvalue.Zero[*int]()
 // nil
 gvalue.IsNil(b)
 // true
-Or(0, 1, 2)
+gvalue.Or(0, 1, 2)
 // 1
 ```
 
