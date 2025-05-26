@@ -340,7 +340,7 @@ func TestMinMaxBy(t *testing.T) {
 
 func TestClone(t *testing.T) {
 	assert.Equal(t, []int{0, 1, 4, 3, 1, 4}, Clone([]int{0, 1, 4, 3, 1, 4}))
-	assert.True(t, Clone[int, []int](nil) == nil)
+	assert.True(t, Clone[[]int](nil) == nil)
 
 	// Test new type.
 	type Ints []int
@@ -366,7 +366,7 @@ func TestCloneBy(t *testing.T) {
 		CloneBy(Ints{0, 1, 4, 3, 1, 4}, id))
 	assert.Equal(t, "gslice.Ints", fmt.Sprintf("%T", CloneBy(Ints{0, 1, 4, 3, 1, 4}, id)))
 
-	assert.True(t, CloneBy[int, []int](nil, nil) == nil)
+	assert.True(t, CloneBy[[]int](nil, nil) == nil)
 
 	// Test deep clone.
 	src := []*int{gptr.Of(1), gptr.Of(2)}
@@ -491,7 +491,7 @@ func TestUnion(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, Union([]int{1, 1, 2, 3, 2, 4}, []int{1, 3, 1, 4, 5}))
 
 	// Test multiple slices.
-	assert.Equal(t, []int{}, Union[int, []int]())
+	assert.Equal(t, []int{}, Union[[]int]())
 	assert.Equal(t, []int{1, 2}, Union([]int{1, 2, 1}))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, Union([]int{1, 2}, []int{2}, []int{1, 3}, []int{4, 4, 4}, []int{5}))
 	assert.Equal(t, []int{}, Union([]int{}, []int{}))
@@ -528,7 +528,7 @@ func TestIntersect(t *testing.T) {
 	assert.Equal(t, []int{2}, Intersect([]int{1, 2, 2}, []int{5, 2}, []int{1, 2, 3}))
 	assert.Equal(t, []int{}, Intersect([]int{}, []int{}))
 	assert.Equal(t, []int{}, Intersect([]int{}))
-	assert.Equal(t, []int{}, Intersect[int, []int]())
+	assert.Equal(t, []int{}, Intersect[[]int]())
 	assert.Equal(t, []int{1, 2}, Intersect([]int{1, 2, 2, 3}, []int{1, 1, 2, 3, 5, 5}, []int{1, 2, 4}))
 }
 

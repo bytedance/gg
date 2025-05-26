@@ -961,7 +961,7 @@ func TestUnion(t *testing.T) {
 		Union(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
 
 	// Empty
-	assert.Equal(t, map[int]string{}, Union[int, string, map[int]string]())
+	assert.Equal(t, map[int]string{}, Union[map[int]string]())
 	assert.Equal(t, map[int]int{}, Union(map[int]int(nil)))
 	assert.Equal(t, map[int]int{}, Union(map[int]int(nil), nil))
 	assert.Equal(t, map[int]int{}, Union(map[int]int(nil), nil, nil))
@@ -994,7 +994,7 @@ func TestUnionBy(t *testing.T) {
 		Union(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
 
 	// Empty
-	assert.Equal(t, map[int]string{}, UnionBy[int, string, map[int]string](nil, nil))
+	assert.Equal(t, map[int]string{}, UnionBy[map[int]string](nil, nil))
 	assert.Equal(t, map[int]int{}, UnionBy([]map[int]int{nil}, nil))
 	assert.Equal(t, map[int]int{}, UnionBy([]map[int]int{nil, nil}, nil))
 	assert.Equal(t, map[int]int{}, UnionBy([]map[int]int{nil, nil, nil}, nil))
@@ -1094,7 +1094,7 @@ func TestDiff(t *testing.T) {
 }
 
 func TestIntersect(t *testing.T) {
-	assert.Equal(t, map[int]int{}, Intersect[int, int, map[int]int]())
+	assert.Equal(t, map[int]int{}, Intersect[map[int]int]())
 	assert.Equal(t, map[int]int{}, Intersect(map[int]int(nil)))
 	assert.Equal(t, map[int]int{}, Intersect(map[int]int(nil), nil))
 	assert.Equal(t, map[int]int{}, Intersect(map[int]int(nil), nil, nil))
@@ -1138,7 +1138,7 @@ func TestIntersect(t *testing.T) {
 
 func TestIntersectBy(t *testing.T) {
 	// Empty
-	assert.Equal(t, map[int]int{}, IntersectBy[int, int, map[int]int](nil, nil))
+	assert.Equal(t, map[int]int{}, IntersectBy[map[int]int](nil, nil))
 	assert.Equal(t, map[int]int{}, IntersectBy([]map[int]int{}, nil))
 	assert.Equal(t, map[int]int{}, IntersectBy([]map[int]int{nil}, nil))
 	assert.Equal(t, map[int]int{}, IntersectBy([]map[int]int{nil, nil}, nil))

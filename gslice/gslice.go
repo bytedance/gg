@@ -156,7 +156,7 @@ func TryMap[F, T any](s []F, f func(F) (T, error)) gresult.R[[]T] {
 //   - Use [FilterMap] if you also want to change the element during filtering.
 //   - If you need elements that do not satisfy f, use [Reject]
 //   - If you need both elements, use [Partition]
-func Filter[T any, S ~[]T](s S, f func(T) bool) S {
+func Filter[S ~[]T, T any](s S, f func(T) bool) S {
 	ret := make(S, 0, len(s)/2)
 	for _, v := range s {
 		if f(v) {
@@ -212,7 +212,7 @@ func TryFilterMap[F, T any](s []F, f func(F) (T, error)) []T {
 //
 //   - If you need elements that satisfy f, use [Filter]
 //   - If you need both elements, use [Partition]
-func Reject[T any, S ~[]T](s S, f func(T) bool) S {
+func Reject[S ~[]T, T any](s S, f func(T) bool) S {
 	ret := make(S, 0, len(s)/2)
 	for _, v := range s {
 		if !f(v) {
@@ -233,7 +233,7 @@ func Reject[T any, S ~[]T](s S, f func(T) bool) S {
 //
 //   - Use [Filter] or [Reject] if you need only one of the return values
 //   - Use [Chunk] or [Divide] if you want to divide elements by index
-func Partition[T any, S ~[]T](s S, f func(T) bool) (S, S) {
+func Partition[S ~[]T, T any](s S, f func(T) bool) (S, S) {
 	var (
 		retTrue  = make(S, 0, len(s)/2)
 		retFalse = make(S, 0, len(s)/2)
@@ -405,7 +405,7 @@ func FindRev[T any](s []T, f func(T) bool) goption.O[T] {
 //   - Use [RemoveIndex] if you want to remove value by index
 //
 // 💡 AKA: Delete
-func Remove[T comparable, S ~[]T](s S, v T) S {
+func Remove[S ~[]T, T comparable](s S, v T) S {
 	return iter.ToSlice(iter.Remove(v, iter.FromSlice(s)))
 }
 
@@ -426,7 +426,7 @@ func Remove[T comparable, S ~[]T](s S, v T) S {
 //   - Use [Flatten] to restore chunks to flat slice.
 //
 // 💡 AKA: Page, Pagination
-func Chunk[T any, S ~[]T](s S, size int) []S {
+func Chunk[S ~[]T, T any](s S, size int) []S {
 	rtassert.MustLessThan(size, 1)
 	ret := make([]S, 0, (len(s)+size-1)/size)
 	for i := 0; i < len(s); i += size {
@@ -437,7 +437,7 @@ func Chunk[T any, S ~[]T](s S, size int) []S {
 
 // ChunkClone is variant of function [Chunk].
 // It clones the original slice before chunking it.
-func ChunkClone[T any, S ~[]T](s S, size int) []S {
+func ChunkClone[S ~[]T, T any](s S, size int) []S {
 	rtassert.MustLessThan(size, 1)
 	ret := make([]S, 0, (len(s)+size-1)/size)
 	for i := 0; i < len(s); i += size {
@@ -467,7 +467,7 @@ func ChunkClone[T any, S ~[]T](s S, size int) []S {
 //   - Use [Flatten] to restore chunks to flat slice.
 //
 // 💡 AKA: Page, Pagination
-func Divide[T any, S ~[]T](s S, n int) []S {
+func Divide[S ~[]T, T any](s S, n int) []S {
 	rtassert.MustLessThan(n, 1)
 	k := len(s) / n // Every chunk have at least k elements
 	m := len(s) % n // The first m chunks have an extra element
@@ -480,7 +480,7 @@ func Divide[T any, S ~[]T](s S, n int) []S {
 
 // DivideClone is variant of function Divide.
 // It clones the original slice before dividing it.
-func DivideClone[T any, S ~[]T](s S, n int) []S {
+func DivideClone[S ~[]T, T any](s S, n int) []S {
 	rtassert.MustLessThan(n, 1)
 	k := len(s) / n // Every chunk have at least k elements
 	m := len(s) % n // The first m chunks have an extra element
@@ -508,7 +508,7 @@ func DivideClone[T any, S ~[]T](s S, n int) []S {
 //	}
 //
 // 💡 HINT: If function f returns bool, use [Partition] instead.
-func GroupBy[K comparable, T any, S ~[]T](s S, f func(T) K) map[K]S {
+func GroupBy[S ~[]T, K comparable, T any](s S, f func(T) K) map[K]S {
 	m := make(map[K]S)
 	for i := range s {
 		k := f(s[i])
@@ -530,7 +530,7 @@ func GroupBy[K comparable, T any, S ~[]T](s S, f func(T) K) map[K]S {
 //   - If you need  duplicate elements, use [Dup].
 //
 // 💡 AKA: Distinct, Dedup, Unique
-func Uniq[T comparable, S ~[]T](s S) S {
+func Uniq[S ~[]T, T comparable](s S) S {
 	return iter.ToSlice(iter.Uniq(iter.FromSlice(s)))
 }
 
@@ -544,7 +544,7 @@ func Uniq[T comparable, S ~[]T](s S) S {
 //	UniqBy(s, func(v Foo) int { return v.Value }) ⏩ []Foo{{0}, {1}, {4}, {3}}
 //
 // 💡 AKA: DistinctBy, DedupBy.
-func UniqBy[K comparable, T any, S ~[]T](s S, f func(T) K) S {
+func UniqBy[S ~[]T, K comparable, T any](s S, f func(T) K) S {
 	return iter.ToSlice(iter.UniqBy(f, iter.FromSlice(s)))
 }
 
@@ -562,7 +562,7 @@ func UniqBy[K comparable, T any, S ~[]T](s S, f func(T) K) S {
 //   - If you need distinct elements, use [Uniq].
 //
 // 💡 AKA: Duplicate.
-func Dup[T comparable, S ~[]T](s S) S {
+func Dup[S ~[]T, T comparable](s S) S {
 	return iter.ToSlice(iter.Dup(iter.FromSlice(s)))
 }
 
@@ -577,7 +577,7 @@ func Dup[T comparable, S ~[]T](s S) S {
 //	DupBy(s, func(v Foo) int { return v.Value }) ⏩ []Foo{{2}, {3}}
 //
 // 💡 AKA: DuplicateBy.
-func DupBy[K comparable, T any, S ~[]T](s S, f func(T) K) S {
+func DupBy[S ~[]T, K comparable, T any](s S, f func(T) K) S {
 	return iter.ToSlice(iter.DupBy(f, iter.FromSlice(s)))
 }
 
@@ -721,7 +721,7 @@ func MinMaxBy[T any](s []T, less func(T, T) bool) goption.O[tuple.T2[T, T]] {
 // clone function.
 //
 // 💡 AKA: Copy
-func Clone[T any, S ~[]T](s S) S {
+func Clone[S ~[]T, T any](s S) S {
 	if s == nil {
 		return nil
 	}
@@ -733,7 +733,7 @@ func Clone[T any, S ~[]T](s S) S {
 // If the given slice is nil, nil is returned.
 //
 // 💡 AKA: CopyBy
-func CloneBy[T any, S ~[]T](s S, f func(T) T) S {
+func CloneBy[S ~[]T, T any](s S, f func(T) T) S {
 	if s == nil {
 		return nil
 	}
@@ -747,7 +747,7 @@ func CloneBy[T any, S ~[]T](s S, f func(T) T) S {
 //	Flatten([][]int{{0}, {1, 2}, {3, 4}}) ⏩ []int{0, 1, 2, 3, 4}
 //
 // 💡 HINT: Use [FlatMap] if you want to flatten non-slice elements.
-func Flatten[T any, S ~[]T](s []S) S {
+func Flatten[S ~[]T, T any](s []S) S {
 	return iter.ToSlice(
 		iter.FlatMap(func(v []T) []T { return v },
 			iter.Map(func(s S) []T { return s },
@@ -849,7 +849,7 @@ func Last[T any](s []T) goption.O[T] {
 //
 // 💡 HINT: if you need a set data structure,
 // use [github.com/bytedance/gg/collection/set].
-func Union[T comparable, S ~[]T](ss ...S) S {
+func Union[S ~[]T, T comparable](ss ...S) S {
 	if len(ss) == 0 {
 		return S{}
 	}
@@ -880,7 +880,7 @@ func Union[T comparable, S ~[]T](ss ...S) S {
 //
 // 💡 HINT: if you need a set data structure,
 // use [github.com/bytedance/gg/collection/set].
-func Diff[T comparable, S ~[]T](s S, againsts ...S) S {
+func Diff[S ~[]T, T comparable](s S, againsts ...S) S {
 	if len(s) == 0 {
 		return []T{}
 	}
@@ -920,7 +920,7 @@ func Diff[T comparable, S ~[]T](s S, againsts ...S) S {
 //
 // 💡 HINT: if you need a set data structure,
 // use [github.com/bytedance/gg/collection/set].
-func Intersect[T comparable, S ~[]T](ss ...S) S {
+func Intersect[S ~[]T, T comparable](ss ...S) S {
 	if len(ss) == 0 {
 		return S{}
 	}
@@ -963,7 +963,7 @@ func Reverse[T any](s []T) {
 
 // ReverseClone is variant of [Reverse].
 // It clones the original slice before reversing it.
-func ReverseClone[T any, S ~[]T](s S) S {
+func ReverseClone[S ~[]T, T any](s S) S {
 	return iter.ToSlice(iter.Reverse(iter.FromSlice(s)))
 }
 
@@ -988,7 +988,7 @@ func Sort[T constraints.Ordered](s []T) {
 
 // SortClone is variant of [Sort].
 // It clones the original slice before sorting it.
-func SortClone[T constraints.Ordered, S ~[]T](s S) S {
+func SortClone[S ~[]T, T constraints.Ordered](s S) S {
 	return iter.ToSlice(iter.Sort(iter.FromSlice(s)))
 }
 
@@ -1001,7 +1001,7 @@ func SortBy[T any](s []T, less func(T, T) bool) {
 
 // SortCloneBy is variant of function [SortBy].
 // It clones the original slice before sorting it.
-func SortCloneBy[T any, S ~[]T](s S, less func(T, T) bool) S {
+func SortCloneBy[S ~[]T, T any](s S, less func(T, T) bool) S {
 	return iter.ToSlice(iter.SortBy(less, iter.FromSlice(s)))
 }
 
@@ -1168,7 +1168,7 @@ func Shuffle[T any](s []T) {
 
 // ShuffleClone is variant of [Shuffle].
 // It clones the original slice before shuffling it.
-func ShuffleClone[T any, S ~[]T](s S) S {
+func ShuffleClone[S ~[]T, T any](s S) S {
 	return iter.ToSlice(iter.Shuffle(iter.FromSlice(s)))
 }
 
@@ -1249,7 +1249,7 @@ func IndexRevBy[T any](s []T, f func(T) bool) goption.O[int] {
 // 💡 HINT: This function returns sub-slices of original slice,
 // if you modify the sub-slices, the original slice is modified too.
 // Use [TakeClone] to prevent this.
-func Take[T any, I constraints.Integer, S ~[]T](s S, n I) S {
+func Take[S ~[]T, I constraints.Integer, T any](s S, n I) S {
 	startIdx, endIdx := 0, int(n)
 	if n < 0 {
 		endIdx = len(s)
@@ -1264,7 +1264,7 @@ func Take[T any, I constraints.Integer, S ~[]T](s S, n I) S {
 }
 
 // TakeClone is variant of [Take].
-func TakeClone[T any, I constraints.Integer, S ~[]T](s S, n I) S {
+func TakeClone[S ~[]T, I constraints.Integer, T any](s S, n I) S {
 	return Clone(Take(s, n))
 }
 
@@ -1296,7 +1296,7 @@ func TakeClone[T any, I constraints.Integer, S ~[]T](s S, n I) S {
 // Use [SliceClone] to prevent this.
 //
 // [Slice Expression]: https://tip.golang.org/ref/spec#Slice_expressions
-func Slice[T any, I constraints.Integer, S ~[]T](s S, start, end I) S {
+func Slice[S ~[]T, I constraints.Integer, T any](s S, start, end I) S {
 	// Handle the negative index
 	startIdx, _ := normalizeIndex(s, start)
 	// Particularly, 0 in the right endpoint and the light endpoint is negative
@@ -1322,7 +1322,7 @@ func Slice[T any, I constraints.Integer, S ~[]T](s S, start, end I) S {
 }
 
 // SliceClone is variant of [Slice].
-func SliceClone[T any, I constraints.Integer, S ~[]T](s S, start, end I) S {
+func SliceClone[S ~[]T, I constraints.Integer, T any](s S, start, end I) S {
 	return Clone(Slice(s, start, end))
 }
 
@@ -1341,7 +1341,7 @@ func SliceClone[T any, I constraints.Integer, S ~[]T](s S, start, end I) S {
 // 💡 NOTE: This function returns sub-slices of original slice,
 // if you modify the sub-slices, the original slice is modified too.
 // Use [DropClone] to prevent this.
-func Drop[T any, S ~[]T](s S, n int) S {
+func Drop[S ~[]T, T any](s S, n int) S {
 	rtassert.MustNotNeg(n)
 	if n > len(s) {
 		n = len(s)
@@ -1350,7 +1350,7 @@ func Drop[T any, S ~[]T](s S, n int) S {
 }
 
 // DropClone is variant of [Drop].
-func DropClone[T any, S ~[]T](s S, n int) S {
+func DropClone[S ~[]T, T any](s S, n int) S {
 	return Clone(Drop(s, n))
 }
 
@@ -1413,12 +1413,12 @@ func Len[T any](s []T) int {
 //	Concat([]int{0}, []int{1, 2}, []int{3, 4}) ⏩ []int{0, 1, 2, 3, 4}
 //
 // 💡 AKA: Merge, Connect
-func Concat[T any, S ~[]T](ss ...S) S {
+func Concat[S ~[]T, T any](ss ...S) S {
 	return Flatten(ss)
 }
 
 // Merge is alias of [Concat].
-func Merge[T any, S ~[]T](ss ...S) S {
+func Merge[S ~[]T, T any](ss ...S) S {
 	return Flatten(ss)
 }
 
@@ -1430,7 +1430,7 @@ func Merge[T any, S ~[]T](ss ...S) S {
 //	Compact([]string{"", "foo", "", "bar"}) ⏩ []string{"foo", "bar"}
 //
 // 💡 HINT: See [github.com/bytedance/gg/gvalue.Zero] for details of zero value.
-func Compact[T comparable, S ~[]T](s S) S {
+func Compact[S ~[]T, T comparable](s S) S {
 	return Filter(s, gvalue.IsNotZero[T])
 }
 
@@ -1449,7 +1449,7 @@ func Compact[T comparable, S ~[]T](s S) S {
 //	Insert(s, 4, 99)      ⏩ []int{0, 1, 2, 3, 99}
 //	Insert(s, 1, 99)      ⏩ []int{0, 99, 1, 2, 3}
 //	Insert(s, -1, 99)     ⏩ []int{0, 1, 2, 99, 3}
-func Insert[T any, I constraints.Integer, S ~[]T](s S, pos I, vs ...T) S {
+func Insert[S ~[]T, T any, I constraints.Integer](s S, pos I, vs ...T) S {
 	if len(vs) == 0 {
 		return Clone(s)
 	}
@@ -1569,7 +1569,7 @@ func Range[I constraints.Number](start, stop I) []I {
 // 💡 HINT: Use [Remove] if you want to remove elements by value
 //
 // 💡 AKA: DeleteIndex
-func RemoveIndex[T any, I constraints.Integer, S ~[]T](s S, index I) S {
+func RemoveIndex[S ~[]T, I constraints.Integer, T any](s S, index I) S {
 	idx, ok := normalizeIndex(s, int(index)) // conventionalize Index
 	if !ok {
 		return Clone(s) // fast path, not valid index. return the original slice
