@@ -23,7 +23,15 @@ import (
 
 // Valid reports whether data is a valid JSON encoding.
 func Valid[V ~[]byte | ~string](data V) bool {
-	return json.Valid([]byte(data))
+	switch v := any(data).(type) {
+	case string: // support types like ~string
+		return json.Valid(conv.StringToBytes(v))
+	case []byte: // for types like []byte, ~[]bytes
+		return json.Valid(v)
+	default:
+		// fallback for robustness: theoretically unreachable due to type constraint V ~[]byte | ~string
+		return json.Valid([]byte(data))
+	}
 }
 
 // Marshal returns the JSON-encoded bytes of v.
