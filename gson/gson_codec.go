@@ -137,6 +137,16 @@ func ToStringIndentBy[T any](codec PrettyMarshaler, v T, prefix, indent string) 
 // 💡 HINT: For high-performance JSON decoding, see [github.com/json-iterator/go] or [github.com/bytedance/sonic].
 func UnmarshalBy[T any, V ~[]byte | ~string](codec Unmarshaler, v V) (T, error) {
 	var t T
-	err := codec.Unmarshal([]byte(v), &t)
-	return t, err
+	switch tv := any(v).(type) {
+	case string:
+		err := codec.Unmarshal(conv.StringToBytes(tv), &t)
+		return t, err
+	case []byte:
+		err := codec.Unmarshal(tv, &t)
+		return t, err
+	default:
+		// fallback
+		err := codec.Unmarshal([]byte(v), &t)
+		return t, err
+	}
 }
