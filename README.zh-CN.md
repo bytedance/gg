@@ -692,7 +692,7 @@ for _, v := range s {
 // green:15
 // blue:16
 
-fmt.Println(s.Unzip())
+s.Unzip()
 // ["red", "green", "blue"] [14, 15, 16]
 ```
 
@@ -843,7 +843,7 @@ s.Len()
 // 1000
 ```
 
-## License
+## 许可证
 
 `gg` 采用 Apache-2.0 许可证。详情请参阅 [LICENSE](LICENSE)。
 
