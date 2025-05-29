@@ -591,7 +591,7 @@ Usage：
 
 ```go
 import (
-    "github.com/bytedance/gg/stdwrap/gsync"
+    "github.com/bytedance/gg/gstd/gsync"
 )
 ```
 
