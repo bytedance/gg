@@ -553,7 +553,7 @@ gconv.ToE[int]("x")
 
 ```go
 import (
-    "github.com/bytedance/gg/stdwrap/gson"
+    "github.com/bytedance/gg/gson"
 )
 ```
 
