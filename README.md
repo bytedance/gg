@@ -7,13 +7,13 @@
 
 English | [简体中文](README.zh-CN.md)
 
-🔥`bytedance-gg` is a basic library of generics for Go language developed by ByteDance. It is based on the Go 1.18+ generic features and provides efficient, type-safe and rich generic data structures and tool functions.
+🔥`bytedance/gg` is a basic library of generics for Go language developed by ByteDance. It is based on the Go 1.18+ generic features and provides efficient, type-safe and rich generic data structures and tool functions.
 
 ❓**Why this name?**
 
 Take the first letter of **G**o **G**enerics, short and simple.
 
-❓Why choose gg?
+❓**Why choose gg?**
 
 - Stable and reliable: It is a necessary tool library for ByteDance R&D team, and it has 1w+ repository references inside.
 - Easy to use: With the design principle of simplicity and self-consistent, subcontracted according to functions, modular, semantic intuitive and unified, and low learning cost.
@@ -30,22 +30,24 @@ go get github.com/bytedance/gg
 ## 🔎 Table of contents
 
 - [Generic Functional Programming](#-generic-functional-programming)
-    - [goption](#goption)：Option type, simplifying the processing of `(T, bool)`
-    - [gresult](#gresult)：Result type, simplifying the processing of `(T, error)`
+  - [goption](#goption)：Option type, simplifying the processing of `(T, bool)`
+  - [gresult](#gresult)：Result type, simplifying the processing of `(T, error)`
 - [Generic Data Processing](#-generic-data-processing)
-    - [gcond](#gcond)：Conditional operation
-    - [gvalue](#gvalue)：Processing value `T`
-    - [gptr](#gptr)：Processing pointer `*T`
-    - [gslice](#gslice)：Process slice `[]T`
-    - [gmap](#gmap)：Processing map `map[K]V`
-    - [gfunc](#gfunc)：Processing function `func`
-    - [gconv](#gconv)：Data type conversion
-    - [gson](#gson)：Processing `JSON`
+  - [gcond](#gcond)：Conditional operation
+  - [gvalue](#gvalue)：Processing value `T`
+  - [gptr](#gptr)：Processing pointer `*T`
+  - [gslice](#gslice)：Processing slice `[]T`
+  - [gmap](#gmap)：Processing map `map[K]V`
+  - [gfunc](#gfunc)：Processing function `func`
+  - [gconv](#gconv)：Data type conversion
+  - [gson](#gson)：Processing JSON
+- [Generic Standard Wrapper](#-generic-standard-wrapper)
+  - [gsync](#gsync)：Wrap `sync`
 - [Generic Data Structures](#-generic-data-structures)
-    - [tuple](#tuple)：The implementation of tuples provides the definition of 2 to 10 tuples
-    - [set](#set)：The implementation of the collection is based on `map[T]struct{}`
-    - [skipset](#skipset)：High-performance concurrent set based on skiplist are ~15 times faster than `sync.Map`
-    - [skipmap](#skipmap)：High-performance concurrent map implemented based on skiplist, ~10 times faster than `sync.Map`
+  - [tuple](#tuple)：Implementation of tuple provides definition of generic n-ary tuples
+  - [set](#set)：Implementation of set based on `map[T]struct{}`
+  - [skipset](#skipset)：High-performance, scalable, concurrent-safe set based on skip-list, up to 15x faster than the built-in `sync.Map` below Go 1.24
+  - [skipmap](#skipmap)：High-performance, scalable, concurrent-safe map based on skip-list, up to 10x faster than the built-in `sync.Map` below Go 1.24
 
 ## ✨ Generic Functional Programming
 
@@ -145,7 +147,7 @@ gcond.Switch[string](3).
     CaseLazy(2, func() string { return "3" }).
     When(3, 4).Then("3/4").
     When(5, 6).ThenLazy(func() string { return "5/6" }).
-    Default("other"))
+    Default("other")
 // 3/4
 ```
 
@@ -171,6 +173,8 @@ b := gvalue.Zero[*int]()
 // nil
 gvalue.IsNil(b)
 // true
+gvalue.Or(0, 1, 2)
+// 1
 ```
 
 Example2：Math Operation
@@ -204,18 +208,6 @@ gvalue.TypeAssert[int](any(1))
 // 1
 gvalue.TryAssert[int](any(1))
 // 1 true
-```
-
-Example5：Once
-
-```go
-once := gvalue.Once(func() {
-    fmt.Println("once")
-})
-once()
-// "once"
-once()
-// (no output)
 ```
 
 ### gptr
@@ -255,7 +247,7 @@ gptr.IndirectOr(c, 2)
 
 ### gslice
 
-Process slice `[]T`
+Processing slice `[]T`
 
 Usage：
 
@@ -305,8 +297,14 @@ gslice.Get([]int{1, 2, 3, 4, 5}, -1).Value() // Access element with negative ind
 Example3：Partion Operation
 
 ```go
+gslice.Range(1, 5)
+// [1, 2, 3, 4]
+gslice.RangeWithStep(5, 1, -2)
+// [5, 3]
 gslice.Take([]int{1, 2, 3, 4, 5}, 2)
 // [1, 2]
+gslice.Take([]int{1, 2, 3, 4, 5}, -2)
+// [4, 5]
 gslice.Slice([]int{1, 2, 3, 4, 5}, 1, 3)
 // [2, 3]
 gslice.Chunk([]int{1, 2, 3, 4, 5}, 2)
@@ -450,9 +448,9 @@ Example4：Partion Operation
 
 ```go
 Chunk(map[int]int{1: 2, 2: 3, 3: 4, 4: 5, 5: 6}, 2)
-// possible output: [{1:2, 2:3}, {3:4, 4:5}, {5:6}]
+// possible result: [{1:2, 2:3}, {3:4, 4:5}, {5:6}]
 Divide(map[int]int{1: 2, 2: 3, 3: 4, 4: 5, 5: 6}, 2)
-// possible output: [{1:2, 2:3, 3:4}, {4:5, 5:6}]
+// possible result: [{1:2, 2:3, 3:4}, {4:5, 5:6}]
 ```
 
 Example5：Math Operation
@@ -548,7 +546,7 @@ gconv.ToE[int]("x")
 
 ### gson
 
-Processing `JSON`
+Processing JSON
 
 Usage：
 
@@ -583,11 +581,93 @@ gson.Unmarshal[testStruct](`{"name":"test","age":10}`)
 // {test 10} nil
 ```
 
+## ✨ Generic Standard Wrapper
+
+### gsync
+
+Wrap `sync`
+
+Usage：
+
+```go
+import (
+    "github.com/bytedance/gg/gstd/gsync"
+)
+```
+
+Example1：`gsync.Map` wraps `sync.Map`
+
+```go
+sm := gsync.Map[string, int]{}
+sm.Store("k", 1)
+sm.Load("k")
+// 1 true
+sm.LoadO("k").Value()
+// 1
+sm.Store("k", 2)
+sm.Load("k")
+// 2 true
+sm.LoadAndDelete("k")
+// 2 true
+sm.Load("k")
+// 0 false
+sm.LoadOrStore("k", 3)
+// 3 false
+sm.Load("k")
+// 3 true
+sm.ToMap()
+// {"k":3}
+```
+
+Example2：`gsync.Pool` wraps `sync.Pool`
+
+```go
+pool := Pool[*int]{
+    New: func() *int {
+        i := 1
+        return &i
+    },
+}
+a := pool.Get()
+*a
+// 1
+*a = 2
+pool.Put(a)
+*pool.Get()
+// possible result: 1 or 2
+```
+
+Example3：`gsync.OnceXXX` wraps `sync.Once`
+
+
+```go
+onceFunc := gsync.OnceFunc(func() { fmt.Println("OnceFunc") })
+onceFunc()
+// "OnceFunc"
+onceFunc()
+// (no output)
+onceFunc()
+// (no output)
+
+i := 1
+onceValue := gsync.OnceValue(func() int { i++; return i })
+onceValue()
+// 2
+onceValue()
+// 2
+
+onceValues := gsync.OnceValues(func() (int, error) { i++; return i, nil })
+onceValues()
+// 3 nil
+onceValues()
+// 3 nil
+```
+
 ## ✨ Generic Data Structures
 
 ### tuple
 
-The implementation of tuples provides the definition of 2 to 10 tuples
+Implementation of tuple provides definition of generic n-ary tuples
 
 Usage
 
@@ -612,13 +692,13 @@ for _, v := range s {
 // green:15
 // blue:16
 
-fmt.Println(s.Unzip())
+s.Unzip()
 // ["red", "green", "blue"] [14, 15, 16]
 ```
 
 ### set
 
-Set implementation based on `map[T]struct{}`
+Implementation of set based on `map[T]struct{}`
 
 Usage
 
@@ -660,7 +740,9 @@ len(s.ToSlice())
 
 ### skipset
 
-High-performance concurrent sets based on skiplist are ~15 times faster than sync.Map
+High-performance, scalable, concurrent-safe set based on skip-list, up to 15x faster than the built-in `sync.Map` below Go 1.24
+
+⚠️ NOTICE: Go 1.24 or later, please consider using the std `sync.Map`, which has better performance compared to `skipset` in about 90% of use cases.
 
 Usage
 
@@ -711,9 +793,9 @@ s.Len()
 
 ### skipmap
 
-High-performance concurrent hash list implemented based on skiplist, ~10 times faster than `sync.Map` below Go 1.23.
+High-performance, scalable, concurrent-safe map based on skip-list, up to 10x faster than the built-in `sync.Map` below Go 1.24
 
-After Go 1.24, please consider using the std `sync.Map`, which has better performance compared to skipmap in about 90% of use cases.
+⚠️ Go 1.24 or later, please consider using the std `sync.Map`, which has better performance compared to `skipmap` in about 90% of use cases.
 
 Usage
 

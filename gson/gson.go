@@ -17,54 +17,60 @@ package gson
 
 import (
 	"encoding/json"
-
-	"github.com/bytedance/gg/internal/conv"
 )
+
+// default json std lib.
+type stdJSONCodec struct{}
+
+func (stdJSONCodec) Valid(data []byte) bool {
+	return json.Valid(data)
+}
+
+func (stdJSONCodec) Marshal(v any) ([]byte, error) {
+	return json.Marshal(v)
+}
+
+func (stdJSONCodec) MarshalIndent(v any, prefix, indent string) ([]byte, error) {
+	return json.MarshalIndent(v, prefix, indent)
+}
+
+func (stdJSONCodec) Unmarshal(data []byte, out any) error {
+	return json.Unmarshal(data, out)
+}
+
+var stdJSON JSONCodec = stdJSONCodec{}
 
 // Valid reports whether data is a valid JSON encoding.
 func Valid[V ~[]byte | ~string](data V) bool {
-	switch v := any(data).(type) {
-	case string: // support types like ~string
-		return json.Valid(conv.StringToBytes(v))
-	case []byte: // for types like []byte, ~[]bytes
-		return json.Valid(v)
-	default:
-		// fallback for robustness: theoretically unreachable due to type constraint V ~[]byte | ~string
-		return json.Valid([]byte(data))
-	}
+	return ValidBy(stdJSON, data)
 }
 
 // Marshal returns the JSON-encoded bytes of v.
 func Marshal[V any](v V) ([]byte, error) {
-	return json.Marshal(v)
+	return MarshalBy(stdJSON, v)
 }
 
 // MarshalIndent returns the JSON-encoded bytes with indent and prefix.
 func MarshalIndent[V any](v V, prefix, indent string) ([]byte, error) {
-	return json.MarshalIndent(v, prefix, indent)
+	return MarshalIndentBy(stdJSON, v, prefix, indent)
 }
 
 // MarshalString returns the JSON-encoded string of v.
 func MarshalString[V any](v V) (string, error) {
-	data, err := json.Marshal(v)
-	return conv.BytesToString(data), err
+	return MarshalStringBy(stdJSON, v)
 }
 
 // ToString returns the JSON-encoded string of v and ignores error.
 func ToString[V any](v V) string {
-	data, _ := json.Marshal(v)
-	return conv.BytesToString(data)
+	return ToStringBy(stdJSON, v)
 }
 
 // ToStringIndent returns the JSON-encoded string with indent and prefix of v and ignores error.
 func ToStringIndent[V any](v V, prefix, indent string) string {
-	data, _ := json.MarshalIndent(v, prefix, indent)
-	return conv.BytesToString(data)
+	return ToStringIndentBy(stdJSON, v, prefix, indent)
 }
 
 // Unmarshal parses the JSON-encoded bytes and string and returns the result.
 func Unmarshal[T any, V ~[]byte | ~string](v V) (T, error) {
-	var t T
-	err := json.Unmarshal([]byte(v), &t)
-	return t, err
+	return UnmarshalBy[T](stdJSON, v)
 }

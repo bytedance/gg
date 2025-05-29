@@ -305,6 +305,11 @@ func TestIsSuperset(t *testing.T) {
 	assert.False(t, New(5, 3, 2, 1).IsSuperset(New(1, 2, 3, 4)))
 }
 
+func TestString(t *testing.T) {
+	assert.Equal(t, "set[]", New[int]().String())
+	assert.Equal(t, "set[1 2 3 4]", New(1, 2, 3, 4).String())
+}
+
 func TestContainsAny(t *testing.T) {
 	s := New(1, 2, 3, 4)
 	assert.True(t, s.ContainsAny(1))
@@ -378,6 +383,8 @@ func TestJSON(t *testing.T) {
 		assert.Equal(t, `{"set":["bar","foo"]}`, string(bs))
 
 		f2 := Foo{}
+		bs2, _ := json.Marshal(f2)
+		assert.Equal(t, `{"set":null}`, string(bs2))
 		err = json.Unmarshal(bs, &f2)
 		assert.Nil(t, err)
 		assert.Equal(t, f2, f1)

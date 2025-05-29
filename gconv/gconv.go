@@ -437,9 +437,6 @@ func formatDecimalString(numStr string) string {
 	}
 	integerPart, decimalPart := parts[0], parts[1]
 
-	if integerPart == "" {
-		integerPart = "0"
-	}
 	decimalPart = strings.TrimRight(decimalPart, "0")
 	if decimalPart == "" {
 		return integerPart

@@ -12,29 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package rtassert provides runtime assertion.
-package rtassert
+package gsync
 
-import (
-	"fmt"
+import "sync"
 
-	"github.com/bytedance/gg/internal/constraints"
-)
-
-func MustNotNeg[T constraints.Number](n T) {
-	if n < 0 {
-		panic(fmt.Errorf("must not be negative: %v", n))
-	}
+// Pool wraps [sync.Pool].
+type Pool[T any] struct {
+	New     func() T
+	p       sync.Pool
+	newOnce sync.Once
 }
 
-func MustLessThan[T constraints.Ordered](x, y T) {
-	if x < y {
-		panic(fmt.Errorf("must not be less than %v", y))
-	}
+func (p *Pool[T]) init() {
+	p.newOnce.Do(func() {
+		p.p.New = func() any {
+			return p.New()
+		}
+	})
 }
 
-func ErrMustNil(err error) {
-	if err != nil {
-		panic(fmt.Errorf("unexpected error: %s", err))
-	}
+// Get wraps [sync.Pool.Get].
+func (p *Pool[T]) Get() T {
+	p.init()
+	return p.p.Get().(T)
+}
+
+// Put wraps [sync.Pool.Put].
+func (p *Pool[T]) Put(x T) {
+	p.init()
+	p.p.Put(x)
 }

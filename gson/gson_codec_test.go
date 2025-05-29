@@ -15,41 +15,22 @@
 package gson
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/bytedance/gg/collection/set"
 	"github.com/bytedance/gg/internal/assert"
 )
 
-// default json std lib
-type stdCodec struct{}
-
-var JsonStdCodec FullCodec = stdCodec{}
-
-func (stdCodec) Marshal(v any) ([]byte, error) {
-	return json.Marshal(v)
-}
-
-func (stdCodec) MarshalIndent(v any, prefix, indent string) ([]byte, error) {
-	return json.MarshalIndent(v, prefix, indent)
-}
-
-func (stdCodec) Unmarshal(data []byte, out any) error {
-	return json.Unmarshal(data, out)
-}
-
-func (stdCodec) Valid(data []byte) bool {
-	return json.Valid(data)
-}
-
-var codecs = map[string]FullCodec{
-	"stdlib": JsonStdCodec, //"sonic.Default":     sonic.ConfigDefault,
-	//"sonic.Std":         sonic.ConfigStd,
-	//"json_iter.Default": jsoniter.ConfigDefault,
-	//"json_iter.Compat":  jsoniter.ConfigCompatibleWithStandardLibrary,
-	//"json_iter.Fastest": jsoniter.ConfigFastest,
-	//"sonic.Fastest":     sonic.ConfigFastest,
+var codecs = map[string]JSONCodec{
+	"stdlib": stdJSON,
+	// import "github.com/bytedance/sonic"
+	// "sonic.ConfigDefault": sonic.ConfigDefault,
+	// "sonic.ConfigStd":     sonic.ConfigStd,
+	// "sonic.ConfigFastest": sonic.ConfigFastest,
+	// import jsoniter "github.com/json-iterator/go"
+	// "jsoniter.ConfigDefault": jsoniter.ConfigDefault,
+	// "jsoniter.ConfigStd":     jsoniter.ConfigCompatibleWithStandardLibrary,
+	// "jsoniter.ConfigFastest": jsoniter.ConfigFastest,
 }
 
 func TestValidBy(t *testing.T) {

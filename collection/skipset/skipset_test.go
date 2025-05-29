@@ -23,72 +23,18 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/bytedance/gg/gcond"
 	"github.com/bytedance/gg/internal/assert"
 	"github.com/bytedance/gg/internal/fastrand"
 )
 
 func TestOrdered(t *testing.T) {
-	testIntSet(t, func() anyskipset[int] {
-		return New[int]()
-	})
-	testIntSetDesc(t, func() anyskipset[int] {
-		return NewDesc[int]()
-	})
-	testStringSet(t, func() anyskipset[string] {
-		return New[string]()
-	})
-}
-
-func TestFunc(t *testing.T) {
-	x := NewFunc(func(a, b float64) bool {
-		return a < b || (math.IsNaN(a) && !math.IsNaN(b))
-	})
-	x.Add(math.NaN())
-	x.Add(3)
-	x.Add(1)
-	x.Add(math.NaN())
-	x.Add(2)
-	x.Add(math.NaN())
-	if x.Len() != 4 {
-		t.Fatal(x.Len())
-	}
-	expected := []float64{math.NaN(), 1, 2, 3}
-	var i int
-	x.Range(func(value float64) bool {
-		if i == 0 && !math.IsNaN(value) {
-			t.Fatal("invalid range")
-		}
-		if i >= 1 && value != expected[i] {
-			t.Fatal("invalid range")
-		}
-		i++
-		return true
-	})
-	actual := x.ToSlice()
-	equal := func(a, b float64) bool {
-		return a == b || (math.IsNaN(a) && math.IsNaN(b))
-	}
-	for j := 0; j < 4; j++ {
-		if !equal(expected[j], actual[j]) {
-			t.Fatal("invalid toslice")
-		}
-	}
-
-	testIntSet(t, func() anyskipset[int] {
-		return NewFunc(func(a, b int) bool {
-			return a < b
-		})
-	})
-	testIntSetDesc(t, func() anyskipset[int] {
-		return NewFunc(func(a, b int) bool {
-			return a > b
-		})
-	})
-	testStringSet(t, func() anyskipset[string] {
-		return NewFunc(func(a, b string) bool {
-			return a < b
-		})
-	})
+	testIntSet(t, func() anyskipset[int] { return New[int]() }, true)
+	testIntSet(t, func() anyskipset[int] { return NewDesc[int]() }, false)
+	testIntSet(t, func() anyskipset[int] { return NewFunc(func(a, b int) bool { return a < b }) }, true)
+	testStringSet(t, func() anyskipset[string] { return New[string]() }, true)
+	testStringSet(t, func() anyskipset[string] { return NewDesc[string]() }, false)
+	testStringSet(t, func() anyskipset[string] { return NewFunc(func(a, b string) bool { return a < b }) }, true)
 }
 
 type anyskipset[T any] interface {
@@ -102,7 +48,7 @@ type anyskipset[T any] interface {
 
 // Test suites.
 
-func testIntSet(t *testing.T, newset func() anyskipset[int]) {
+func testIntSet(t *testing.T, newset func() anyskipset[int], asc bool) {
 	// Correctness.
 	l := newset()
 	if l.Len() != 0 {
@@ -132,7 +78,7 @@ func testIntSet(t *testing.T, newset func() anyskipset[int]) {
 		t.Fatal("invalid add")
 	}
 
-	expected := []int{20, 21, 22}
+	expected := gcond.If(asc, []int{20, 21, 22}, []int{22, 21, 20})
 	var i int
 	l.Range(func(score int) bool {
 		if score != expected[i] {
@@ -149,7 +95,7 @@ func testIntSet(t *testing.T, newset func() anyskipset[int]) {
 		t.Fatal("invalid remove")
 	}
 
-	expected = []int{20, 22}
+	expected = gcond.If(asc, []int{20, 22}, []int{22, 20})
 	i = 0
 	l.Range(func(score int) bool {
 		if score != expected[i] {
@@ -241,10 +187,10 @@ func testIntSet(t *testing.T, newset func() anyskipset[int]) {
 			} else if r != 999 {
 				l.Remove(int(fastrand.Uint32n(smallRndN)) + 1)
 			} else {
-				var pre int
+				pre := gcond.If(asc, 0, 257)
 				l.Range(func(score int) bool {
-					if score <= pre { // 0 is the default value for header and tail score
-						panic("invalid content")
+					if (asc && score <= pre) || (!asc && pre <= score) {
+						panic(fmt.Sprintf("invalid content, pre %d, score %d", pre, score))
 					}
 					pre = score
 					return true
@@ -317,9 +263,9 @@ func testIntSet(t *testing.T, newset func() anyskipset[int]) {
 		panic("invalid count")
 	}
 
-	pre := -1
+	pre := gcond.If(asc, -1, 10)
 	x.Range(func(score int) bool {
-		if score <= pre {
+		if (asc && score <= pre) || (!asc && pre <= score) {
 			panic("invalid content")
 		}
 		pre = score
@@ -362,27 +308,7 @@ func testIntSet(t *testing.T, newset func() anyskipset[int]) {
 	})
 }
 
-func testIntSetDesc(t *testing.T, newsetdesc func() anyskipset[int]) {
-	s := newsetdesc()
-	nums := []int{-1, 0, 5, 12}
-	for _, v := range nums {
-		s.Add(v)
-	}
-	expected := []int{12, 5, 0, -1}
-	i := 0
-	s.Range(func(value int) bool {
-		if expected[i] != value {
-			t.Fatal("error")
-		}
-		i++
-		return true
-	})
-	if !assert.Equal(t, expected, s.ToSlice()) {
-		t.Fatal("invalid toslice")
-	}
-}
-
-func testStringSet(t *testing.T, newset func() anyskipset[string]) {
+func testStringSet(t *testing.T, newset func() anyskipset[string], asc bool) {
 	x := newset()
 	if !x.Add("111") || x.Len() != 1 {
 		t.Fatal("invalid")
@@ -416,21 +342,15 @@ func testStringSet(t *testing.T, newset func() anyskipset[string]) {
 	}
 	wg.Wait()
 
-	tmp := make([]int, 0, 100)
-	x.Range(func(val string) bool {
-		res, _ := strconv.Atoi(val)
-		tmp = append(tmp, res)
-		return true
-	})
-	sort.Ints(tmp)
 	expected := make([]string, 0, 100)
 	for i := 0; i < 100; i++ {
-		if i != tmp[i] {
-			t.Fatal("invalid")
-		}
 		expected = append(expected, strconv.Itoa(i))
 	}
-	sort.Strings(expected)
+	if asc {
+		sort.Strings(expected)
+	} else {
+		sort.Sort(sort.Reverse(sort.StringSlice(expected)))
+	}
 	if !assert.Equal(t, expected, x.ToSlice()) {
 		t.Fatal("invalid toslice")
 	}

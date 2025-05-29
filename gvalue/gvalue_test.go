@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"math"
 	"net"
-	"sync"
 	"testing"
 
 	"github.com/bytedance/gg/internal/assert"
@@ -31,6 +30,15 @@ func TestZero(t *testing.T) {
 	assert.Zero(t, Zero[string]())
 	assert.Zero(t, Zero[interface{}]())
 	assert.Zero(t, Zero[*interface{}]())
+}
+
+func TestOr(t *testing.T) {
+	assert.True(t, Or(false, false, true))
+	assert.Equal(t, 1, Or(0, 1, 2))
+	assert.Equal(t, "1", Or("", "1", "2"))
+	assert.Equal(t, 0, Or(0, 0, 0))
+	assert.Equal(t, "", Or("", "", ""))
+	assert.Equal(t, 0, Or[int]())
 }
 
 func TestMin(t *testing.T) {
@@ -241,43 +249,4 @@ func TestTryAssert(t *testing.T) {
 	assert.NotPanic(t, func() {
 		TryAssert[float64](any(1))
 	})
-}
-
-func TestOnce(t *testing.T) {
-	{
-		i := 2
-		f := func() int {
-			i++
-			return i
-		}
-		assert.Equal(t, i, 2)
-		once := Once(f)
-		assert.Equal(t, i, 2)
-		assert.Equal(t, 3, once())
-		assert.Equal(t, 3, once())
-		assert.Equal(t, 3, once())
-		assert.Equal(t, i, 3)
-	}
-
-	{ // Test concurrency.
-		i := 2
-		f := func() int {
-			i++
-			return i
-		}
-		assert.Equal(t, i, 2)
-		once := Once(f)
-		assert.Equal(t, i, 2)
-		var wg sync.WaitGroup
-		wg.Add(100)
-		for j := 0; j < 100; j++ {
-			go func() {
-				assert.Equal(t, 3, once())
-				assert.Equal(t, i, 3)
-				wg.Done()
-			}()
-		}
-		wg.Wait()
-		assert.Equal(t, i, 3)
-	}
 }

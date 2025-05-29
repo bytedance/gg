@@ -35,10 +35,16 @@ func TestMap(t *testing.T) {
 		Map([]int{1, 2, 3}, strconv.Itoa))
 }
 
+func TestTryMap(t *testing.T) {
+	assert.Equal(t, TryMap(Of("1", "2", "3"), strconv.Atoi), gresult.OK(Of(1, 2, 3)))
+	assert.Equal(t, TryMap(nil, strconv.Atoi), gresult.OK(([]int{})))
+	assert.Equal(t, TryMap(Of("1", "2", "a"), strconv.Atoi).Err().Error(), "strconv.Atoi: parsing \"a\": invalid syntax")
+}
+
 func TestFilter(t *testing.T) {
 	assert.Equal(t,
 		[]int{},
-		Filter(nil, gvalue.IsZero[int]))
+		Filter([]int(nil), gvalue.IsZero[int]))
 	assert.Equal(t,
 		[]int{},
 		Filter([]int{}, gvalue.IsZero[int]))
@@ -85,7 +91,7 @@ func TestTryFilterMap(t *testing.T) {
 func TestReject(t *testing.T) {
 	assert.Equal(t,
 		[]int{},
-		Reject(nil, gvalue.IsZero[int]))
+		Reject([]int(nil), gvalue.IsZero[int]))
 	assert.Equal(t,
 		[]int{},
 		Reject([]int{}, gvalue.IsZero[int]))
@@ -95,6 +101,29 @@ func TestReject(t *testing.T) {
 	assert.Equal(t,
 		[]int{0},
 		Reject([]int{0, 1, 2, 3}, gvalue.IsNotZero[int]))
+}
+
+func TestPartition(t *testing.T) {
+	{
+		filter, reject := Partition([]int(nil), gvalue.IsZero[int])
+		assert.Equal(t, []int{}, filter)
+		assert.Equal(t, []int{}, reject)
+	}
+	{
+		filter, reject := Partition([]int{}, gvalue.IsZero[int])
+		assert.Equal(t, []int{}, filter)
+		assert.Equal(t, []int{}, reject)
+	}
+	{
+		filter, reject := Partition([]int{0, 1, 2, 3}, gvalue.IsNotZero[int])
+		assert.Equal(t, []int{1, 2, 3}, filter)
+		assert.Equal(t, []int{0}, reject)
+	}
+	{
+		filter, reject := Partition([]int{0, 1, 2, 3}, gvalue.IsZero[int])
+		assert.Equal(t, []int{0}, filter)
+		assert.Equal(t, []int{1, 2, 3}, reject)
+	}
 }
 
 func TestReduce(t *testing.T) {
@@ -311,7 +340,7 @@ func TestMinMaxBy(t *testing.T) {
 
 func TestClone(t *testing.T) {
 	assert.Equal(t, []int{0, 1, 4, 3, 1, 4}, Clone([]int{0, 1, 4, 3, 1, 4}))
-	assert.True(t, Clone[int, []int](nil) == nil)
+	assert.True(t, Clone[[]int](nil) == nil)
 
 	// Test new type.
 	type Ints []int
@@ -337,7 +366,7 @@ func TestCloneBy(t *testing.T) {
 		CloneBy(Ints{0, 1, 4, 3, 1, 4}, id))
 	assert.Equal(t, "gslice.Ints", fmt.Sprintf("%T", CloneBy(Ints{0, 1, 4, 3, 1, 4}, id)))
 
-	assert.True(t, CloneBy[int, []int](nil, nil) == nil)
+	assert.True(t, CloneBy[[]int](nil, nil) == nil)
 
 	// Test deep clone.
 	src := []*int{gptr.Of(1), gptr.Of(2)}
@@ -462,7 +491,7 @@ func TestUnion(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, Union([]int{1, 1, 2, 3, 2, 4}, []int{1, 3, 1, 4, 5}))
 
 	// Test multiple slices.
-	assert.Equal(t, []int{}, Union[int]())
+	assert.Equal(t, []int{}, Union[[]int]())
 	assert.Equal(t, []int{1, 2}, Union([]int{1, 2, 1}))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, Union([]int{1, 2}, []int{2}, []int{1, 3}, []int{4, 4, 4}, []int{5}))
 	assert.Equal(t, []int{}, Union([]int{}, []int{}))
@@ -499,7 +528,7 @@ func TestIntersect(t *testing.T) {
 	assert.Equal(t, []int{2}, Intersect([]int{1, 2, 2}, []int{5, 2}, []int{1, 2, 3}))
 	assert.Equal(t, []int{}, Intersect([]int{}, []int{}))
 	assert.Equal(t, []int{}, Intersect([]int{}))
-	assert.Equal(t, []int{}, Intersect[int]())
+	assert.Equal(t, []int{}, Intersect[[]int]())
 	assert.Equal(t, []int{1, 2}, Intersect([]int{1, 2, 2, 3}, []int{1, 1, 2, 3, 5, 5}, []int{1, 2, 4}))
 }
 
@@ -607,22 +636,22 @@ func TestTypeAssert(t *testing.T) {
 	})
 }
 
-func TestEqualStrict(t *testing.T) {
+func TestEqual(t *testing.T) {
 	assert.True(t, Equal[int](nil, nil))
 	assert.True(t, Equal([]int{}, []int{}))
-	assert.False(t, Equal([]int{}, nil))
-	assert.False(t, Equal(nil, []int{}))
+	assert.True(t, Equal([]int{}, nil))
+	assert.True(t, Equal(nil, []int{}))
 	assert.True(t, Equal([]int{1, 2, 3}, []int{1, 2, 3}))
 	assert.False(t, Equal([]int{1, 2, 3}, []int{1, 2, 3, 4}))
 	assert.False(t, Equal([]int{1, 2, 3}, []int{1, 2, 4}))
 }
 
-func TestEqualStrictBy(t *testing.T) {
+func TestEqualBy(t *testing.T) {
 	eq := gvalue.Equal[int]
 	assert.True(t, EqualBy(nil, nil, eq))
 	assert.True(t, EqualBy([]int{}, []int{}, eq))
-	assert.False(t, EqualBy([]int{}, nil, eq))
-	assert.False(t, EqualBy(nil, []int{}, eq))
+	assert.True(t, EqualBy([]int{}, nil, eq))
+	assert.True(t, EqualBy(nil, []int{}, eq))
 	assert.True(t, EqualBy([]int{1, 2, 3}, []int{1, 2, 3}, eq))
 	assert.False(t, EqualBy([]int{1, 2, 3}, []int{1, 2, 3, 4}, eq))
 	assert.False(t, EqualBy([]int{1, 2, 3}, []int{1, 2, 4}, eq))
@@ -631,8 +660,8 @@ func TestEqualStrictBy(t *testing.T) {
 	eqAny := func(a, b any) bool { return a == b }
 	assert.True(t, EqualBy(nil, nil, eqAny))
 	assert.True(t, EqualBy([]any{}, []any{}, eqAny))
-	assert.False(t, EqualBy([]any{}, nil, eqAny))
-	assert.False(t, EqualBy(nil, []any{}, eqAny))
+	assert.True(t, EqualBy([]any{}, nil, eqAny))
+	assert.True(t, EqualBy(nil, []any{}, eqAny))
 	assert.True(t, EqualBy([]any{1, 2, 3}, []any{1, 2, 3}, eqAny))
 	assert.False(t, EqualBy([]any{1, 2, 3}, []any{1, 2, 3, 4}, eqAny))
 	assert.False(t, EqualBy([]any{1, 2, 3}, []any{1, 2, 4}, eqAny))
@@ -670,6 +699,11 @@ func TestDivide(t *testing.T) {
 		assert.Equal(t, []int{0, 1, 2, 3, 9}, s)
 		assert.Equal(t, [][]int{{0, 1, 2}, {3, 9}}, chunks)
 	}
+	{
+		s := []int{0, 1, 2, 3, 4, 5, 6}
+		chunks := Divide(s, 3)
+		assert.Equal(t, [][]int{{0, 1, 2}, {3, 4}, {5, 6}}, chunks)
+	}
 }
 
 func TestDivideClone(t *testing.T) {
@@ -680,6 +714,11 @@ func TestDivideClone(t *testing.T) {
 		chunks[1][1] = 9 // Modify original slice
 		assert.Equal(t, []int{0, 1, 2, 3, 4}, s)
 		assert.Equal(t, [][]int{{0, 1, 2}, {3, 9}}, chunks)
+	}
+	{
+		s := []int{0, 1, 2, 3, 4, 5, 6}
+		chunks := DivideClone(s, 3)
+		assert.Equal(t, [][]int{{0, 1, 2}, {3, 4}, {5, 6}}, chunks)
 	}
 }
 
@@ -898,9 +937,9 @@ func TestTake(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, Take([]int{1, 2, 3, 4, 5}, 3))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, Take([]int{1, 2, 3, 4, 5}, 5))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, Take([]int{1, 2, 3, 4, 5}, 10))
-	assert.Panic(t, func() {
-		Take([]int{1, 2, 3, 4, 5}, -1)
-	})
+	assert.Equal(t, []int{5}, Take([]int{1, 2, 3, 4, 5}, -1))
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, Take([]int{1, 2, 3, 4, 5}, -5))
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, Take([]int{1, 2, 3, 4, 5}, -10))
 	{
 		s1 := []int{1, 2, 3, 4, 5}
 		s2 := Take(s1, 3)
@@ -914,9 +953,9 @@ func TestTakeClone(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, TakeClone([]int{1, 2, 3, 4, 5}, 3))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, TakeClone([]int{1, 2, 3, 4, 5}, 5))
 	assert.Equal(t, []int{1, 2, 3, 4, 5}, TakeClone([]int{1, 2, 3, 4, 5}, 10))
-	assert.Panic(t, func() {
-		TakeClone([]int{1, 2, 3, 4, 5}, -1)
-	})
+	assert.Equal(t, []int{5}, TakeClone([]int{1, 2, 3, 4, 5}, -1))
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, TakeClone([]int{1, 2, 3, 4, 5}, -5))
+	assert.Equal(t, []int{1, 2, 3, 4, 5}, TakeClone([]int{1, 2, 3, 4, 5}, -10))
 	{
 		s1 := []int{1, 2, 3, 4, 5}
 		s2 := TakeClone(s1, 3)
@@ -1025,8 +1064,12 @@ func TestConcat(t *testing.T) {
 	assert.Equal(t, []int{0, 1, 2, 3, 4}, Concat([]int{0}, []int{1, 2}, []int{3, 4}))
 }
 
+func TestMerge(t *testing.T) {
+	assert.Equal(t, []int{0, 1, 2, 3, 4}, Merge([]int{0}, []int{1, 2}, []int{3, 4}))
+}
+
 func TestCompact(t *testing.T) {
-	assert.Equal(t, []int{}, Compact[int](nil))
+	assert.Equal(t, []int{}, Compact([]int(nil)))
 	assert.Equal(t, []int{}, Compact([]int{}))
 	assert.Equal(t, []int{1, 2, 3, 4}, Compact([]int{0, 1, 2, 3, 4}))
 	assert.Equal(t, []int{1, 2, 3, -1, 4}, Compact([]int{0, 1, 0, 0, 2, 3, 0, -1, 4}))
@@ -1092,11 +1135,11 @@ func TestInsertInplace(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	// Test empty.
-	assert.Equal(t, nil, Insert[int](nil, 0))
-	assert.Equal(t, []int{1}, Insert(nil, 0, 1))
-	assert.Equal(t, []int{1}, Insert(nil, 100, 1))
-	assert.Equal(t, []int{1}, Insert(nil, -1, 1))
-	assert.Equal(t, []int{1}, Insert(nil, -100, 1))
+	assert.Equal(t, nil, Insert([]int(nil), 0))
+	assert.Equal(t, []int{1}, Insert([]int(nil), 0, 1))
+	assert.Equal(t, []int{1}, Insert([]int(nil), 100, 1))
+	assert.Equal(t, []int{1}, Insert([]int(nil), -1, 1))
+	assert.Equal(t, []int{1}, Insert([]int(nil), -100, 1))
 	assert.Equal(t, []int{1}, Insert([]int{}, 0, 1))
 	assert.Equal(t, []int{1}, Insert([]int{}, 100, 1))
 	assert.Equal(t, []int{1}, Insert([]int{}, -1, 1))
@@ -1187,31 +1230,15 @@ func TestSlice(t *testing.T) {
 		{in: []string{"byte", "dance", "is", "best", "company"}, start: 0, end: 0, expected: []string{}},
 		{in: []string{"byte", "dance", "is", "best", "company"}, start: 0, end: 1, expected: []string{"byte"}},
 	}
-	shouldPanicTbl := []struct {
-		in    []int
-		start int
-		end   int
-	}{}
 	t.Run("SliceRange", func(t *testing.T) {
 		t.Parallel()
-		for k, col := range intTbl {
-			t.Run(fmt.Sprintf("SliceRange_intCase%d", k), func(t *testing.T) {
-				out := Slice(col.in, col.start, col.end)
-				assert.Equal(t, col.expected, out)
-			})
+		for _, col := range intTbl {
+			out := Slice(col.in, col.start, col.end)
+			assert.Equal(t, col.expected, out)
 		}
-		for k, col := range stringTbl {
-			t.Run(fmt.Sprintf("SliceRange_stringCase%d", k), func(t *testing.T) {
-				out := Slice(col.in, col.start, col.end)
-				assert.Equal(t, col.expected, out)
-			})
-		}
-		for k, col := range shouldPanicTbl {
-			t.Run(fmt.Sprintf("SliceRange_PanicCase%d", k), func(t *testing.T) {
-				assert.Panic(t, func() {
-					_ = Slice(col.in, col.start, col.end)
-				})
-			})
+		for _, col := range stringTbl {
+			out := Slice(col.in, col.start, col.end)
+			assert.Equal(t, col.expected, out)
 		}
 		// TestModify
 		s := []int{1, 2, 3, 4, 5}
@@ -1221,26 +1248,15 @@ func TestSlice(t *testing.T) {
 	})
 	t.Run("SliceRangeClone", func(t *testing.T) {
 		t.Parallel()
-		for k, col := range intTbl {
-			t.Run(fmt.Sprintf("SliceRangeClone_intCase%d", k), func(t *testing.T) {
-				out := SliceClone(col.in, col.start, col.end)
-				assert.Equal(t, col.expected, out)
-				assert.False(t, overlaps(col.in, out))
-			})
+		for _, col := range intTbl {
+			out := SliceClone(col.in, col.start, col.end)
+			assert.Equal(t, col.expected, out)
+			assert.False(t, overlaps(col.in, out))
 		}
-		for k, col := range stringTbl {
-			t.Run(fmt.Sprintf("SliceRangeClone_stringCase%d", k), func(t *testing.T) {
-				out := SliceClone(col.in, col.start, col.end)
-				assert.Equal(t, col.expected, out)
-				assert.False(t, overlaps(col.in, out))
-			})
-		}
-		for k, col := range shouldPanicTbl {
-			t.Run(fmt.Sprintf("ExtractRange_PanicCase%d", k), func(t *testing.T) {
-				assert.Panic(t, func() {
-					_ = SliceClone(col.in, col.start, col.end)
-				})
-			})
+		for _, col := range stringTbl {
+			out := SliceClone(col.in, col.start, col.end)
+			assert.Equal(t, col.expected, out)
+			assert.False(t, overlaps(col.in, out))
 		}
 
 		// TestModifyClone
@@ -1266,14 +1282,26 @@ func TestOf(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, Of(1, 2, 3))
 }
 
-func TestTryMap(t *testing.T) {
-	assert.Equal(t, TryMap(Of("1", "2", "3"), strconv.Atoi), gresult.OK(Of(1, 2, 3)))
-	assert.Equal(t, TryMap(nil, strconv.Atoi), gresult.OK(([]int{})))
-	assert.Equal(t, TryMap(Of("1", "2", "a"), strconv.Atoi).Err().Error(), "strconv.Atoi: parsing \"a\": invalid syntax")
+func TestRangeWithStep(t *testing.T) {
+	assert.Equal(t, []int{}, RangeWithStep(0, 0, 2))
+	assert.Equal(t, []int{}, RangeWithStep(0, -1, 2))
+	assert.Equal(t, []int{0}, RangeWithStep(0, 1, 2))
+	assert.Equal(t, []int{0, -1, -2, -3, -4}, RangeWithStep(0, -5, -1))
+	assert.Equal(t, []int{0, 2, 4}, RangeWithStep(0, 5, 2))
+	assert.Equal(t, []int{0, 3}, RangeWithStep(0, 5, 3))
+
+	assert.Equal(t, []float64{0.5, 1, 1.5}, RangeWithStep(0.5, 2.0, 0.5))
+}
+
+func TestRange(t *testing.T) {
+	assert.Equal(t, []int{}, Range(0, 0))
+	assert.Equal(t, []int{}, Range(0, -1))
+	assert.Equal(t, []int{0}, Range(0, 1))
+	assert.Equal(t, []int{-2, -1}, Range(-2, 0))
+	assert.Equal(t, []int{0, 1, 2, 3, 4}, Range(0, 5))
 }
 
 func TestRemoveIndex(t *testing.T) {
-
 	// traditional cases
 	tbl := []struct {
 		input    []int
@@ -1297,12 +1325,10 @@ func TestRemoveIndex(t *testing.T) {
 		{input: []int{1, 2, 3, 4, 5}, index: 1000, expected: []int{1, 2, 3, 4, 5}},
 		{input: []int{1, 2, 3, 4, 5}, index: 3, expected: []int{1, 2, 3, 5}},
 	}
-	for k, col := range tbl {
-		t.Run(fmt.Sprintf("case_%d,total:%d", k, len(tbl)), func(t *testing.T) {
-			output := RemoveIndex(col.input, col.index)
-			assert.Equal(t, col.expected, output)
-			assert.False(t, overlaps(col.input, output))
-		})
+	for _, col := range tbl {
+		output := RemoveIndex(col.input, col.index)
+		assert.Equal(t, col.expected, output)
+		assert.False(t, overlaps(col.input, output))
 	}
 
 	// Different type cases.
@@ -1418,27 +1444,4 @@ func overlaps[E any](a, b []E) bool {
 	}
 	return uintptr(unsafe.Pointer(&a[0])) <= uintptr(unsafe.Pointer(&b[len(b)-1]))+(elemSize-1) &&
 		uintptr(unsafe.Pointer(&b[0])) <= uintptr(unsafe.Pointer(&a[len(a)-1]))+(elemSize-1)
-}
-
-func TestPartition(t *testing.T) {
-	{
-		filter, reject := Partition(nil, gvalue.IsZero[int])
-		assert.Equal(t, []int{}, filter)
-		assert.Equal(t, []int{}, reject)
-	}
-	{
-		filter, reject := Partition([]int{}, gvalue.IsZero[int])
-		assert.Equal(t, []int{}, filter)
-		assert.Equal(t, []int{}, reject)
-	}
-	{
-		filter, reject := Partition([]int{0, 1, 2, 3}, gvalue.IsNotZero[int])
-		assert.Equal(t, []int{1, 2, 3}, filter)
-		assert.Equal(t, []int{0}, reject)
-	}
-	{
-		filter, reject := Partition([]int{0, 1, 2, 3}, gvalue.IsZero[int])
-		assert.Equal(t, []int{0}, filter)
-		assert.Equal(t, []int{1, 2, 3}, reject)
-	}
 }

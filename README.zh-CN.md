@@ -40,12 +40,14 @@ go get github.com/bytedance/gg
   - [gmap](#gmap)：处理散列表 `map[K]V`
   - [gfunc](#gfunc)：处理函数 `func`
   - [gconv](#gconv)：数据类型转换
-  - [gson](#gson)：处理 `JSON`
+  - [gson](#gson)：处理 JSON 数据
+- [泛型标准库封装](#-泛型标准库封装)
+  - [gsync](#gsync)：封装 `sync` 标准库
 - [泛型数据结构](#-泛型数据结构)
   - [tuple](#tuple)：元组的实现，提供了 2～10 元组的定义
   - [set](#set)：集合的实现，基于 `map[T]struct{}`
-  - [skipset](#skipset)：基于 skiplist 实现的高性能并发集合，比 `sync.Map` 快 ~15 倍
-  - [skipmap](#skipmap)：基于 skiplist 实现的高性能并发散列表，比 `sync.Map` 快 ~10 倍
+  - [skipset](#skipset)：基于 skiplist 实现的高性能并发集合，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~15 倍
+  - [skipmap](#skipmap)：基于 skiplist 实现的高性能并发散列表，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~10 倍
 
 ## ✨ 泛型函数式编程
 
@@ -171,6 +173,8 @@ b := gvalue.Zero[*int]()
 // nil
 gvalue.IsNil(b)
 // true
+gvalue.Or(0, 1, 2)
+// 1
 ```
 
 示例2：数学运算
@@ -204,18 +208,6 @@ gvalue.TypeAssert[int](any(1))
 // 1
 gvalue.TryAssert[int](any(1))
 // 1 true
-```
-
-示例5：Once
-
-```go
-once := gvalue.Once(func() {
-    fmt.Println("once")
-})
-once()
-// "once"
-once()
-// (no output)
 ```
 
 ### gptr
@@ -305,8 +297,14 @@ gslice.Get([]int{1, 2, 3, 4, 5}, -1).Value() // 负索引
 示例3：分块操作
 
 ```go
+gslice.Range(1, 5)
+// [1, 2, 3, 4]
+gslice.RangeWithStep(5, 1, -2)
+// [5, 3]
 gslice.Take([]int{1, 2, 3, 4, 5}, 2)
 // [1, 2]
+gslice.Take([]int{1, 2, 3, 4, 5}, -2)
+// [4, 5]
 gslice.Slice([]int{1, 2, 3, 4, 5}, 1, 3)
 // [2, 3]
 gslice.Chunk([]int{1, 2, 3, 4, 5}, 2)
@@ -549,7 +547,7 @@ gconv.ToE[int]("x")
 
 ### gson
 
-处理 `JSON`
+处理 JSON 数据
 
 引用：
 
@@ -584,6 +582,87 @@ gson.Unmarshal[testStruct](`{"name":"test","age":10}`)
 // {test 10} nil
 ```
 
+## ✨ 泛型标准库封装
+
+### gsync
+
+封装 `sync` 标准库
+
+引用：
+
+```go
+import (
+    "github.com/bytedance/gg/gstd/gsync"
+)
+```
+
+示例1：`gsync.Map` 封装了 `sync.Map`
+
+```go
+sm := gsync.Map[string, int]{}
+sm.Store("k", 1)
+sm.Load("k")
+// 1 true
+sm.LoadO("k").Value()
+// 1
+sm.Store("k", 2)
+sm.Load("k")
+// 2 true
+sm.LoadAndDelete("k")
+// 2 true
+sm.Load("k")
+// 0 false
+sm.LoadOrStore("k", 3)
+// 3 false
+sm.Load("k")
+// 3 true
+sm.ToMap()
+// {"k":3}
+```
+
+示例2：`gsync.Pool` 封装了 `sync.Pool`
+
+```go
+pool := Pool[*int]{
+    New: func() *int {
+        i := 1
+        return &i
+    },
+}
+a := pool.Get()
+*a
+// 1
+*a = 2
+pool.Put(a)
+*pool.Get()
+// 可能的结果: 1 或 2
+```
+
+示例3：`gsync.OnceXXX` 封装了 `sync.Once`
+
+```go
+onceFunc := gsync.OnceFunc(func() { fmt.Println("OnceFunc") })
+onceFunc()
+// "OnceFunc"
+onceFunc()
+// (no output)
+onceFunc()
+// (no output)
+
+i := 1
+onceValue := gsync.OnceValue(func() int { i++; return i })
+onceValue()
+// 2
+onceValue()
+// 2
+
+onceValues := gsync.OnceValues(func() (int, error) { i++; return i, nil })
+onceValues()
+// 3 nil
+onceValues()
+// 3 nil
+```
+
 ## ✨ 泛型数据结构
 
 ### tuple
@@ -613,7 +692,7 @@ for _, v := range s {
 // green:15
 // blue:16
 
-fmt.Println(s.Unzip())
+s.Unzip()
 // ["red", "green", "blue"] [14, 15, 16]
 ```
 
@@ -661,7 +740,9 @@ len(s.ToSlice())
 
 ### skipset
 
-基于 skiplist 实现的高性能并发集合，比 sync.Map 快 ~15 倍
+基于 skiplist 实现的高性能并发集合，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~15 倍
+
+⚠️ 注意：Go 1.24 及更高版本，建议使用标准库 `sync.Map`，在约 90% 的使用场景中，其性能优于 `skipset`
 
 引用
 
@@ -712,7 +793,9 @@ s.Len()
 
 ### skipmap
 
-基于 skiplist 实现的高性能并发散列表，比 sync.Map 快 ~10 倍
+基于 skiplist 实现的高性能并发散列表，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~15 倍
+
+⚠️ 注意：Go 1.24 及更高版本，建议使用标准库 `sync.Map`，在约 90% 的使用场景中，其性能优于 `skipmap`
 
 引用
 
@@ -760,7 +843,7 @@ s.Len()
 // 1000
 ```
 
-## License
+## 许可证
 
 `gg` 采用 Apache-2.0 许可证。详情请参阅 [LICENSE](LICENSE)。
 

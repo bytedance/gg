@@ -31,7 +31,6 @@
 package gvalue
 
 import (
-	"sync"
 	"unsafe"
 
 	"github.com/bytedance/gg/internal/constraints"
@@ -41,11 +40,30 @@ import (
 //
 // The zero value is:
 //
-//   - 0	for numeric types,
+//   - 0 for numeric types,
 //   - false for the boolean type
 //   - "" (the empty string) for strings
 //   - nil for reference/pointer type
 func Zero[T any]() (v T) {
+	return
+}
+
+// Or returns the first non-zero value of inputs.
+// If all values are zero, return the zero value of type.
+//
+// 🚀 EXAMPLE:
+//
+//	Or(false, true)  ⏩ true
+//	Or(0, 1, 2)      ⏩ 1
+//	Or("", "1", "2") ⏩ "1"
+//	Or(0, 0, 0)      ⏩ 0
+//	Or("", "", "")   ⏩ ""
+func Or[T comparable](vals ...T) (v T) {
+	for _, val := range vals {
+		if val != v {
+			return val
+		}
+	}
 	return
 }
 
@@ -216,47 +234,4 @@ func GreaterEqual[T constraints.Ordered](x, y T) bool {
 // Between returns true when v is within [min, max], otherwise false.
 func Between[T constraints.Ordered](v, min, max T) bool {
 	return v >= min && v <= max
-}
-
-// Once returns a function as value getter.
-// Value is returned by function f, and f is invoked only once when returned
-// function is firstly called.
-//
-// This function can be used to lazily initialize a value, as replacement of
-// the packages-level init function. For example:
-//
-//	var DB *sql.DB
-//
-//	func init() {
-//		// 💡 NOTE: DB is initialized here.
-//		DB, _ = sql.Open("mysql", "user:password@/dbname")
-//	}
-//
-//	func main() {
-//		DB.Query(...)
-//	}
-//
-// Can be rewritten to:
-//
-//	var DB = Once(func () *sql.DB {
-//		return gresult.Of(sql.Open("mysql", "user:password@/dbname")).Value()
-//	})
-//
-//	func main() {
-//		// 💡 NOTE: DB is *LAZILY* initialized here.
-//		DB().Query(...)
-//	}
-//
-// 💡 HINT:
-//
-//   - See also https://github.com/golang/go/issues/56102
-func Once[T any](f func() T) func() T {
-	var (
-		once sync.Once
-		v    T
-	)
-	return func() T {
-		once.Do(func() { v = f() })
-		return v
-	}
 }

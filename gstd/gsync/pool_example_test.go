@@ -12,29 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package rtassert provides runtime assertion.
-package rtassert
+package gsync
 
 import (
 	"fmt"
-
-	"github.com/bytedance/gg/internal/constraints"
 )
 
-func MustNotNeg[T constraints.Number](n T) {
-	if n < 0 {
-		panic(fmt.Errorf("must not be negative: %v", n))
+func ExamplePool() {
+	pool := Pool[*int]{
+		New: func() *int {
+			i := 1
+			return &i
+		},
 	}
-}
+	a := pool.Get()
+	fmt.Println(*a) // 1
+	*a = 2
+	pool.Put(a)
+	_ = *pool.Get() // possible output: 1 or 2
 
-func MustLessThan[T constraints.Ordered](x, y T) {
-	if x < y {
-		panic(fmt.Errorf("must not be less than %v", y))
-	}
-}
-
-func ErrMustNil(err error) {
-	if err != nil {
-		panic(fmt.Errorf("unexpected error: %s", err))
-	}
+	// Output:
+	// 1
 }

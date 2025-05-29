@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,29 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package rtassert provides runtime assertion.
-package rtassert
+package gsync
 
 import (
 	"fmt"
-
-	"github.com/bytedance/gg/internal/constraints"
 )
 
-func MustNotNeg[T constraints.Number](n T) {
-	if n < 0 {
-		panic(fmt.Errorf("must not be negative: %v", n))
-	}
-}
+func Example() {
+	onceFunc := OnceFunc(func() { fmt.Println("OnceFunc") })
+	onceFunc() // "OnceFunc"
+	onceFunc() // (no output)
+	onceFunc() // (no output)
 
-func MustLessThan[T constraints.Ordered](x, y T) {
-	if x < y {
-		panic(fmt.Errorf("must not be less than %v", y))
-	}
-}
+	i := 1
+	onceValue := OnceValue(func() int { i++; return i })
+	fmt.Println(onceValue()) // 2
+	fmt.Println(onceValue()) // 2
 
-func ErrMustNil(err error) {
-	if err != nil {
-		panic(fmt.Errorf("unexpected error: %s", err))
-	}
+	onceValues := OnceValues(func() (int, error) { i++; return i, nil })
+	fmt.Println(onceValues()) // 3 nil
+	fmt.Println(onceValues()) // 3 nil
+
+	// Output:
+	// OnceFunc
+	// 2
+	// 2
+	// 3 <nil>
+	// 3 <nil>
 }

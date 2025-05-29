@@ -18,19 +18,15 @@ import (
 	"fmt"
 )
 
-var once = Once(func() int {
-	fmt.Println("once")
-	return 0
-})
-
 func Example() {
 	// Zero value
 	a := Zero[int]()
 	fmt.Println(a)         // 0
 	fmt.Println(IsZero(a)) // true
 	b := Zero[*int]()
-	fmt.Println(b)        // nil
-	fmt.Println(IsNil(b)) // true
+	fmt.Println(b)           // nil
+	fmt.Println(IsNil(b))    // true
+	fmt.Println(Or(0, 1, 2)) // 1
 
 	// Math operation
 	fmt.Println(Max(1, 2, 3))    // 3
@@ -47,16 +43,12 @@ func Example() {
 	fmt.Println(TypeAssert[int](any(1))) // 1
 	fmt.Println(TryAssert[int](any(1)))  // 1 true
 
-	// Once
-	once() // "once"
-	once() // (no output)
-	once() // (no output)
-
 	// Output:
 	// 0
 	// true
 	// <nil>
 	// true
+	// 1
 	// 3
 	// 1
 	// 1 3
@@ -66,5 +58,4 @@ func Example() {
 	// true
 	// 1
 	// 1 true
-	// once
 }

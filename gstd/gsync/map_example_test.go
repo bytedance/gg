@@ -12,29 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package rtassert provides runtime assertion.
-package rtassert
+package gsync
 
 import (
 	"fmt"
-
-	"github.com/bytedance/gg/internal/constraints"
 )
 
-func MustNotNeg[T constraints.Number](n T) {
-	if n < 0 {
-		panic(fmt.Errorf("must not be negative: %v", n))
-	}
-}
+func ExampleMap() {
+	sm := Map[string, int]{}
+	sm.Store("k", 1)
+	fmt.Println(sm.Load("k"))          // 1 true
+	fmt.Println(sm.LoadO("k").Value()) // 1
+	sm.Store("k", 2)
+	fmt.Println(sm.Load("k"))           // 2 true
+	fmt.Println(sm.LoadAndDelete("k"))  // 2 true
+	fmt.Println(sm.Load("k"))           // 0 false
+	fmt.Println(sm.LoadOrStore("k", 3)) // 3 false
+	fmt.Println(sm.Load("k"))           // 3 true
+	fmt.Println(sm.ToMap())             // {"k":3}
 
-func MustLessThan[T constraints.Ordered](x, y T) {
-	if x < y {
-		panic(fmt.Errorf("must not be less than %v", y))
-	}
-}
-
-func ErrMustNil(err error) {
-	if err != nil {
-		panic(fmt.Errorf("unexpected error: %s", err))
-	}
+	// Output:
+	// 1 true
+	// 1
+	// 2 true
+	// 2 true
+	// 0 false
+	// 3 false
+	// 3 true
+	// map[k:3]
 }

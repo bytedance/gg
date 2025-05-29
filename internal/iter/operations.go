@@ -1215,7 +1215,7 @@ func Chunk[T any](n int, i Iter[T]) Iter[[]T] {
 func Divide[T any](n int, i Iter[T]) Iter[[]T] {
 	elems := i.Next(ALL)
 	k := len(elems) / n // Every chunk have at least k elements
-	m := len(elems) % n // Thf first m chunks have a extra elements
+	m := len(elems) % n // The first m chunks have an extra element
 	next := make([][]T, n)
 	for i := 0; i < n; i++ {
 		next[i] = elems[i*k+gvalue.Min(i, m) : (i+1)*k+gvalue.Min(i+1, m)]

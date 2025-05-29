@@ -383,6 +383,19 @@ func TestFoldValues(t *testing.T) {
 		foldValues(map[int]int{}, gvalue.Add[int], 2))
 }
 
+func TestReduce(t *testing.T) {
+	assert.Equal(t,
+		goption.OK(tuple.Make2(3, 6)),
+		reduce(map[int]int{1: 2, 2: 4}, func(t tuple.T2[int, int], x int, y int) tuple.T2[int, int] {
+			return tuple.Make2(t.First+x, t.Second+y)
+		}))
+	assert.Equal(t,
+		goption.Nil[tuple.T2[int, int]](),
+		reduce(map[int]int{}, func(t tuple.T2[int, int], x int, y int) tuple.T2[int, int] {
+			return tuple.Make2(t.First+x, t.Second+y)
+		}))
+}
+
 func TestReduceKeys(t *testing.T) {
 	assert.Equal(t,
 		goption.OK(3),
@@ -459,7 +472,7 @@ func TestMerge(t *testing.T) {
 		Merge(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil))
 	assert.Equal(t, map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
 		Merge(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
-	assert.Equal(t, map[int]int{}, Merge[int, int](nil, nil))
+	assert.Equal(t, map[int]int{}, Merge(map[int]int(nil), nil))
 	assert.Equal(t, map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
 		Merge(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
 	assert.Equal(t, map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
@@ -550,7 +563,7 @@ func TestLoadAndDelete(t *testing.T) {
 	}
 }
 
-func TestEqualStrict(t *testing.T) {
+func TestEqual(t *testing.T) {
 	assert.True(t, Equal(
 		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
 		map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
@@ -566,12 +579,12 @@ func TestEqualStrict(t *testing.T) {
 	assert.False(t, Equal(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil))
 	assert.False(t, Equal(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
 	assert.True(t, Equal(map[int]int{}, map[int]int{}))
-	assert.False(t, Equal(nil, map[int]int{}))
-	assert.False(t, Equal(map[int]int{}, nil))
+	assert.True(t, Equal(nil, map[int]int{}))
+	assert.True(t, Equal(map[int]int{}, nil))
 	assert.True(t, Equal[int, int](nil, nil))
 }
 
-func TestEqualStrictBy(t *testing.T) {
+func TestEqualBy(t *testing.T) {
 	eq := gvalue.Equal[int]
 	assert.True(t, EqualBy(
 		map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
@@ -588,8 +601,8 @@ func TestEqualStrictBy(t *testing.T) {
 	assert.False(t, EqualBy(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil, eq))
 	assert.False(t, EqualBy(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, eq))
 	assert.True(t, EqualBy(map[int]int{}, map[int]int{}, eq))
-	assert.False(t, EqualBy(nil, map[int]int{}, eq))
-	assert.False(t, EqualBy(map[int]int{}, nil, eq))
+	assert.True(t, EqualBy(nil, map[int]int{}, eq))
+	assert.True(t, EqualBy(map[int]int{}, nil, eq))
 	assert.True(t, EqualBy[int](nil, nil, eq))
 
 	anyEq := func(v1, v2 any) bool { return v1 == v2 }
@@ -936,6 +949,11 @@ func TestTypeAssert(t *testing.T) {
 	})
 }
 
+func TestLen(t *testing.T) {
+	assert.Equal(t, 0, Len(map[int]int{}))
+	assert.Equal(t, 2, Len(map[int]int{1: 1, 2: 2}))
+}
+
 func TestUnion(t *testing.T) {
 	assert.Equal(t, map[int]int{1: 1, 2: 2, 3: 3, 4: 4},
 		Union(map[int]int{1: 1, 2: 2, 3: 3, 4: 4}, nil))
@@ -943,10 +961,10 @@ func TestUnion(t *testing.T) {
 		Union(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
 
 	// Empty
-	assert.Equal(t, map[int]string{}, Union[int, string]())
-	assert.Equal(t, map[int]int{}, Union[int, int](nil))
-	assert.Equal(t, map[int]int{}, Union[int, int](nil, nil))
-	assert.Equal(t, map[int]int{}, Union[int, int](nil, nil, nil))
+	assert.Equal(t, map[int]string{}, Union[map[int]string]())
+	assert.Equal(t, map[int]int{}, Union(map[int]int(nil)))
+	assert.Equal(t, map[int]int{}, Union(map[int]int(nil), nil))
+	assert.Equal(t, map[int]int{}, Union(map[int]int(nil), nil, nil))
 
 	// New value replace old.
 	assert.Equal(t, map[int]int{1: 3},
@@ -976,7 +994,7 @@ func TestUnionBy(t *testing.T) {
 		Union(nil, map[int]int{1: 1, 2: 2, 3: 3, 4: 4}))
 
 	// Empty
-	assert.Equal(t, map[int]string{}, UnionBy[int, string, map[int]string](nil, nil))
+	assert.Equal(t, map[int]string{}, UnionBy[map[int]string](nil, nil))
 	assert.Equal(t, map[int]int{}, UnionBy([]map[int]int{nil}, nil))
 	assert.Equal(t, map[int]int{}, UnionBy([]map[int]int{nil, nil}, nil))
 	assert.Equal(t, map[int]int{}, UnionBy([]map[int]int{nil, nil, nil}, nil))
@@ -1076,10 +1094,10 @@ func TestDiff(t *testing.T) {
 }
 
 func TestIntersect(t *testing.T) {
-	assert.Equal(t, map[int]int{}, Intersect[int, int]())
-	assert.Equal(t, map[int]int{}, Intersect[int, int](nil))
-	assert.Equal(t, map[int]int{}, Intersect[int, int](nil, nil))
-	assert.Equal(t, map[int]int{}, Intersect[int, int](nil, nil, nil))
+	assert.Equal(t, map[int]int{}, Intersect[map[int]int]())
+	assert.Equal(t, map[int]int{}, Intersect(map[int]int(nil)))
+	assert.Equal(t, map[int]int{}, Intersect(map[int]int(nil), nil))
+	assert.Equal(t, map[int]int{}, Intersect(map[int]int(nil), nil, nil))
 
 	assert.Equal(t, map[int]int{}, Intersect(nil, map[int]int{1: 1}, nil))
 	assert.Equal(t, map[int]int{}, Intersect(map[int]int{1: 1}, nil, nil))
@@ -1120,7 +1138,7 @@ func TestIntersect(t *testing.T) {
 
 func TestIntersectBy(t *testing.T) {
 	// Empty
-	assert.Equal(t, map[int]int{}, IntersectBy[int, int, map[int]int](nil, nil))
+	assert.Equal(t, map[int]int{}, IntersectBy[map[int]int](nil, nil))
 	assert.Equal(t, map[int]int{}, IntersectBy([]map[int]int{}, nil))
 	assert.Equal(t, map[int]int{}, IntersectBy([]map[int]int{nil}, nil))
 	assert.Equal(t, map[int]int{}, IntersectBy([]map[int]int{nil, nil}, nil))
@@ -1173,7 +1191,7 @@ func TestIntersectBy(t *testing.T) {
 }
 
 func TestCompact(t *testing.T) {
-	assert.Equal(t, map[int]int{}, Compact[int, int](nil))
+	assert.Equal(t, map[int]int{}, Compact(map[int]int(nil)))
 	assert.Equal(t, map[int]int{}, Compact(map[int]int{}))
 	assert.Equal(t,
 		map[int]string{1: "foo", 3: "bar"},
