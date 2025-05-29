@@ -40,9 +40,9 @@ go get github.com/bytedance/gg
   - [gmap](#gmap)：Processing map `map[K]V`
   - [gfunc](#gfunc)：Processing function `func`
   - [gconv](#gconv)：Data type conversion
+  - [gson](#gson)：Processing JSON
 - [Generic Standard Wrapper](#-generic-standard-wrapper)
   - [gsync](#gsync)：Wrap `sync`
-  - [gson](#gson)：Wrap `encoding/json`
 - [Generic Data Structures](#-generic-data-structures)
     - [tuple](#tuple)：Implementation of tuple provides definition of generic n-ary tuples
     - [set](#set)：Implementation of set based on `map[T]struct{}`
@@ -544,6 +544,43 @@ gconv.ToE[int]("x")
 // 0 strconv.ParseInt: parsing "x": invalid syntax
 ```
 
+### gson
+
+Processing JSON
+
+Usage：
+
+```go
+import (
+    "github.com/bytedance/gg/gson"
+)
+```
+
+Example：
+
+```go
+type testStruct struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+testcase := testStruct{Name: "test", Age: 10}
+
+gson.Marshal(testcase)
+// []byte(`{"name":"test","age":10}`) nil
+gson.MarshalString(testcase)
+// `{"name":"test","age":10}` nil
+gson.ToString(testcase)
+// `{"name":"test","age":10}`
+gson.MarshalIndent(testcase, "", "  ")
+// "{\n  \"name\": \"test\",\n  \"age\": 10\n}" nil
+gson.ToStringIndent(testcase, "", "  ")
+// "{\n  \"name\": \"test\",\n  \"age\": 10\n}"
+gson.Valid(`{"name":"test","age":10}`)
+// true
+gson.Unmarshal[testStruct](`{"name":"test","age":10}`)
+// {test 10} nil
+```
+
 ## ✨ Generic Standard Wrapper
 
 ### gsync
@@ -624,43 +661,6 @@ onceValues()
 // 3 nil
 onceValues()
 // 3 nil
-```
-
-### gson
-
-Wrap `encoding/json`
-
-Usage：
-
-```go
-import (
-    "github.com/bytedance/gg/stdwrap/gson"
-)
-```
-
-Example：
-
-```go
-type testStruct struct {
-    Name string `json:"name"`
-    Age  int    `json:"age"`
-}
-testcase := testStruct{Name: "test", Age: 10}
-
-gson.Marshal(testcase)
-// []byte(`{"name":"test","age":10}`) nil
-gson.MarshalString(testcase)
-// `{"name":"test","age":10}` nil
-gson.ToString(testcase)
-// `{"name":"test","age":10}`
-gson.MarshalIndent(testcase, "", "  ")
-// "{\n  \"name\": \"test\",\n  \"age\": 10\n}" nil
-gson.ToStringIndent(testcase, "", "  ")
-// "{\n  \"name\": \"test\",\n  \"age\": 10\n}"
-gson.Valid(`{"name":"test","age":10}`)
-// true
-gson.Unmarshal[testStruct](`{"name":"test","age":10}`)
-// {test 10} nil
 ```
 
 ## ✨ Generic Data Structures

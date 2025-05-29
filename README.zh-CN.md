@@ -40,9 +40,9 @@ go get github.com/bytedance/gg
   - [gmap](#gmap)：处理散列表 `map[K]V`
   - [gfunc](#gfunc)：处理函数 `func`
   - [gconv](#gconv)：数据类型转换
+  - [gson](#gson)：处理 JSON 数据
 - [泛型标准库封装](#-泛型标准库封装)
   - [gsync](#gsync)：封装 `sync` 标准库
-  - [gson](#gson)：封装 `encoding/json` 标准库
 - [泛型数据结构](#-泛型数据结构)
   - [tuple](#tuple)：元组的实现，提供了 2～10 元组的定义
   - [set](#set)：集合的实现，基于 `map[T]struct{}`
@@ -545,6 +545,43 @@ gconv.ToE[int]("x")
 // 0 strconv.ParseInt: parsing "x": invalid syntax
 ```
 
+### gson
+
+处理 JSON 数据
+
+引用：
+
+```go
+import (
+    "github.com/bytedance/gg/gson"
+)
+```
+
+示例：
+
+```go
+type testStruct struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+testcase := testStruct{Name: "test", Age: 10}
+
+gson.Marshal(testcase)
+// []byte(`{"name":"test","age":10}`) nil
+gson.MarshalString(testcase)
+// `{"name":"test","age":10}` nil
+gson.ToString(testcase)
+// `{"name":"test","age":10}`
+gson.MarshalIndent(testcase, "", "  ")
+// "{\n  \"name\": \"test\",\n  \"age\": 10\n}" nil
+gson.ToStringIndent(testcase, "", "  ")
+// "{\n  \"name\": \"test\",\n  \"age\": 10\n}"
+gson.Valid(`{"name":"test","age":10}`)
+// true
+gson.Unmarshal[testStruct](`{"name":"test","age":10}`)
+// {test 10} nil
+```
+
 ## ✨ 泛型标准库封装
 
 ### gsync
@@ -624,43 +661,6 @@ onceValues()
 // 3 nil
 onceValues()
 // 3 nil
-```
-
-### gson
-
-封装 `encoding/json` 标准库
-
-引用：
-
-```go
-import (
-    "github.com/bytedance/gg/stdwrap/gson"
-)
-```
-
-示例：
-
-```go
-type testStruct struct {
-    Name string `json:"name"`
-    Age  int    `json:"age"`
-}
-testcase := testStruct{Name: "test", Age: 10}
-
-gson.Marshal(testcase)
-// []byte(`{"name":"test","age":10}`) nil
-gson.MarshalString(testcase)
-// `{"name":"test","age":10}` nil
-gson.ToString(testcase)
-// `{"name":"test","age":10}`
-gson.MarshalIndent(testcase, "", "  ")
-// "{\n  \"name\": \"test\",\n  \"age\": 10\n}" nil
-gson.ToStringIndent(testcase, "", "  ")
-// "{\n  \"name\": \"test\",\n  \"age\": 10\n}"
-gson.Valid(`{"name":"test","age":10}`)
-// true
-gson.Unmarshal[testStruct](`{"name":"test","age":10}`)
-// {test 10} nil
 ```
 
 ## ✨ 泛型数据结构
