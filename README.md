@@ -44,10 +44,10 @@ go get github.com/bytedance/gg
 - [Generic Standard Wrapper](#-generic-standard-wrapper)
   - [gsync](#gsync)：Wrap `sync`
 - [Generic Data Structures](#-generic-data-structures)
-    - [tuple](#tuple)：Implementation of tuple provides definition of generic n-ary tuples
-    - [set](#set)：Implementation of set based on `map[T]struct{}`
-    - [skipset](#skipset)：High-performance, scalable, concurrent-safe set based on skip-list, up to 15x faster than the built-in `sync.Map` below Go 1.24
-    - [skipmap](#skipmap)：High-performance, scalable, concurrent-safe map based on skip-list, up to 10x faster than the built-in `sync.Map` below Go 1.24
+  - [tuple](#tuple)：Implementation of tuple provides definition of generic n-ary tuples
+  - [set](#set)：Implementation of set based on `map[T]struct{}`
+  - [skipset](#skipset)：High-performance, scalable, concurrent-safe set based on skip-list, up to 15x faster than the built-in `sync.Map` below Go 1.24
+  - [skipmap](#skipmap)：High-performance, scalable, concurrent-safe map based on skip-list, up to 10x faster than the built-in `sync.Map` below Go 1.24
 
 ## ✨ Generic Functional Programming
 
