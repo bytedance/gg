@@ -144,5 +144,8 @@ func UnmarshalBy[T any, V ~[]byte | ~string](codec Unmarshaler, v V) (T, error) 
 	case []byte:
 		err := codec.Unmarshal(tv, &t)
 		return t, err
+	default:
+		err := codec.Unmarshal([]byte(v), &t) // fallback for robustness: theoretically unreachable due to type constraint V ~[]byte | ~string
+		return t, err
 	}
 }

@@ -160,12 +160,6 @@ func TestUnmarshalBy(t *testing.T) {
 			expected := set.New[int32](1, 2, 3)
 			assert.Nil(t, err)
 			assert.Equal(t, expected, got)
-		},
-		{
-			got, err := UnmarshalBy[*set.Set[int32]](codec, `[1,2, 3]`)
-			expected := set.New[int32](1, 2, 3)
-			assert.Nil(t, err)
-			assert.Equal(t, expected, got)
 		}
 
 		// add MyBytes(~[]byte), MyString(~string) test cases to ensure no other types for switch default 
