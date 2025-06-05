@@ -415,11 +415,11 @@ gmap.ToOrderedSlice(map[int]int{1: 2, 2: 3, 3: 4}, f)
 示例2：高阶函数
 
 ```go
-Map(map[int]int{1: 2, 2: 3, 3: 4}, func(k int, v int) (string, string) {
+gmap.Map(map[int]int{1: 2, 2: 3, 3: 4}, func(k int, v int) (string, string) {
     return strconv.Itoa(k), strconv.Itoa(k + 1)
 })
 // {"1":"2", "2":"3", "3":"4"}
-Filter(map[int]int{1: 2, 2: 3, 3: 4}, func(k int, v int) bool {
+gmap.Filter(map[int]int{1: 2, 2: 3, 3: 4}, func(k int, v int) bool {
     return k+v > 3
 })
 // {"2":2, "3":3}
@@ -580,6 +580,26 @@ gson.Valid(`{"name":"test","age":10}`)
 // true
 gson.Unmarshal[testStruct](`{"name":"test","age":10}`)
 // {test 10} nil
+
+// 使用高性能 JSON codecs 如Sonic, json-iterator
+import "github.com/bytedance/sonic"
+
+gson.MarshalBy(sonic.ConfigDefault, testcase)
+// []byte(`{"name":"test","age":10}`) nil
+gson.MarshalString(sonic.ConfigDefault, testcase)
+// {"name":"test","age":10}`, nil
+gson.UnmarshalBy[testStruct](sonic.ConfigDefault, `{"name":"test","age":10}`)
+// testStruct{Name: "test", Age: 10}, nil
+
+// Json-Iterator:
+import jsoniter "github.com/json-iterator/go"
+
+gson.MarshalBy(jsoniter.ConfigDefault, testcase)
+// []byte(`{"name":"test","age":10}`) nil
+gson.MarshalString(jsoniter.ConfigDefault, testcase)   
+// {"name":"test","age":10}`, nil
+gson.UnmarshalBy[testStruct](jsoniter.ConfigDefault, `{"name":"test","age":10}`)
+// testStruct{Name: "test", Age: 10}, nil
 ```
 
 ## ✨ 泛型标准库封装
