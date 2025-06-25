@@ -623,6 +623,50 @@ func TestStableSortBy(t *testing.T) {
 	}
 }
 
+func TestPartialSort(t *testing.T) {
+	// Basic case - first k elements sorted and smallest
+	{
+		s := []int{5, 2, 9, 1, 5, 6}
+		PartialSort(s, 3)
+		assert.Equal(t, []int{1, 2, 5, 9, 5, 6}, s) // First 3 are smallest + sorted
+	}
+
+	// k == length (full sort)
+	{
+		s := []int{3, 1, 4}
+		PartialSort(s, 3)
+		assert.Equal(t, []int{1, 3, 4}, s) // Fully sorted
+	}
+
+	// k > length (behaves like full sort)
+	{
+		s := []int{7, 3}
+		PartialSort(s, 5)
+		assert.Equal(t, []int{3, 7}, s) // Treats as full sort
+	}
+
+	// Empty slice
+	{
+		s := []int{}
+		PartialSort(s, 2)
+		assert.Equal(t, []int{}, s) // No panic
+	}
+
+	// k == 0 (no-op)
+	{
+		s := []int{5, 2, 8}
+		PartialSort(s, 0)
+		assert.Equal(t, []int{5, 2, 8}, s) // Unmodified
+	}
+
+	// Already sorted
+	{
+		s := []int{1, 2, 3, 4, 5}
+		PartialSort(s, 3)
+		assert.Equal(t, []int{1, 2, 3, 4, 5}, s) // Unchanged
+	}
+}
+
 func TestTypeAssert(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3, 4}, TypeAssert[int, any]([]any{1, 2, 3, 4}))
 	assert.Equal(t, []any{1, 2, 3, 4}, TypeAssert[any, int]([]int{1, 2, 3, 4}))

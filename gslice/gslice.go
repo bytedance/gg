@@ -1011,6 +1011,11 @@ func StableSortBy[T any](s []T, less func(T, T) bool) {
 	_ = iter.ToSlice(iter.StableSortBy(less, iter.StealSlice(s)))
 }
 
+// PartialSort
+func PartialSort[T constraints.Ordered](s []T, k int) {
+	_ = iter.ToSlice(iter.PartialSort(k, iter.StealSlice(s)))
+}
+
 // TypeAssert converts a slice from type From to type To by type assertion.
 //
 // 🚀 EXAMPLE:
