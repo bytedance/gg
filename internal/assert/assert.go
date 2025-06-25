@@ -322,8 +322,20 @@ func NotPanic(t *testing.T, f func()) bool {
 	return !ok
 }
 
+func isNil(i any) bool {
+	if i == nil {
+		return true
+	}
+
+	value := reflect.ValueOf(i)
+	if value.Kind() == reflect.Ptr && value.IsNil() {
+		return true
+	}
+	return false
+}
+
 func Nil(t *testing.T, i any) bool {
-	if i != nil {
+	if !isNil(i) {
 		// Ask *testing.T to skip current function when printing file and
 		// line information.
 		t.Helper()
@@ -336,7 +348,7 @@ func Nil(t *testing.T, i any) bool {
 }
 
 func NotNil(t *testing.T, i any) bool {
-	if i == nil {
+	if isNil(i) {
 		// Ask *testing.T to skip current function when printing file and
 		// line information.
 		t.Helper()
