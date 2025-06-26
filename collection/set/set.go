@@ -52,6 +52,7 @@ import (
 	"strings"
 
 	"github.com/bytedance/gg/gcond"
+	"github.com/bytedance/gg/gvalue"
 	"github.com/bytedance/gg/internal/heapsort"
 	"github.com/bytedance/gg/internal/jsonbuilder"
 )
@@ -82,15 +83,33 @@ func New[T comparable](members ...T) *Set[T] {
 	return s
 }
 
+// NewWithCap creates a new set with capacity.
+func NewWithCap[T comparable](capacity int) *Set[T] {
+	s := &Set[T]{}
+	s.m = make(map[T]struct{}, capacity)
+	return s
+}
+
 // Len returns the number of elements of set s.
 // The complexity is O(1).
 func (s *Set[T]) Len() int {
+	if s == nil {
+		return 0
+	}
 	return len(s.m)
+}
+
+// lazyInit lazily initializes a zero Set value.
+func (s *Set[T]) lazyInit() {
+	if s.m == nil {
+		s.m = make(map[T]struct{}, initSize)
+	}
 }
 
 // Add adds element v to set.
 // If element is already member of set, return false.
 func (s *Set[T]) Add(v T) bool {
+	s.lazyInit()
 	if _, ok := s.m[v]; ok {
 		return false
 	}
@@ -101,6 +120,7 @@ func (s *Set[T]) Add(v T) bool {
 // AddN is a variant of [set.Set.Add], adds multiple elements to set.
 // It will not tell you which elements have been successfully added.
 func (s *Set[T]) AddN(vs ...T) {
+	s.lazyInit()
 	for i := range vs {
 		s.m[vs[i]] = struct{}{}
 	}
@@ -109,6 +129,9 @@ func (s *Set[T]) AddN(vs ...T) {
 // Remove removes element v from set.
 // If element is not member of set, return false.
 func (s *Set[T]) Remove(v T) bool {
+	if s == nil {
+		return false
+	}
 	_, ok := s.m[v]
 	if ok {
 		delete(s.m, v)
@@ -119,6 +142,9 @@ func (s *Set[T]) Remove(v T) bool {
 // RemoveN is a variant of [set.Set.Remove], removes multiple elements from set.
 // It will not tell you which elements have been successfully removed.
 func (s *Set[T]) RemoveN(vs ...T) {
+	if s == nil {
+		return
+	}
 	for i := range vs {
 		delete(s.m, vs[i])
 	}
@@ -126,6 +152,9 @@ func (s *Set[T]) RemoveN(vs ...T) {
 
 // Contains returns true if element v is member of set.
 func (s *Set[T]) Contains(v T) bool {
+	if s == nil {
+		return false
+	}
 	_, ok := s.m[v]
 	return ok
 }
@@ -134,6 +163,9 @@ func (s *Set[T]) Contains(v T) bool {
 //
 // 💡 NOTE: If no element given, ContainsAny always return false.
 func (s *Set[T]) ContainsAny(vs ...T) bool {
+	if s == nil {
+		return false
+	}
 	for _, v := range vs {
 		if _, ok := s.m[v]; ok {
 			return true
@@ -146,6 +178,9 @@ func (s *Set[T]) ContainsAny(vs ...T) bool {
 //
 // 💡 NOTE: If no element given, ContainsAll always return true.
 func (s *Set[T]) ContainsAll(vs ...T) bool {
+	if s == nil && len(vs) > 0 {
+		return false
+	}
 	for _, v := range vs {
 		if _, ok := s.m[v]; !ok {
 			return false
@@ -160,6 +195,9 @@ func (s *Set[T]) ContainsAll(vs ...T) bool {
 // 💡 NOTE: The iteration order over sets is not specified and is not guaranteed
 // to be the same from one iteration to the next.
 func (s *Set[T]) Range(f func(T) bool) {
+	if s == nil {
+		return
+	}
 	for v := range s.m {
 		if !f(v) {
 			return
@@ -167,37 +205,46 @@ func (s *Set[T]) Range(f func(T) bool) {
 	}
 }
 
+func (s *Set[T]) forEach(f func(T)) {
+	if s == nil {
+		return
+	}
+	for v := range s.m {
+		f(v)
+	}
+}
+
 // Union returns the unions of sets as a new set.
 func (s *Set[T]) Union(other *Set[T]) *Set[T] {
-	res := New[T]()
-	for v := range s.m {
+	res := NewWithCap[T](s.Len() + other.Len())
+	s.forEach(func(v T) {
 		res.m[v] = struct{}{}
-	}
-	for v := range other.m {
+	})
+	other.forEach(func(v T) {
 		res.m[v] = struct{}{}
-	}
+	})
 	return res
 }
 
 // Diff returns the difference of sets as a new set.
 func (s *Set[T]) Diff(other *Set[T]) *Set[T] {
-	res := New[T]()
-	for v := range s.m {
-		if _, ok := other.m[v]; !ok {
+	res := NewWithCap[T](s.Len())
+	s.forEach(func(v T) {
+		if !other.Contains(v) {
 			res.m[v] = struct{}{}
 		}
-	}
+	})
 	return res
 }
 
 // Intersect returns the intersection of sets as a new set.
 func (s *Set[T]) Intersect(other *Set[T]) *Set[T] {
-	res := New[T]()
-	for v := range s.m {
-		if _, ok := other.m[v]; ok {
+	res := NewWithCap[T](gvalue.Min(s.Len(), other.Len()))
+	s.forEach(func(v T) {
+		if other.Contains(v) {
 			res.m[v] = struct{}{}
 		}
-	}
+	})
 	return res
 }
 
@@ -208,33 +255,37 @@ func (s *Set[T]) Update(other *Set[T]) {
 
 // UnionInplace updates set s with union itself and set other.
 func (s *Set[T]) UnionInplace(other *Set[T]) {
-	for v := range other.m {
+	s.lazyInit()
+	other.forEach(func(v T) {
 		s.m[v] = struct{}{}
-	}
+	})
 }
 
 // DiffInplace removes all elements of set other from set s.
 func (s *Set[T]) DiffInplace(other *Set[T]) {
-	for v := range s.m {
-		if _, ok := other.m[v]; ok {
+	s.forEach(func(v T) {
+		if other.Contains(v) {
 			delete(s.m, v)
 		}
-	}
+	})
 }
 
 // IntersectInplace updates set s with the intersection of itself and set other.
 func (s *Set[T]) IntersectInplace(other *Set[T]) {
-	for v := range s.m {
-		if _, ok := other.m[v]; !ok {
+	s.forEach(func(v T) {
+		if !other.Contains(v) {
 			delete(s.m, v)
 		}
-	}
+	})
 }
 
 // Equal returns whether set s and other are equal.
 func (s *Set[T]) Equal(other *Set[T]) bool {
-	if len(s.m) != len(other.m) {
+	if s.Len() != other.Len() {
 		return false
+	}
+	if s.Len() == 0 {
+		return true
 	}
 	for v := range s.m {
 		_, ok := other.m[v]
@@ -247,7 +298,10 @@ func (s *Set[T]) Equal(other *Set[T]) bool {
 
 // IsSubset returns whether another set contains this set.
 func (s *Set[T]) IsSubset(other *Set[T]) bool {
-	if len(s.m) > len(other.m) {
+	if s.Len() == 0 {
+		return true
+	}
+	if s.Len() > other.Len() {
 		return false
 	}
 	for v := range s.m {
@@ -261,7 +315,10 @@ func (s *Set[T]) IsSubset(other *Set[T]) bool {
 
 // IsSuperset returns whether this set contains another set.
 func (s *Set[T]) IsSuperset(other *Set[T]) bool {
-	if len(s.m) < len(other.m) {
+	if other.Len() == 0 {
+		return true
+	}
+	if s.Len() < other.Len() {
 		return false
 	}
 	for v := range other.m {
@@ -277,7 +334,10 @@ func (s *Set[T]) IsSuperset(other *Set[T]) bool {
 //
 // Experimental: This API is experimental and may change in the future.
 func (s *Set[T]) String() string {
-	members := make([]string, 0, len(s.m))
+	if s == nil {
+		return "set[]"
+	}
+	members := make([]string, 0, s.Len())
 	for m := range s.m {
 		members = append(members, fmt.Sprintf("%v", m))
 	}
@@ -290,10 +350,10 @@ func (s *Set[T]) String() string {
 // 💡 NOTE: The order of returned slice is not specified and is not guaranteed
 // to be the same from another ToSlice call.
 func (s *Set[T]) ToSlice() []T {
-	members := make([]T, 0, len(s.m))
-	for m := range s.m {
-		members = append(members, m)
-	}
+	members := make([]T, 0, s.Len())
+	s.forEach(func(v T) {
+		members = append(members, v)
+	})
 	return members
 }
 
@@ -339,9 +399,9 @@ func (s *Set[T]) UnmarshalJSON(data []byte) error {
 //
 // 💡 NOTE: Members are copied using assignment (=).
 func (s *Set[T]) Clone() *Set[T] {
-	ns := New[T]()
-	for m := range s.m {
-		ns.m[m] = struct{}{}
-	}
+	ns := NewWithCap[T](s.Len())
+	s.forEach(func(v T) {
+		ns.m[v] = struct{}{}
+	})
 	return ns
 }

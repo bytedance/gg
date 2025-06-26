@@ -22,6 +22,137 @@ import (
 	"github.com/bytedance/gg/internal/iter"
 )
 
+func TestNilSet(t *testing.T) {
+	{ // read for set value
+		var s1, s2 Set[int]
+		assert.Equal(t, 0, s1.Len())
+		assert.False(t, s1.Remove(1))
+		s1.RemoveN(1, 2, 3)
+		assert.False(t, s1.Contains(1))
+		assert.False(t, s1.ContainsAny())
+		assert.False(t, s1.ContainsAny(1, 2, 3))
+		assert.True(t, s1.ContainsAll())
+		assert.False(t, s1.ContainsAll(1, 2, 3))
+		s1.Range(func(i int) bool {
+			return true
+		})
+		assert.Equal(t, true, s1.Equal(&s2))
+		assert.Equal(t, true, s1.IsSubset(&s2))
+		assert.Equal(t, true, s1.IsSuperset(&s2))
+		assert.Equal(t, "set[]", s1.String())
+		assert.Equal(t, []int{}, s1.ToSlice())
+		assert.Equal(t, &Set[int]{m: make(map[int]struct{})}, s1.Clone())
+	}
+	{ // read for set pointer
+		var s1, s2 *Set[int]
+		assert.Equal(t, 0, s1.Len())
+		assert.False(t, s1.Remove(1))
+		s1.RemoveN(1, 2, 3)
+		assert.False(t, s1.Contains(1))
+		assert.False(t, s1.ContainsAny())
+		assert.False(t, s1.ContainsAny(1, 2, 3))
+		assert.True(t, s1.ContainsAll())
+		assert.False(t, s1.ContainsAll(1, 2, 3))
+		s1.Range(func(i int) bool {
+			return true
+		})
+		assert.Equal(t, true, s1.Equal(s2))
+		assert.Equal(t, true, s1.IsSubset(s2))
+		assert.Equal(t, true, s1.IsSuperset(s2))
+		assert.Equal(t, "set[]", s1.String())
+		assert.Equal(t, []int{}, s1.ToSlice())
+		assert.Equal(t, &Set[int]{m: make(map[int]struct{})}, s1.Clone())
+	}
+	{ // write for set value
+		{
+			var s Set[int]
+			assert.Equal(t, true, s.Add(1))
+		}
+		{
+			var s Set[int]
+			s.AddN(1, 2, 3)
+			assert.Equal(t, true, s.ContainsAll(1, 2, 3))
+		}
+		{
+			var s1, s2 Set[int]
+			assert.Equal(t, 0, s1.Union(&s2).Len())
+		}
+		{
+			var s1, s2 Set[int]
+			assert.Equal(t, 0, s1.Diff(&s2).Len())
+		}
+		{
+			var s1, s2 Set[int]
+			assert.Equal(t, 0, s1.Intersect(&s2).Len())
+		}
+		{
+			var s1, s2 Set[int]
+			s1.Update(&s2)
+			assert.Equal(t, 0, s1.Len())
+		}
+		{
+			var s1, s2 Set[int]
+			s1.UnionInplace(&s2)
+			assert.Equal(t, 0, s1.Len())
+		}
+		{
+			var s1, s2 Set[int]
+			s1.DiffInplace(&s2)
+			assert.Equal(t, 0, s1.Len())
+		}
+		{
+			var s1, s2 Set[int]
+			s1.IntersectInplace(&s2)
+			assert.Equal(t, 0, s1.Len())
+		}
+	}
+	{ // write for set pointer
+		{
+			s := new(Set[int])
+			assert.Equal(t, true, s.Add(1))
+		}
+		{
+			s := new(Set[int])
+			s.AddN(1, 2, 3)
+			assert.Equal(t, true, s.ContainsAll(1, 2, 3))
+		}
+		{
+			var s1, s2 *Set[int]
+			assert.Equal(t, 0, s1.Union(s2).Len())
+		}
+		{
+			var s1, s2 *Set[int]
+			assert.Equal(t, 0, s1.Diff(s2).Len())
+		}
+		{
+			var s1, s2 *Set[int]
+			assert.Equal(t, 0, s1.Intersect(s2).Len())
+		}
+		{
+			s1 := new(Set[int])
+			s2 := New(1, 2, 3)
+			s1.Update(s2)
+			assert.Equal(t, 3, s1.Len())
+		}
+		{
+			s1 := new(Set[int])
+			s2 := New(1, 2, 3)
+			s1.UnionInplace(s2)
+			assert.Equal(t, 3, s1.Len())
+		}
+		{
+			var s1, s2 *Set[int]
+			s1.DiffInplace(s2)
+			assert.Equal(t, 0, s1.Len())
+		}
+		{
+			var s1, s2 *Set[int]
+			s1.IntersectInplace(s2)
+			assert.Equal(t, 0, s1.Len())
+		}
+	}
+}
+
 func TestLen(t *testing.T) {
 	s := New[int]()
 	assert.Zero(t, s.Len())
