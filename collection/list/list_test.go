@@ -29,23 +29,31 @@ func TestNew(t *testing.T) {
 }
 
 func TestListPush(t *testing.T) {
-	l := New[int]()
-	l.PushBack(3)  // 3
-	l.PushBack(4)  // 3->4
-	l.PushFront(1) // 1->3->4
-	l.PushFront(2) // 2->1->3->4
+	{
+		l := New[int]()
+		l.PushBack(3)  // 3
+		l.PushBack(4)  // 3->4
+		l.PushFront(1) // 1->3->4
+		l.PushFront(2) // 2->1->3->4
 
-	assert.Equal(t, 4, l.Len())
-	assert.Equal(t, 2, l.Front().Value)
-	assert.Equal(t, 1, l.Front().Next().Value)
-	assert.Equal(t, 3, l.Front().Next().Next().Value)
-	assert.Equal(t, 4, l.Front().Next().Next().Next().Value)
-	assert.Nil(t, l.Front().Next().Next().Next().Next())
-	assert.Equal(t, 4, l.Back().Value)
-	assert.Equal(t, 3, l.Back().Prev().Value)
-	assert.Equal(t, 1, l.Back().Prev().Prev().Value)
-	assert.Equal(t, 2, l.Back().Prev().Prev().Prev().Value)
-	assert.Nil(t, l.Back().Prev().Prev().Prev().Prev())
+		assert.Equal(t, 4, l.Len())
+		assert.Equal(t, 2, l.Front().Value)
+		assert.Equal(t, 1, l.Front().Next().Value)
+		assert.Equal(t, 3, l.Front().Next().Next().Value)
+		assert.Equal(t, 4, l.Front().Next().Next().Next().Value)
+		assert.Nil(t, l.Front().Next().Next().Next().Next())
+		assert.Equal(t, 4, l.Back().Value)
+		assert.Equal(t, 3, l.Back().Prev().Value)
+		assert.Equal(t, 1, l.Back().Prev().Prev().Value)
+		assert.Equal(t, 2, l.Back().Prev().Prev().Prev().Value)
+		assert.Nil(t, l.Back().Prev().Prev().Prev().Prev())
+	}
+	{ // nil list
+		l := new(List[int])
+		l.PushBack(2)
+		l.PushFront(1)
+		assert.Equal(t, 2, l.Len())
+	}
 }
 
 func TestListRemove(t *testing.T) {
@@ -59,74 +67,108 @@ func TestListRemove(t *testing.T) {
 }
 
 func TestListInsert(t *testing.T) {
-	l := New[int]()
-	e1 := l.PushBack(2)         // 2
-	e2 := l.InsertBefore(1, e1) // 1->2
-	l.InsertAfter(3, e1)        // 1->2->3
-	l.InsertBefore(4, e2)       // 4->1->2->3
+	{
+		l := New[int]()
+		e1 := l.PushBack(2)         // 2
+		e2 := l.InsertBefore(1, e1) // 1->2
+		l.InsertAfter(3, e1)        // 1->2->3
+		l.InsertBefore(4, e2)       // 4->1->2->3
 
-	assert.Equal(t, 4, l.Len())
-	assert.Equal(t, 4, l.Front().Value)
-	assert.Equal(t, 1, l.Front().Next().Value)
-	assert.Equal(t, 2, l.Back().Prev().Value)
-	assert.Equal(t, 3, l.Back().Value)
-}
-
-func TestListMoveToFront(t *testing.T) {
-	l := New[int]()
-	l.PushBack(1)
-	l.PushBack(2)
-	e := l.PushBack(3)
-	l.MoveToFront(e)
-
-	assert.Equal(t, 3, l.Front().Value)
-	assert.Equal(t, 2, l.Back().Value)
+		assert.Equal(t, 4, l.Len())
+		assert.Equal(t, 4, l.Front().Value)
+		assert.Equal(t, 1, l.Front().Next().Value)
+		assert.Equal(t, 2, l.Back().Prev().Value)
+		assert.Equal(t, 3, l.Back().Value)
+	}
+	{
+		l := new(List[int])
+		e := &Element[int]{
+			Value: 1,
+		}
+		l.InsertAfter(2, e)
+		l.InsertBefore(1, e)
+		assert.Equal(t, 0, l.Len())
+	}
 }
 
 func TestListMove(t *testing.T) {
-	l := New[int]()
-	e1 := l.PushBack(1) // 1
-	e2 := l.PushBack(2) // 1->2
-	e3 := l.PushBack(3) // 1->2->3
-	e4 := l.PushBack(4) // 1->2->3->4
-	e5 := l.PushBack(5) // 1->2->3->4->5
+	{
+		l := New[int]()
+		e1 := l.PushBack(1) // 1
+		e2 := l.PushBack(2) // 1->2
+		e3 := l.PushBack(3) // 1->2->3
+		e4 := l.PushBack(4) // 1->2->3->4
+		e5 := l.PushBack(5) // 1->2->3->4->5
 
-	l.MoveToBack(e1)     // 2->3->4->5->1
-	l.MoveToFront(e5)    // 5->2->3->4->1
-	l.MoveAfter(e2, e3)  // 5->3->2->4->1
-	l.MoveBefore(e4, e3) // 5->4->3->2->1
+		l.MoveToBack(e1)     // 2->3->4->5->1
+		l.MoveToFront(e5)    // 5->2->3->4->1
+		l.MoveAfter(e2, e3)  // 5->3->2->4->1
+		l.MoveBefore(e4, e3) // 5->4->3->2->1
 
-	assert.Equal(t, 5, l.Front().Value)
-	assert.Equal(t, 4, l.Front().Next().Value)
-	assert.Equal(t, 3, l.Front().Next().Next().Value)
-	assert.Equal(t, 2, l.Back().Prev().Value)
-	assert.Equal(t, 1, l.Back().Value)
+		assert.Equal(t, 5, l.Front().Value)
+		assert.Equal(t, 4, l.Front().Next().Value)
+		assert.Equal(t, 3, l.Front().Next().Next().Value)
+		assert.Equal(t, 2, l.Back().Prev().Value)
+		assert.Equal(t, 1, l.Back().Value)
+	}
+	{
+		l := new(List[int])
+		e1 := l.PushFront(1)
+		e2 := l.PushBack(2)
+		l.MoveToFront(e1)
+		l.MoveToBack(e2)
+		l.MoveBefore(e1, e1)
+		l.MoveAfter(e2, e2)
+		l.MoveBefore(e1, e2)
+		l.MoveAfter(e2, e1)
+		assert.Equal(t, 2, l.Len())
+		assert.Equal(t, 1, l.Front().Value)
+		assert.Equal(t, 2, l.Back().Value)
+	}
 }
 
 func TestListPushBackList(t *testing.T) {
-	l1 := New[int]()
-	l1.PushBack(1) // 1
-	l1.PushBack(2) // 1->2
+	{
+		l1 := New[int]()
+		l1.PushBack(1) // 1
+		l1.PushBack(2) // 1->2
 
-	l2 := New[int]()
-	l2.PushBack(3)      // 3
-	l2.PushBackList(l1) // 3->1->2
+		l2 := New[int]()
+		l2.PushBack(3)      // 3
+		l2.PushBackList(l1) // 3->1->2
 
-	assert.Equal(t, 3, l2.Len())
-	assert.Equal(t, 3, l2.Front().Value)
-	assert.Equal(t, 2, l2.Back().Value)
+		assert.Equal(t, 3, l2.Len())
+		assert.Equal(t, 3, l2.Front().Value)
+		assert.Equal(t, 2, l2.Back().Value)
+	}
+	{
+		l1 := new(List[int])
+		l2 := new(List[int])
+		l1.PushBackList(l2)
+		assert.Equal(t, 0, l1.Len())
+	}
 }
 
 func TestListPushFrontList(t *testing.T) {
-	l1 := New[int]()
-	l1.PushBack(1) // 1
-	l1.PushBack(2) // 1->2
+	{
+		l1 := New[int]()
+		l1.PushBack(1) // 1
+		l1.PushBack(2) // 1->2
 
-	l2 := New[int]()
-	l2.PushBack(3) // 3
-	l2.PushFrontList(l1)
+		l2 := New[int]()
+		l2.PushBack(3) // 3
+		l2.PushFrontList(l1)
 
-	assert.Equal(t, 3, l2.Len())
-	assert.Equal(t, 1, l2.Front().Value)
-	assert.Equal(t, 3, l2.Back().Value)
+		assert.Equal(t, 3, l2.Len())
+		assert.Equal(t, 1, l2.Front().Value)
+		assert.Equal(t, 3, l2.Back().Value)
+	}
+	{
+		{
+			l1 := new(List[int])
+			l2 := new(List[int])
+			l1.PushFrontList(l2)
+			assert.Equal(t, 0, l1.Len())
+		}
+	}
 }
