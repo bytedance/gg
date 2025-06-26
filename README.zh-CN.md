@@ -46,6 +46,7 @@ go get github.com/bytedance/gg
 - [泛型数据结构](#-泛型数据结构)
   - [tuple](#tuple)：元组的实现，提供了 2～10 元组的定义
   - [set](#set)：集合的实现，基于 `map[T]struct{}`
+  - [list](#list)：双向链表的实现
   - [skipset](#skipset)：基于 skiplist 实现的高性能并发集合，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~15 倍
   - [skipmap](#skipmap)：基于 skiplist 实现的高性能并发散列表，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~10 倍
 
@@ -756,6 +757,44 @@ s.ContainsAll()
 
 len(s.ToSlice())
 // 2
+```
+
+### list
+
+双向链表的实现
+
+引用
+
+```go
+import (
+    "github.com/bytedance/gg/collection/list"
+)
+```
+
+示例：
+
+```go
+l := New[int]()
+e1 := l.PushFront(1)        // 1
+e2 := l.PushBack(2)         // 1->2
+e3 := l.InsertBefore(3, e2) // 1->3->2
+e4 := l.InsertAfter(4, e1)  // 1->4->3->2
+
+l.MoveToFront(e4)    // 4->1->3->2
+l.MoveToBack(e1)     // 4->3->2->1
+l.MoveAfter(e3, e2)  // 4->2->3->1
+l.MoveBefore(e4, e1) // 2->3->4->1
+
+l.Len()
+// 4
+l.Front().Value
+// 2
+l.Back().Value
+// 1
+
+for e := l.Front(); e != nil; e = e.Next() {
+    fmt.Println(e.Value) // 2 3 4 1
+}
 ```
 
 ### skipset

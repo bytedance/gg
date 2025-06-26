@@ -20,16 +20,30 @@ import (
 
 func Example() {
 	l := New[int]()
-	l.PushBack(1)
-	l.PushBack(2)
-	l.PushBack(3)
+	e1 := l.PushFront(1)        // 1
+	e2 := l.PushBack(2)         // 1->2
+	e3 := l.InsertBefore(3, e2) // 1->3->2
+	e4 := l.InsertAfter(4, e1)  // 1->4->3->2
+
+	l.MoveToFront(e4)    // 4->1->3->2
+	l.MoveToBack(e1)     // 4->3->2->1
+	l.MoveAfter(e3, e2)  // 4->2->3->1
+	l.MoveBefore(e4, e1) // 2->3->4->1
+
+	fmt.Println(l.Len())         // 4
+	fmt.Println(l.Front().Value) // 2
+	fmt.Println(l.Back().Value)  // 1
 
 	for e := l.Front(); e != nil; e = e.Next() {
 		fmt.Println(e.Value)
 	}
 
 	// Output:
+	// 4
+	// 2
 	// 1
 	// 2
 	// 3
+	// 4
+	// 1
 }
