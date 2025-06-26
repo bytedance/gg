@@ -46,6 +46,7 @@ go get github.com/bytedance/gg
 - [Generic Data Structures](#-generic-data-structures)
   - [tuple](#tuple)：Implementation of tuple provides definition of generic n-ary tuples
   - [set](#set)：Implementation of set based on `map[T]struct{}`
+  - [list](#list)：Implementation of doubly linked list
   - [skipset](#skipset)：High-performance, scalable, concurrent-safe set based on skip-list, up to 15x faster than the built-in `sync.Map` below Go 1.24
   - [skipmap](#skipmap)：High-performance, scalable, concurrent-safe map based on skip-list, up to 10x faster than the built-in `sync.Map` below Go 1.24
 
@@ -756,6 +757,44 @@ s.ContainsAll()
 
 len(s.ToSlice())
 // 2
+```
+
+### list
+
+Implementation of doubly linked list
+
+Usage
+
+```go
+import (
+    "github.com/bytedance/gg/collection/list"
+)
+```
+
+Example：
+
+```go
+l := New[int]()
+e1 := l.PushFront(1)        // 1
+e2 := l.PushBack(2)         // 1->2
+e3 := l.InsertBefore(3, e2) // 1->3->2
+e4 := l.InsertAfter(4, e1)  // 1->4->3->2
+
+l.MoveToFront(e4)    // 4->1->3->2
+l.MoveToBack(e1)     // 4->3->2->1
+l.MoveAfter(e3, e2)  // 4->2->3->1
+l.MoveBefore(e4, e1) // 2->3->4->1
+
+l.Len()
+// 4
+l.Front().Value
+// 2
+l.Back().Value
+// 1
+
+for e := l.Front(); e != nil; e = e.Next() {
+    fmt.Println(e.Value) // 2 3 4 1
+}
 ```
 
 ### skipset
