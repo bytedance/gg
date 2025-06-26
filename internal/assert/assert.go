@@ -328,10 +328,12 @@ func isNil(i any) bool {
 	}
 
 	value := reflect.ValueOf(i)
-	if value.Kind() == reflect.Ptr && value.IsNil() {
-		return true
+	switch value.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Pointer, reflect.UnsafePointer, reflect.Interface, reflect.Slice:
+		return value.IsNil()
+	default:
+		return false
 	}
-	return false
 }
 
 func Nil(t *testing.T, i any) bool {
