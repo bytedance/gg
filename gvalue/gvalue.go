@@ -31,7 +31,7 @@
 package gvalue
 
 import (
-	"unsafe"
+	"reflect"
 
 	"github.com/bytedance/gg/internal/constraints"
 )
@@ -139,11 +139,6 @@ func Clamp[T constraints.Ordered](value, min, max T) T {
 	return value
 }
 
-type xface struct {
-	x    uintptr
-	data unsafe.Pointer
-}
-
 // IsNil returns whether the given value v is nil.
 //
 // 💡 NOTE: Typed nil interface (such as fmt.Stringer((*net.IP)(nil))) is nil,
@@ -155,10 +150,20 @@ type xface struct {
 //	IsNil(1)                             ⏩ false
 //	IsNil((*int)(nil))                   ⏩ true
 //	IsNil(fmt.Stringer((*net.IP)(nil)))  ⏩ true
-//
-// ⚠️ WARNING: This function is implemented using [unsafe].
 func IsNil(v any) bool {
-	return (*xface)(unsafe.Pointer(&v)).data == nil
+	if v == nil {
+		return true
+	}
+
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Map,
+		reflect.Pointer, reflect.UnsafePointer,
+		reflect.Interface, reflect.Slice:
+		return rv.IsNil()
+	default:
+		return false
+	}
 }
 
 // IsNotNil is negation of [IsNil].
