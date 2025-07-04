@@ -279,6 +279,8 @@ Example2：CURD Operation
 ```go
 gslice.Contains([]int{1, 2, 3, 4, 5}, 2)
 // true
+gslice.ContainsBy([]int{1, 2, 3, 4, 5}, func(v int) bool { return v == 2 })
+// true
 gslice.ContainsAny([]int{1, 2, 3, 4, 5}, 2, 6)
 // true
 gslice.ContainsAll([]int{1, 2, 3, 4, 5}, 2, 6)

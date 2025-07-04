@@ -182,6 +182,13 @@ func TestContains(t *testing.T) {
 	assert.False(t, Contains([]int{}, 5))
 }
 
+func TestContainsBy(t *testing.T) {
+	assert.True(t, ContainsBy([]int{1, 2, 3}, func(x int) bool { return x > 2 }))
+	assert.False(t, ContainsBy([]int{1, 2, 3}, func(x int) bool { return x > 3 }))
+	assert.False(t, ContainsBy([]int{1, 2, 3}, gvalue.IsZero[int]))
+	assert.True(t, ContainsBy([]int{1, 2, 3}, gvalue.IsNotZero[int]))
+}
+
 func TestContainsAny(t *testing.T) {
 	assert.True(t, ContainsAny([]int{0, 1, 2, 3, 4}, 0))
 	assert.False(t, Contains([]int{0, 1, 2, 3, 4}, 5))
