@@ -19,6 +19,7 @@ import (
 	"math"
 	"net"
 	"testing"
+	"unsafe"
 
 	"github.com/bytedance/gg/internal/assert"
 )
@@ -104,36 +105,55 @@ func TestClamp(t *testing.T) {
 }
 
 func TestIsNil(t *testing.T) {
-	assert.False(t, IsNil(1))
-	ii := 1
-	assert.False(t, IsNil(&ii))
-	assert.False(t, &ii == nil)
-	assert.True(t, IsNil(nil))
-	// assert.True(t, nil == nil)
+	{
+		assert.False(t, IsNil(1))
+		ii := 1
+		assert.False(t, IsNil(&ii))
+		assert.False(t, &ii == nil)
+		assert.True(t, IsNil(nil))
+	}
 
 	// Nil
-	var i *int
-	assert.True(t, IsNil(i))
-	assert.True(t, i == nil)
-	assert.True(t, IsNil(Zero[*int]()))
-	assert.True(t, IsNil((*int)(nil)))
-	assert.True(t, (*int)(nil) == nil)
+	{
+		var i *int
+		assert.True(t, IsNil(i))
+		assert.True(t, i == nil)
+		assert.True(t, IsNil(Zero[*int]()))
+		assert.True(t, IsNil((*int)(nil)))
+		assert.True(t, (*int)(nil) == nil)
+	}
 
 	// Interface
-	var ip *net.IP
-	assert.True(t, IsNil(fmt.Stringer(ip)))
-	assert.True(t, ip == nil)
-	assert.True(t, IsNil(fmt.Stringer((*net.IP)(nil))))
-	assert.False(t, fmt.Stringer((*net.IP)(nil)) == nil)
-	var s fmt.Stringer
-	assert.True(t, IsNil(s))
-	assert.True(t, s == nil)
-	s = ip
-	assert.True(t, IsNil(s))
-	assert.False(t, s == nil)
-	s = &net.IP{}
-	assert.False(t, IsNil(s))
-	assert.False(t, s == nil)
+	{
+		var ip *net.IP
+		assert.True(t, IsNil(fmt.Stringer(ip)))
+		assert.True(t, ip == nil)
+		assert.True(t, IsNil(fmt.Stringer((*net.IP)(nil))))
+		assert.False(t, fmt.Stringer((*net.IP)(nil)) == nil)
+		var s fmt.Stringer
+		assert.True(t, IsNil(s))
+		assert.True(t, s == nil)
+		s = ip
+		assert.True(t, IsNil(s))
+		assert.False(t, s == nil)
+		s = &net.IP{}
+		assert.False(t, IsNil(s))
+		assert.False(t, s == nil)
+	}
+
+	// Slice, Map, ...
+	{
+		var s []int
+		assert.True(t, IsNil(s))
+		var m map[int]int
+		assert.True(t, IsNil(m))
+		var f func()
+		assert.True(t, IsNil(f))
+		var p unsafe.Pointer
+		assert.True(t, IsNil(p))
+		var c chan int
+		assert.True(t, IsNil(c))
+	}
 }
 
 func TestIsNotNil(t *testing.T) {
