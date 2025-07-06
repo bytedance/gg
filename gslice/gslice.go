@@ -887,7 +887,7 @@ func Diff[S ~[]T, T comparable](s S, againsts ...S) S {
 	if len(againsts) == 0 {
 		return Uniq(s)
 	}
-	members := set.New(s...)
+	members := set.New[T](s...)
 	for _, s := range againsts {
 		for _, v := range s {
 			members.Remove(v)
@@ -930,12 +930,12 @@ func Intersect[S ~[]T, T comparable](ss ...S) S {
 	if len(ss[0]) == 0 {
 		return S{}
 	}
-	members := set.New(ss[0]...)
+	members := set.New[T](ss[0]...)
 	for _, s := range ss[1:] {
 		if len(s) == 0 {
 			return S{}
 		}
-		members.IntersectInplace(set.New(s...))
+		members.IntersectInplace(set.New[T](s...))
 	}
 	if members.Len() == 0 {
 		return S{}
