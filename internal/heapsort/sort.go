@@ -48,3 +48,32 @@ func Sort[T constraints.Ordered](v []T) {
 		siftDown(v[:i], 0)
 	}
 }
+
+func PartialSort[T constraints.Ordered](v []T, k int) {
+	n := len(v)
+
+	if k <= 0 {
+		return
+	}
+
+	if k >= n {
+		Sort(v)
+		return
+	}
+
+	// Build a max-heap from the first k elements
+	for j := (k - 1) / 2; j >= 0; j-- {
+		siftDown(v[:k], j)
+	}
+
+	// Iterate through the rest of the slice
+	for j := k; j < n; j++ {
+		if v[j] < v[0] {
+			v[0], v[j] = v[j], v[0]
+			siftDown(v[:k], 0)
+		}
+	}
+
+	// Sort the heap to get the final k smallest elements in order
+	Sort(v[:k])
+}
