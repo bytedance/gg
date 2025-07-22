@@ -54,7 +54,7 @@
 //
 // Convert to Map:
 //
-//   - [ToMap], [ToMapValues]
+//   - [ToMap], [ToMapValues], [ToSet]
 //   - [GroupBy]
 //
 // Set operations:
@@ -1114,6 +1114,24 @@ func ToMap[T, V any, K comparable](s []T, f func(T) (K, V)) map[K]V {
 // 💡 AKA: Kotlin's associateBy
 func ToMapValues[T any, K comparable](s []T, f func(T) K) map[K]T {
 	return iter.ToMapValues(f, iter.StealSlice(s))
+}
+
+// ToSet collects elements of a slice into a set-like structure represented by map[T]bool.
+// Each unique element from the input slice becomes a key in the map with the value `true`.
+// Duplicate elements are automatically de-duplicated due to map key uniqueness.
+//
+// 🚀 EXAMPLE:
+//
+//	s := []int{1, 2, 2, 3}
+//	ToSet(s) ⏩ map[int]bool{1: true, 2: true, 3: true}
+//
+// 🧠 NOTE:
+//
+//	The element type T must be comparable, as required by Go map keys.
+//
+// 💡 AKA: setOf(...) in Kotlin, .toSet() in Python
+func ToSet[T comparable](s []T) map[T]bool {
+	return ToMap(s, func(t T) (T, bool) { return t, true })
 }
 
 // PtrOf returns pointers that point to equivalent elements of slice s.

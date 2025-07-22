@@ -690,6 +690,14 @@ func TestToMap(t *testing.T) {
 		ToMap([]Foo{{1, "one"}, {2, "two"}, {3, "three"}}, mapper))
 }
 
+func TestToSet(t *testing.T) {
+	assert.Equal(t, map[int]bool{}, ToSet([]int{}))
+	assert.Equal(t, map[int]bool{1: true, 2: true, 3: true}, ToSet([]int{1, 2, 2, 3}))
+	assert.Equal(t,
+		map[string]bool{"a": true, "b": true},
+		ToSet([]string{"a", "b", "a", "a", "b"}))
+}
+
 func TestDivide(t *testing.T) {
 	{
 		s := []int{0, 1, 2, 3, 4}
