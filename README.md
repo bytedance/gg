@@ -696,7 +696,7 @@ Implementation of tuple provides definition of generic n-ary tuples
 Usage
 
 ```go
-Timport (
+import(
     "github.com/bytedance/gg/collection/tuple"
 )
 ```
