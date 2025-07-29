@@ -157,6 +157,7 @@ gcond.Switch[string](3).
 Processing value `T`
 
 Usage：
+
 ```go
 import (
     "github.com/bytedance/gg/gvalue"
@@ -338,7 +339,7 @@ Example5：Convert to map
 ```go
 ToMap([]int{1, 2, 3, 4, 5}, func(i int) (string, int) { return strconv.Itoa(i), i })
 // {"1":1, "2":2, "3":3, "4":4, "5":5}
-ToSet([]int{1, 2, 3, 3, 2})
+ToBoolMap([]int{1, 2, 3, 3, 2})
 // {1: true, 2: true, 3: true}
 ToMapValues([]int{1, 2, 3, 4, 5}, strconv.Itoa)
 // {"1":1, "2":2, "3":3, "4":4, "5":5}
@@ -387,6 +388,7 @@ Reverse(s4)
 Processing map `map[K]V`
 
 Usage：
+
 ```go
 import (
     "github.com/bytedance/gg/gmap"
@@ -662,7 +664,6 @@ pool.Put(a)
 
 Example3：`gsync.OnceXXX` wraps `sync.Once`
 
-
 ```go
 onceFunc := gsync.OnceFunc(func() { fmt.Println("OnceFunc") })
 onceFunc()
@@ -695,7 +696,7 @@ Implementation of tuple provides definition of generic n-ary tuples
 Usage
 
 ```go
-import (
+Timport (
     "github.com/bytedance/gg/collection/tuple"
 )
 ```

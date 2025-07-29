@@ -338,7 +338,7 @@ gslice.Sum([]int{1, 2, 3, 4, 5})
 ```go
 ToMap([]int{1, 2, 3, 4, 5}, func(i int) (string, int) { return strconv.Itoa(i), i })
 // {"1":1, "2":2, "3":3, "4":4, "5":5}
-ToSet([]int{1, 2, 3, 3, 2})
+ToBoolMap([]int{1, 2, 3, 3, 2})
 // {1: true, 2: true, 3: true}
 ToMapValues([]int{1, 2, 3, 4, 5}, strconv.Itoa)
 // {"1":1, "2":2, "3":3, "4":4, "5":5}
