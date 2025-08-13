@@ -933,6 +933,15 @@ func PartialSort[T constraints.Ordered](k int, iter Iter[T]) Iter[T] {
 	return StealSlice(s)
 }
 
+// PartialSortBy reorders the slice so that the first k elements are the top-k
+// according to the comparison function `less`, and sorted in that order.
+// return a new iterator.
+func PartialSortBy[T constraints.Ordered](k int, less func(T, T) bool, iter Iter[T]) Iter[T] {
+	s := ToSlice(iter)
+	heapsort.PartialSortBy(s, k, less)
+	return StealSlice(s)
+}
+
 // Contains returns whether the element occur in iterator.
 func Contains[T comparable](v T, i Iter[T]) bool {
 	for _, vv := range i.Next(ALL) {

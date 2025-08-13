@@ -18,62 +18,83 @@ import (
 	"github.com/bytedance/gg/internal/constraints"
 )
 
-// siftDown implements the heap property on v[lo:hi].
-func siftDown[T constraints.Ordered](v []T, node int) {
+func siftDown[T constraints.Ordered](v []T, lo, hi, first int, less func(i, j int) bool) {
+	root := lo
 	for {
-		child := 2*node + 1
-		if child >= len(v) {
+		child := 2*root + 1
+		if child >= hi {
 			break
 		}
-		if child+1 < len(v) && v[child] < v[child+1] {
+		if child+1 < hi && less(first+child, first+child+1) {
 			child++
 		}
-		if v[node] >= v[child] {
+		if !less(first+root, first+child) {
 			return
 		}
-		v[node], v[child] = v[child], v[node]
-		node = child
+		v[first+root], v[first+child] = v[first+child], v[first+root]
+		root = child
 	}
+}
+
+func buildHeap[T constraints.Ordered](v []T, a, b int, less func(i, j int) bool) {
+	first := a
+	hi := b - a
+	for i := (hi - 1) / 2; i >= 0; i-- {
+		siftDown(v, i, hi, first, less)
+	}
+}
+
+func heapSort[T constraints.Ordered](v []T, a, b int, less func(i, j int) bool) {
+	first := a
+	lo := 0
+	hi := b - a
+	for i := (hi - 1) / 2; i >= 0; i-- {
+		siftDown(v, i, hi, first, less)
+	}
+	for i := hi - 1; i >= 0; i-- {
+		v[first], v[first+i] = v[first+i], v[first]
+		siftDown(v, lo, i, first, less)
+	}
+}
+
+func partialSort[T constraints.Ordered](v []T, k int, less func(i, j int) bool) {
+	n := len(v)
+	if k <= 0 || n <= 1 {
+		return
+	}
+	if k >= n {
+		heapSort(v, 0, n, less)
+		return
+	}
+	buildHeap(v, 0, k, less)
+	for i := k; i < n; i++ {
+		if less(i, 0) {
+			v[0], v[i] = v[i], v[0]
+			siftDown(v, 0, k, 0, less)
+		}
+	}
+	heapSort(v, 0, k, less)
 }
 
 func Sort[T constraints.Ordered](v []T) {
-	// Build heap with the greatest element at the top.
-	for i := (len(v) - 1) / 2; i >= 0; i-- {
-		siftDown(v, i)
+	if len(v) <= 1 {
+		return
 	}
-
-	// Pop elements into end of v.
-	for i := len(v) - 1; i >= 1; i-- {
-		v[0], v[i] = v[i], v[0]
-		siftDown(v[:i], 0)
-	}
+	heapSort(v, 0, len(v), func(i, j int) bool { return v[i] < v[j] })
 }
 
 func PartialSort[T constraints.Ordered](v []T, k int) {
+	PartialSortBy(v, k, func(a, b T) bool { return a < b })
+}
+
+func PartialSortBy[T constraints.Ordered](v []T, k int, less func(a, b T) bool) {
 	n := len(v)
-
-	if k <= 0 {
+	if k <= 0 || n <= 1 {
 		return
 	}
-
 	if k >= n {
-		Sort(v)
+		heapSort(v, 0, n, func(i, j int) bool { return less(v[i], v[j]) })
 		return
 	}
-
-	// Build a max-heap from the first k elements
-	for j := (k - 1) / 2; j >= 0; j-- {
-		siftDown(v[:k], j)
-	}
-
-	// Iterate through the rest of the slice
-	for j := k; j < n; j++ {
-		if v[j] < v[0] {
-			v[0], v[j] = v[j], v[0]
-			siftDown(v[:k], 0)
-		}
-	}
-
-	// Sort the heap to get the final k smallest elements in order
-	Sort(v[:k])
+	partialSort(v, k, func(i, j int) bool { return less(v[i], v[j]) })
 }

@@ -1011,9 +1011,15 @@ func StableSortBy[T any](s []T, less func(T, T) bool) {
 	_ = iter.ToSlice(iter.StableSortBy(less, iter.StealSlice(s)))
 }
 
-// PartialSort
+// PartialSort sorts the first k smallest elements in order, with the remaining elements left unordered
 func PartialSort[T constraints.Ordered](s []T, k int) {
 	_ = iter.ToSlice(iter.PartialSort(k, iter.StealSlice(s)))
+}
+
+// PartialSortBy reorders the slice so that the first k elements are the top-k
+// according to the comparison function `less`, and sorted in that order.
+func PartialSortBy[T constraints.Ordered](s []T, k int, less func(T, T) bool) {
+	_ = iter.ToSlice(iter.PartialSortBy(k, less, iter.StealSlice(s)))
 }
 
 // TypeAssert converts a slice from type From to type To by type assertion.
