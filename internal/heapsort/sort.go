@@ -48,9 +48,9 @@ func heapSort[T constraints.Ordered](v []T, a, b int, less func(i, j int) bool) 
 	first := a
 	lo := 0
 	hi := b - a
-	for i := (hi - 1) / 2; i >= 0; i-- {
-		siftDown(v, i, hi, first, less)
-	}
+
+	heapify(v, a, b, less)
+
 	for i := hi - 1; i >= 0; i-- {
 		v[first], v[first+i] = v[first+i], v[first]
 		siftDown(v, lo, i, first, less)
