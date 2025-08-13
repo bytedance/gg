@@ -36,7 +36,7 @@ func siftDown[T constraints.Ordered](v []T, lo, hi, first int, less func(i, j in
 	}
 }
 
-func buildHeap[T constraints.Ordered](v []T, a, b int, less func(i, j int) bool) {
+func heapify[T constraints.Ordered](v []T, a, b int, less func(i, j int) bool) {
 	first := a
 	hi := b - a
 	for i := (hi - 1) / 2; i >= 0; i-- {
@@ -66,7 +66,7 @@ func partialSort[T constraints.Ordered](v []T, k int, less func(i, j int) bool) 
 		heapSort(v, 0, n, less)
 		return
 	}
-	buildHeap(v, 0, k, less)
+	heapify(v, 0, k, less)
 	for i := k; i < n; i++ {
 		if less(i, 0) {
 			v[0], v[i] = v[i], v[0]
