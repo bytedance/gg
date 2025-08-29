@@ -623,6 +623,81 @@ func TestStableSortBy(t *testing.T) {
 	}
 }
 
+func TestPartialSort(t *testing.T) {
+	// Basic case - first k elements sorted and smallest
+	{
+		s := []int{5, 2, 9, 1, 5, 6}
+		PartialSort(s, 3)
+		assert.Equal(t, []int{1, 2, 5, 9, 5, 6}, s) // First 3 are smallest + sorted
+	}
+
+	// k == length (full sort)
+	{
+		s := []int{3, 1, 4}
+		PartialSort(s, 3)
+		assert.Equal(t, []int{1, 3, 4}, s) // Fully sorted
+	}
+
+	// k > length (behaves like full sort)
+	{
+		s := []int{7, 3}
+		PartialSort(s, 5)
+		assert.Equal(t, []int{3, 7}, s) // Treats as full sort
+	}
+
+	// Empty slice
+	{
+		s := []int{}
+		PartialSort(s, 2)
+		assert.Equal(t, []int{}, s) // No panic
+	}
+
+	// k == 0 (no-op)
+	{
+		s := []int{5, 2, 8}
+		PartialSort(s, 0)
+		assert.Equal(t, []int{5, 2, 8}, s) // Unmodified
+	}
+
+}
+
+func TestPartialSortByDescending(t *testing.T) {
+	// Basic case - first k elements should be k largest, sorted descending
+	{
+		s := []int{5, 2, 9, 1, 5, 6}
+		PartialSortBy(s, 3, gvalue.Greater[int])
+		assert.Equal(t, []int{9, 6, 5, 1, 2, 5}, s) // First 3 are largest, sorted descending
+	}
+
+	// k == length (full descending sort)
+	{
+		s := []int{3, 1, 4}
+		PartialSortBy(s, 3, gvalue.Greater[int])
+		assert.Equal(t, []int{4, 3, 1}, s)
+	}
+
+	// k > length (full descending sort)
+	{
+		s := []int{3, 7}
+		PartialSortBy(s, 5, gvalue.Greater[int])
+		assert.Equal(t, []int{7, 3}, s)
+	}
+
+	// Empty slice
+	{
+		s := []int{}
+		PartialSortBy(s, 2, gvalue.Greater[int])
+		assert.Equal(t, []int{}, s)
+	}
+
+	// k == 0 (no-op)
+	{
+		s := []int{5, 2, 8}
+		PartialSortBy(s, 0, gvalue.Greater[int])
+		assert.Equal(t, []int{5, 2, 8}, s)
+	}
+}
+
 func TestTypeAssert(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3, 4}, TypeAssert[int, any]([]any{1, 2, 3, 4}))
 	assert.Equal(t, []any{1, 2, 3, 4}, TypeAssert[any, int]([]int{1, 2, 3, 4}))
