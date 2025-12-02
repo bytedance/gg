@@ -33,6 +33,7 @@ package gvalue
 import (
 	"reflect"
 
+	"github.com/bytedance/gg/goption"
 	"github.com/bytedance/gg/internal/constraints"
 )
 
@@ -65,6 +66,26 @@ func Or[T comparable](vals ...T) (v T) {
 		}
 	}
 	return
+}
+
+// OrO returns the first non-zero value of inputs.
+// If all values are zero, return [goption.Nil].
+//
+// 🚀 EXAMPLE:
+//
+//	OrO(false, true)  ⏩ goption.OK(true)
+//	OrO(0, 1, 2)      ⏩ goption.OK(1)
+//	OrO("", "1", "2") ⏩ goption.OK("1")
+//	OrO(0, 0, 0)      ⏩ goption.Nil[int]()
+//	OrO("", "", "")   ⏩ goption.Nil[string]()
+func OrO[T comparable](vals ...T) goption.O[T] {
+	var zero T
+	for _, val := range vals {
+		if val != zero {
+			return goption.OK(val)
+		}
+	}
+	return goption.Nil[T]()
 }
 
 // Max returns the maximum value of inputs.
