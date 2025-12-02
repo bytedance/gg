@@ -115,10 +115,29 @@ import (
 //
 //   - Use [FilterMap] if you also want to ignore some element during mapping.
 //   - Use [TryMap] if function f may fail (return (T, error))
+//   - Use [MapIndexed] if you also need the index of element.
 func Map[F, T any](s []F, f func(F) T) []T {
 	ret := make([]T, 0, len(s))
 	for _, v := range s {
 		ret = append(ret, f(v))
+	}
+	return ret
+}
+
+// MapIndexed is a variant of [Map] that the mapping function f
+// also receives the index of the element.
+//
+// 🚀 EXAMPLE:
+//
+//	MapIndexed([]string{"a", "b", "c"}, func(v string, i int) string {
+//	    return fmt.Sprintf("%d:%s", i, v)
+//	}) ⏩ []string{"0:a", "1:b", "2:c"}
+//
+// 💡 HINT: Use [Map] if you do not need the index.
+func MapIndexed[F, T any](s []F, f func(F, int) T) []T {
+	ret := make([]T, 0, len(s))
+	for i, v := range s {
+		ret = append(ret, f(v, i))
 	}
 	return ret
 }

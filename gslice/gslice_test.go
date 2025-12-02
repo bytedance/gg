@@ -35,6 +35,15 @@ func TestMap(t *testing.T) {
 		Map([]int{1, 2, 3}, strconv.Itoa))
 }
 
+func TestMapIndexed(t *testing.T) {
+	assert.Equal(t,
+		[]string{"0:a", "1:b", "2:c"},
+		MapIndexed([]string{"a", "b", "c"}, func(v string, i int) string {
+			return fmt.Sprintf("%d:%s", i, v)
+		}),
+	)
+}
+
 func TestTryMap(t *testing.T) {
 	assert.Equal(t, TryMap(Of("1", "2", "3"), strconv.Atoi), gresult.OK(Of(1, 2, 3)))
 	assert.Equal(t, TryMap(nil, strconv.Atoi), gresult.OK(([]int{})))
