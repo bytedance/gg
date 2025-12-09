@@ -221,3 +221,27 @@ func Map[F, T any](p *F, f func(F) T) *T {
 	}
 	return Of(f(*p))
 }
+
+// HasZeroValue returns whether the pointer p is not nil and the value it points to is zero.
+//
+// 🚀 EXAMPLE:
+//
+//	var i int = 0
+//	HasZeroValue(&i)   ⏩ true
+//	HasZeroValue(nil)  ⏩ false
+func HasZeroValue[T comparable](p *T) bool {
+	return p != nil && gvalue.IsZero(*p)
+}
+
+// HasNonZeroValue returns whether the pointer p is not nil and the value it points to is not zero.
+//
+// 🚀 EXAMPLE:
+//
+//	var i int = 1
+//	HasNonZeroValue(&i)   ⏩ true
+//	var j int = 0
+//	HasNonZeroValue(&j)   ⏩ false
+//	HasNonZeroValue(nil)  ⏩ false
+func HasNonZeroValue[T comparable](p *T) bool {
+	return p != nil && gvalue.IsNotZero(*p)
+}

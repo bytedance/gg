@@ -166,3 +166,59 @@ func BenchmarkIndirect(b *testing.B) {
 		_ = v
 	})
 }
+
+func TestHasZeroValue(t *testing.T) {
+	// Test zero value
+	var zeroInt int = 0
+	var zeroString string = ""
+	var zeroBool bool = false
+
+	assert.True(t, HasZeroValue(&zeroInt))
+	assert.True(t, HasZeroValue(&zeroString))
+	assert.True(t, HasZeroValue(&zeroBool))
+	assert.True(t, HasZeroValue(Of(0)))
+	assert.True(t, HasZeroValue(Of("")))
+
+	// Test non-zero value
+	var nonZeroInt int = 1
+	var nonZeroString string = "hello"
+	var nonZeroBool bool = true
+
+	assert.False(t, HasZeroValue(&nonZeroInt))
+	assert.False(t, HasZeroValue(&nonZeroString))
+	assert.False(t, HasZeroValue(&nonZeroBool))
+	assert.False(t, HasZeroValue(Of(1)))
+	assert.False(t, HasZeroValue(Of("hello")))
+
+	// Test nil pointer
+	assert.False(t, HasZeroValue[int](nil))
+	assert.False(t, HasZeroValue[string](nil))
+}
+
+func TestHasNonZeroValue(t *testing.T) {
+	// Test non-zero value
+	var nonZeroInt int = 1
+	var nonZeroString string = "hello"
+	var nonZeroBool bool = true
+
+	assert.True(t, HasNonZeroValue(&nonZeroInt))
+	assert.True(t, HasNonZeroValue(&nonZeroString))
+	assert.True(t, HasNonZeroValue(&nonZeroBool))
+	assert.True(t, HasNonZeroValue(Of(1)))
+	assert.True(t, HasNonZeroValue(Of("hello")))
+
+	// Test zero value
+	var zeroInt int = 0
+	var zeroString string = ""
+	var zeroBool bool = false
+
+	assert.False(t, HasNonZeroValue(&zeroInt))
+	assert.False(t, HasNonZeroValue(&zeroString))
+	assert.False(t, HasNonZeroValue(&zeroBool))
+	assert.False(t, HasNonZeroValue(Of(0)))
+	assert.False(t, HasNonZeroValue(Of("")))
+
+	// Test nil pointer
+	assert.False(t, HasNonZeroValue[int](nil))
+	assert.False(t, HasNonZeroValue[string](nil))
+}
