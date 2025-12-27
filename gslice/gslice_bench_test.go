@@ -198,7 +198,7 @@ func BenchmarkUnion(b *testing.B) {
 	// 3. half different
 	ss5 := [][]int{
 		Range(0, 100),
-		Range(0, 100),
+		Range(50, 150),
 	}
 	b.Run("new-union-half-2-100", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
