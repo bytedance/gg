@@ -20,14 +20,14 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/bytedance/gg/gptr"
 	"github.com/bytedance/gg/internal/assert"
 )
 
 func TestOf(t *testing.T) {
 	_ = Of(1, true)
 	_ = OfPtr((*int)(nil))
-	_ = OfPtr(gptr.Of(1))
+	v := 1
+	_ = OfPtr(&v)
 }
 
 func TestOValue(t *testing.T) {
@@ -36,8 +36,8 @@ func TestOValue(t *testing.T) {
 	assert.Equal(t, 10, Of(10, true).Value())
 	assert.Equal(t, 10, Of(10, false).Value()) // 💡 NOTE: not recommend
 	assert.Equal(t, 0, Of(0, false).Value())
-
-	assert.Equal(t, 1, OfPtr(gptr.Of(1)).Value())
+	v := 1
+	assert.Equal(t, 1, OfPtr(&v).Value())
 	assert.Equal(t, 0, OfPtr((*int)(nil)).Value())
 }
 
@@ -130,15 +130,15 @@ func TestJSON(t *testing.T) {
 		assert.Equal(t, string(expect), string(actual))
 	}
 	{
-		v := gptr.Of(1)
-		expect, _ := json.Marshal(v)
-		actual, _ := json.Marshal(OfPtr(v))
+		v := 1
+		expect, _ := json.Marshal(&v)
+		actual, _ := json.Marshal(OfPtr(&v))
 		assert.Equal(t, string(expect), string(actual))
 	}
 	{
-		v := gptr.Of("test")
-		expect, _ := json.Marshal(v)
-		actual, _ := json.Marshal(OfPtr(v))
+		v := "test"
+		expect, _ := json.Marshal(&v)
+		actual, _ := json.Marshal(OfPtr(&v))
 		assert.Equal(t, string(expect), string(actual))
 	}
 
@@ -282,7 +282,8 @@ func TestOThen(t *testing.T) {
 }
 
 func TestOPtr(t *testing.T) {
-	assert.Equal(t, gptr.Of(10), OK(10).Ptr())
+	v := 10
+	assert.Equal(t, &v, OK(v).Ptr())
 	assert.Equal(t, nil, Nil[int]().Ptr())
 
 	// Test modify.
