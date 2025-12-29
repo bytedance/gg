@@ -875,8 +875,9 @@ func Union[S ~[]T, T comparable](ss ...S) S {
 	if len(ss) == 1 {
 		return Uniq(ss[0])
 	}
-	members := set.New[T]()
-	ret := S{} // TODO: Guess a cap.
+	size := Sum(Map(ss, func(s S) int { return len(s) }))
+	members := set.NewWithCap[T](size)
+	ret := make(S, 0, size/2)
 	for _, s := range ss {
 		for _, v := range s {
 			if members.Add(v) {
