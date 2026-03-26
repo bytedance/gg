@@ -686,3 +686,93 @@ func testSkipMapIntUnmarshalJSON[T int | uint](t *testing.T, newset func() anysk
 		}
 	}
 }
+
+// Store can race with LoadAndDelete such that Store writes to a node that is
+// concurrently marked and unlinked, silently losing the value. To detect this,
+// set key=oldValue, then race Store(key, newValue) vs LoadAndDelete(key). If
+// the delete returns oldValue it went first, so the key must still exist with
+// newValue afterward. Finding the key absent means the Store was lost.
+//
+// See: https://github.com/bytedance/gg/issues/36
+func TestStoreLoadAndDeleteRace(t *testing.T) {
+	const key = "k"
+	rounds := 100_000
+	if testing.Short() {
+		rounds = 10_000
+	}
+
+	for round := 0; round < rounds; round++ {
+		m := New[string, int]()
+		oldValue := round*2 + 1
+		newValue := round*2 + 2
+
+		m.Store(key, oldValue)
+
+		var wg sync.WaitGroup
+		var delValue int
+		var delLoaded bool
+
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			m.Store(key, newValue)
+		}()
+		go func() {
+			defer wg.Done()
+			delValue, delLoaded = m.LoadAndDelete(key)
+		}()
+
+		wg.Wait()
+
+		val, exists := m.Load(key)
+
+		if delLoaded && delValue == oldValue && !exists {
+			t.Fatalf("round %d: Store(%s, %d) lost: LoadAndDelete returned old=%d but key is absent",
+				round, key, newValue, oldValue)
+		}
+
+		if exists && val != newValue {
+			t.Fatalf("round %d: key has value %d, want %d", round, val, newValue)
+		}
+	}
+}
+
+// LoadOrStore can return a value from a node that hasn't been fully linked
+// into the skip list yet. Load checks the fullyLinked flag and rejects such
+// nodes, so it returns nil for a key that LoadOrStore just reported as present.
+// Race 8 goroutines doing LoadOrStore on the same absent key; since nothing
+// deletes the key, every goroutine's follow-up Load must succeed.
+//
+// See: https://github.com/bytedance/gg/issues/36
+func TestLoadOrStoreLoadRace(t *testing.T) {
+	const key = "k"
+	rounds := 100_000
+	if testing.Short() {
+		rounds = 10_000
+	}
+
+	for round := 0; round < rounds; round++ {
+		m := New[string, int]()
+
+		var wg sync.WaitGroup
+		var failed int32
+
+		for i := 0; i < 8; i++ {
+			wg.Add(1)
+			go func(v int) {
+				defer wg.Done()
+				m.LoadOrStore(key, v)
+				if _, ok := m.Load(key); !ok {
+					atomic.AddInt32(&failed, 1)
+				}
+			}(round*8 + i)
+		}
+
+		wg.Wait()
+
+		if n := atomic.LoadInt32(&failed); n > 0 {
+			t.Fatalf("round %d: Load returned nil %d times after LoadOrStore (no deletes running)",
+				round, n)
+		}
+	}
+}
