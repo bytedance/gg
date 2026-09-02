@@ -74,3 +74,80 @@ func TestGo127S2Filter(t *testing.T) {
 	assert.Equal(t, []int{1}, first)
 	assert.Equal(t, []string{"a"}, second)
 }
+
+func TestGo127TupleMapT5ToT9(t *testing.T) {
+	assert.Equal(t, Make5(2, 4, 6, 8, 10), Make5(1, 2, 3, 4, 5).Map(
+		func(a, b, c, d, e int) (int, int, int, int, int) {
+			return a * 2, b * 2, c * 2, d * 2, e * 2
+		}))
+
+	assert.Equal(t, Make6(2, 4, 6, 8, 10, 12), Make6(1, 2, 3, 4, 5, 6).Map(
+		func(a, b, c, d, e, f int) (int, int, int, int, int, int) {
+			return a * 2, b * 2, c * 2, d * 2, e * 2, f * 2
+		}))
+
+	assert.Equal(t, Make7(2, 4, 6, 8, 10, 12, 14), Make7(1, 2, 3, 4, 5, 6, 7).Map(
+		func(a, b, c, d, e, f, g int) (int, int, int, int, int, int, int) {
+			return a * 2, b * 2, c * 2, d * 2, e * 2, f * 2, g * 2
+		}))
+
+	assert.Equal(t, Make8(2, 4, 6, 8, 10, 12, 14, 16), Make8(1, 2, 3, 4, 5, 6, 7, 8).Map(
+		func(a, b, c, d, e, f, g, h int) (int, int, int, int, int, int, int, int) {
+			return a * 2, b * 2, c * 2, d * 2, e * 2, f * 2, g * 2, h * 2
+		}))
+
+	assert.Equal(t, Make9(2, 4, 6, 8, 10, 12, 14, 16, 18), Make9(1, 2, 3, 4, 5, 6, 7, 8, 9).Map(
+		func(a, b, c, d, e, f, g, h, i int) (int, int, int, int, int, int, int, int, int) {
+			return a * 2, b * 2, c * 2, d * 2, e * 2, f * 2, g * 2, h * 2, i * 2
+		}))
+}
+
+func intSlice() []int { return []int{1, 2} }
+
+func TestGo127SMapFilterS3ToS10(t *testing.T) {
+	s3 := Zip3(intSlice(), intSlice(), intSlice())
+	assert.Equal(t, []int{1, 2}, s3.Map(func(t T3[int, int, int]) int { return t.First }))
+	assert.Equal(t, 1, len(s3.Filter(func(t T3[int, int, int]) bool { return t.First == 1 })))
+
+	s4 := Zip4(intSlice(), intSlice(), intSlice(), intSlice())
+	assert.Equal(t, []int{1, 2}, s4.Map(func(t T4[int, int, int, int]) int { return t.First }))
+	assert.Equal(t, 1, len(s4.Filter(func(t T4[int, int, int, int]) bool { return t.First == 1 })))
+
+	s5 := Zip5(intSlice(), intSlice(), intSlice(), intSlice(), intSlice())
+	assert.Equal(t, []int{1, 2}, s5.Map(func(t T5[int, int, int, int, int]) int { return t.First }))
+	assert.Equal(t, 1, len(s5.Filter(func(t T5[int, int, int, int, int]) bool { return t.First == 1 })))
+
+	s6 := Zip6(intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice())
+	assert.Equal(t, []int{1, 2}, s6.Map(func(t T6[int, int, int, int, int, int]) int { return t.First }))
+	assert.Equal(t, 1, len(s6.Filter(func(t T6[int, int, int, int, int, int]) bool { return t.First == 1 })))
+
+	s7 := Zip7(intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice())
+	assert.Equal(t, []int{1, 2}, s7.Map(func(t T7[int, int, int, int, int, int, int]) int { return t.First }))
+	assert.Equal(t, 1, len(s7.Filter(func(t T7[int, int, int, int, int, int, int]) bool {
+		return t.First == 1
+	})))
+
+	s8 := Zip8(intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice())
+	assert.Equal(t, []int{1, 2}, s8.Map(func(t T8[int, int, int, int, int, int, int, int]) int {
+		return t.First
+	}))
+	assert.Equal(t, 1, len(s8.Filter(func(t T8[int, int, int, int, int, int, int, int]) bool {
+		return t.First == 1
+	})))
+
+	s9 := Zip9(intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice())
+	assert.Equal(t, []int{1, 2}, s9.Map(func(t T9[int, int, int, int, int, int, int, int, int]) int {
+		return t.First
+	}))
+	assert.Equal(t, 1, len(s9.Filter(func(t T9[int, int, int, int, int, int, int, int, int]) bool {
+		return t.First == 1
+	})))
+
+	s10 := Zip10(intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice(), intSlice())
+	assert.Equal(t, []int{1, 2}, s10.Map(func(t T10[int, int, int, int, int, int, int, int, int, int]) int {
+		return t.First
+	}))
+	assert.Equal(t, 1, len(s10.Filter(func(t T10[int, int, int, int, int, int, int, int, int, int]) bool {
+		return t.First == 1
+	})))
+}

@@ -55,6 +55,74 @@ func TestGo127OrderedMapDesc(t *testing.T) {
 	assert.True(t, m.Any(func(k string, v int) bool { return v == 1 }))
 }
 
+func TestGo127SkipMapDescExtras(t *testing.T) {
+	m := NewDesc[string, int]()
+	m.Store("a", 1)
+	m.Store("b", 2)
+
+	assert.True(t, m.All(func(k string, v int) bool { return v > 0 }))
+	assert.False(t, m.All(func(k string, v int) bool { return v == 1 }))
+	assert.Equal(t, 1, m.Find(func(k string, v int) bool { return v == 1 }).Value())
+	assert.Equal(t, "a", m.FindKey(func(k string, v int) bool { return v == 1 }).Value())
+
+	sum := 0
+	m.ForEach(func(k string, v int) { sum += v })
+	assert.Equal(t, 3, sum)
+}
+
+func TestGo127SkipMapNegative(t *testing.T) {
+	// Empty maps hit the "nothing found" branches.
+	empty := New[string, int]()
+	assert.False(t, empty.Any(func(k string, v int) bool { return true }))
+	assert.True(t, empty.All(func(k string, v int) bool { return false }))
+	assert.True(t, empty.Find(func(k string, v int) bool { return true }).IsNil())
+	assert.True(t, empty.FindKey(func(k string, v int) bool { return true }).IsNil())
+	empty.ForEach(func(k string, v int) { t.Fatal("should not be called") })
+
+	// A predicate that never matches.
+	m := New[string, int]()
+	m.Store("a", 1)
+	assert.False(t, m.Any(func(k string, v int) bool { return v > 9 }))
+	assert.False(t, m.All(func(k string, v int) bool { return v > 9 }))
+	assert.True(t, m.Find(func(k string, v int) bool { return v > 9 }).IsNil())
+	assert.True(t, m.FindKey(func(k string, v int) bool { return v > 9 }).IsNil())
+}
+
+func TestGo127FuncMapAny(t *testing.T) {
+	m := NewFunc[string, int](func(a, b string) bool { return a < b })
+	m.Store("a", 1)
+
+	assert.True(t, m.Any(func(k string, v int) bool { return v == 1 }))
+	assert.False(t, m.Any(func(k string, v int) bool { return v > 9 }))
+}
+
+func TestGo127SkipMapScanBranches(t *testing.T) {
+	// The Range callback has three paths: match on the first item
+	// (short-circuit), match on a later one (keep scanning), and never match.
+	fm := NewFunc[string, int](func(a, b string) bool { return a < b })
+	fm.Store("a", 1)
+	fm.Store("b", 2)
+	assert.True(t, fm.All(func(k string, v int) bool { return v > 0 }))
+	assert.False(t, fm.All(func(k string, v int) bool { return v == 1 }))
+	assert.True(t, fm.Any(func(k string, v int) bool { return v == 2 }))
+	assert.False(t, fm.Any(func(k string, v int) bool { return v > 9 }))
+	assert.Equal(t, 2, fm.Find(func(k string, v int) bool { return v == 2 }).Value())
+
+	m := New[string, int]()
+	m.Store("a", 1)
+	m.Store("b", 2)
+	assert.False(t, m.All(func(k string, v int) bool { return v == 1 }))
+	assert.True(t, m.Any(func(k string, v int) bool { return v == 2 }))
+	assert.False(t, m.Any(func(k string, v int) bool { return v > 9 }))
+
+	dm := NewDesc[string, int]()
+	dm.Store("a", 1)
+	dm.Store("b", 2)
+	assert.False(t, dm.All(func(k string, v int) bool { return v == 2 }))
+	assert.True(t, dm.Any(func(k string, v int) bool { return v == 1 }))
+	assert.False(t, dm.Any(func(k string, v int) bool { return v > 9 }))
+}
+
 func TestGo127FuncMap(t *testing.T) {
 	m := NewFunc[string, int](func(a, b string) bool { return a < b })
 	m.Store("a", 1)

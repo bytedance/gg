@@ -93,6 +93,21 @@ func TestOrd(t *testing.T) {
 	assert.Equal(t, "2", OrderedOf(2).String())
 }
 
+func TestOrdNumCast(t *testing.T) {
+	// Ord and Num are converted back to V.
+	assert.Equal(t, 2, OrderedOf(2).V().Get())
+	assert.Equal(t, 2, NumericOf(2).V().Get())
+}
+
+func TestVNilInterface(t *testing.T) {
+	// A nil interface hits the "av == nil" branches of IsZero and String.
+	var nilAny any
+	assert.True(t, Of(nilAny).IsZero())
+	assert.Equal(t, "<nil>", Of(nilAny).String())
+	assert.True(t, Of(nilAny).Equal(nilAny))
+	assert.False(t, Of(nilAny).Equal(1))
+}
+
 func TestNum(t *testing.T) {
 	assert.Equal(t, 3, NumericOf(1).Add(2))
 	assert.Equal(t, "ab", NumericOf("a").Add("b"))

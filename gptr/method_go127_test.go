@@ -68,6 +68,18 @@ func TestPEqual(t *testing.T) {
 	assert.False(t, New(1).Equal(Wrap[int](nil)))
 }
 
+func TestPEqualSameAddress(t *testing.T) {
+	i := 1
+	p := Wrap(&i)
+	// The same address short-circuits the value comparison.
+	assert.True(t, p.Equal(p))
+	assert.True(t, p.Equal(Wrap(&i)))
+
+	// One of them is nil.
+	assert.False(t, p.Equal(Wrap[int](nil)))
+	assert.False(t, Wrap[int](nil).Equal(p))
+}
+
 func TestPZeroValue(t *testing.T) {
 	assert.True(t, New(0).HasZeroValue())
 	assert.True(t, New(1).HasNonZeroValue())

@@ -82,6 +82,13 @@ func TestGo127SetForEach(t *testing.T) {
 	assert.Equal(t, 6, sum)
 }
 
+func TestGo127SetNegative(t *testing.T) {
+	// The predicate never matches, so Any/All return false.
+	assert.False(t, New(1, 2, 3).Any(func(i int) bool { return i > 9 }))
+	assert.False(t, New(1, 2, 3).All(func(i int) bool { return i == 1 }))
+	assert.True(t, New(1, 2, 3).Find(func(i int) bool { return i > 9 }).IsNil())
+}
+
 func TestGo127SetNilSafety(t *testing.T) {
 	var s *Set[int]
 	assert.Equal(t, 0, s.Map(strconv.Itoa).Len())
@@ -92,4 +99,12 @@ func TestGo127SetNilSafety(t *testing.T) {
 	assert.True(t, s.Reduce(func(a, b int) int { return a + b }).IsNil())
 	s.ForEach(func(i int) { t.Fatal("should not be called") })
 	assert.Equal(t, 0, len(s.GroupBy(strconv.Itoa)))
+
+	// FlatMap and Partition are nil-safe as well.
+	assert.Equal(t, 0, s.FlatMap(func(i int) []string { return []string{strconv.Itoa(i)} }).Len())
+	matched, unmatched := s.Partition(func(i int) bool { return true })
+	assert.Equal(t, 0, matched.Len())
+	assert.Equal(t, 0, unmatched.Len())
+	assert.True(t, s.MaxBy(func(a, b int) bool { return a < b }).IsNil())
+	assert.True(t, s.MinBy(func(a, b int) bool { return a < b }).IsNil())
 }

@@ -156,6 +156,63 @@ func TestSChaining(t *testing.T) {
 	)
 }
 
+func TestSTryFilterMap(t *testing.T) {
+	// The element is dropped when f returns an error.
+	assert.Equal(t, []string{"1", "3"}, Wrap([]int{1, 2, 3}).TryFilterMap(func(i int) (string, error) {
+		if i%2 == 0 {
+			return "", errors.New("even")
+		}
+		return strconv.Itoa(i), nil
+	}).Unwrap())
+}
+
+func TestSFindRev(t *testing.T) {
+	s := Wrap([]int{1, 2, 3, 4})
+	assert.Equal(t, 3, s.FindRev(func(i int) bool { return i < 4 }).Value())
+	assert.Equal(t, 2, s.IndexRevBy(func(i int) bool { return i < 4 }).Value())
+}
+
+func TestSCloneVariants(t *testing.T) {
+	s := Wrap([]int{1, 2, 3, 4, 5})
+	assert.Equal(t, []int{1, 2}, s.ChunkClone(2)[0].Unwrap())
+	assert.Equal(t, []int{1, 2, 3}, s.DivideClone(2)[0].Unwrap())
+	assert.Equal(t, []int{1, 2}, s.TakeClone(2).Unwrap())
+	assert.Equal(t, []int{2, 3}, s.SliceClone(1, 3).Unwrap())
+	assert.Equal(t, []int{3, 4, 5}, s.DropClone(2).Unwrap())
+	assert.Equal(t, []int{1, 2, 3}, Wrap([]int{1, 2}).Merge([]int{3}).Unwrap())
+}
+
+func TestSMinMaxBy(t *testing.T) {
+	less := func(a, b int) bool { return a < b }
+	s := Wrap([]int{3, 1, 2})
+	assert.Equal(t, 3, s.MaxBy(less).Value())
+	assert.Equal(t, 1, s.MinBy(less).Value())
+
+	min, max := s.MinMaxBy(less).Value().Values()
+	assert.Equal(t, 1, min)
+	assert.Equal(t, 3, max)
+
+	assert.True(t, Wrap([]int{}).MaxBy(less).IsNil())
+	assert.True(t, Wrap([]int{}).MinBy(less).IsNil())
+	assert.True(t, Wrap([]int{}).MinMaxBy(less).IsNil())
+}
+
+func TestSForEach(t *testing.T) {
+	sum := 0
+	Wrap([]int{1, 2, 3}).ForEach(func(i int) { sum += i })
+	assert.Equal(t, 6, sum)
+
+	weighted := 0
+	Wrap([]int{1, 2, 3}).ForEachIndexed(func(i, v int) { weighted += i * v })
+	assert.Equal(t, 8, weighted) // 0*1 + 1*2 + 2*3
+}
+
+func TestSEqualBy(t *testing.T) {
+	eq := func(a, b int) bool { return a == b }
+	assert.True(t, Wrap([]int{1, 2}).EqualBy([]int{1, 2}, eq))
+	assert.False(t, Wrap([]int{1, 2}).EqualBy([]int{1, 3}, eq))
+}
+
 func TestC(t *testing.T) {
 	c := WrapC([]int{1, 2, 2, 3})
 	assert.True(t, c.Contains(2))
@@ -200,6 +257,18 @@ func TestO(t *testing.T) {
 	// Ordered elements are comparable and convertible to S and C.
 	assert.Equal(t, []string{"1", "2", "3"}, WrapO([]int{3, 1, 2}).Sort().S().Map(strconv.Itoa).Unwrap())
 	assert.True(t, WrapO([]int{3, 1, 2}).C().Contains(3))
+}
+
+func TestCoverageGaps(t *testing.T) {
+	// The methods that the other tests do not reach.
+	assert.Equal(t, 3, WrapC([]int{1, 2, 3}).Len())
+	assert.Equal(t, 3, WrapO([]int{1, 2, 3}).Len())
+	assert.Equal(t, 3, WrapN([]int{1, 2, 3}).Len())
+	assert.Equal(t, []int{1, 2, 3}, WrapN([]int{1, 2, 3}).Unwrap())
+
+	// PartialSortBy orders the first k elements only.
+	sorted := WrapO([]int{3, 1, 2}).PartialSortBy(2, func(a, b int) bool { return a < b })
+	assert.Equal(t, []int{1, 2}, sorted.Unwrap()[:2])
 }
 
 func TestN(t *testing.T) {

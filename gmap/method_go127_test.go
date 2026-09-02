@@ -164,6 +164,74 @@ func TestMMath(t *testing.T) {
 	assert.Equal(t, 3, max)
 }
 
+func TestMFilterMapFamily(t *testing.T) {
+	m := Wrap(map[int]int{1: 2, 2: 3})
+
+	assert.Equal(t, map[int]int{1: 4}, m.FilterMap(func(k, v int) (int, int, bool) {
+		return k, v * 2, k == 1
+	}).Unwrap())
+
+	// The item is dropped when f returns an error.
+	assert.Equal(t, map[int]int{1: 4}, m.TryFilterMap(func(k, v int) (int, int, error) {
+		if k == 2 {
+			return 0, 0, errors.New("skip")
+		}
+		return k, v * 2, nil
+	}).Unwrap())
+
+	assert.Equal(t, map[string]int{"1": 2}, m.TryFilterMapKeys(func(k int) (string, error) {
+		if k == 2 {
+			return "", errors.New("skip")
+		}
+		return strconv.Itoa(k), nil
+	}).Unwrap())
+
+	assert.Equal(t, map[int]string{1: "2"}, m.TryFilterMapValues(func(v int) (string, error) {
+		if v == 3 {
+			return "", errors.New("skip")
+		}
+		return strconv.Itoa(v), nil
+	}).Unwrap())
+}
+
+func TestMTryMapSuccess(t *testing.T) {
+	m := Wrap(map[int]int{1: 2})
+
+	assert.Equal(t, map[string]string{"1": "2"}, m.TryMap(func(k, v int) (string, string, error) {
+		return strconv.Itoa(k), strconv.Itoa(v), nil
+	}).Value().Unwrap())
+
+	assert.Equal(t, map[string]int{"1": 2}, m.TryMapKeys(func(k int) (string, error) {
+		return strconv.Itoa(k), nil
+	}).Value().Unwrap())
+
+	assert.Equal(t, map[int]string{1: "2"}, m.TryMapValues(func(v int) (string, error) {
+		return strconv.Itoa(v), nil
+	}).Value().Unwrap())
+}
+
+func TestMEqualByAndPeekItem(t *testing.T) {
+	m := Wrap(map[int]int{1: 2})
+	eq := func(a, b int) bool { return a == b }
+
+	assert.True(t, m.EqualBy(map[int]int{1: 2}, eq))
+	assert.False(t, m.EqualBy(map[int]int{1: 3}, eq))
+
+	// PeekItem does not delete the item.
+	key, value := m.PeekItem().Value().Values()
+	assert.Equal(t, 1, key)
+	assert.Equal(t, 2, value)
+	assert.Equal(t, 1, m.Len())
+}
+
+func TestMUnwrapVariants(t *testing.T) {
+	assert.Equal(t, map[int]int{1: 2}, Wrap(map[int]int{1: 2}).Unwrap())
+	assert.Equal(t, map[int]int{1: 2}, WrapMK(map[int]int{1: 2}).Unwrap())
+	assert.Equal(t, map[string]int{"a": 1}, WrapMV(map[string]int{"a": 1}).Unwrap())
+	assert.Equal(t, map[string]int{"a": 1}, WrapMO(map[string]int{"a": 1}).Unwrap())
+	assert.Equal(t, map[string]int{"a": 1}, WrapMN(map[string]int{"a": 1}).Unwrap())
+}
+
 func TestMK(t *testing.T) {
 	mk := WrapMK(map[int]int{2: 3, 1: 2})
 	assert.Equal(t, []int{1, 2}, mk.OrderedKeys())

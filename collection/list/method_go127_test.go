@@ -65,6 +65,14 @@ func TestGo127ListPartition(t *testing.T) {
 	assert.Equal(t, []int{2}, unmatched.ToSlice())
 }
 
+func TestGo127ListNegative(t *testing.T) {
+	// The predicate never matches, and the empty list.
+	assert.False(t, newList(1, 2, 3).Any(func(i int) bool { return i > 9 }))
+	assert.False(t, newList(1, 2, 3).All(func(i int) bool { return i == 1 }))
+	assert.False(t, New[int]().Any(func(i int) bool { return true }))
+	assert.True(t, New[int]().All(func(i int) bool { return false }))
+}
+
 func TestGo127ListForEach(t *testing.T) {
 	sum := 0
 	newList(1, 2, 3).ForEach(func(i int) { sum += i })
