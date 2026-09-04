@@ -267,7 +267,7 @@ gslice.Map([]int{1, 2, 3, 4, 5}, strconv.Itoa)
 isEven := func(i int) bool { return i%2 == 0 }
 gslice.Filter([]int{1, 2, 3, 4, 5}, isEven)
 // [2, 4]
-gslice.Reduce([]int{1, 2, 3, 4, 5}, gvalue.Add[int].Value())
+gslice.Reduce([]int{1, 2, 3, 4, 5}, gvalue.Add[int]).Value()
 // 15
 gslice.Any([]int{1, 2, 3, 4, 5}, isEven)
 // true
@@ -284,7 +284,7 @@ gslice.ContainsAny([]int{1, 2, 3, 4, 5}, 2, 6)
 // true
 gslice.ContainsAll([]int{1, 2, 3, 4, 5}, 2, 6)
 // false
-gslice.Index([]int{1, 2, 3, 4, 5}, 3.Value())
+gslice.Index([]int{1, 2, 3, 4, 5}, 3).Value()
 // 2
 gslice.Find([]int{1, 2, 3, 4, 5}, isEven).Value()
 // 2
@@ -590,7 +590,7 @@ import "github.com/bytedance/sonic"
 
 gson.MarshalBy(sonic.ConfigDefault, testcase)
 // []byte(`{"name":"test","age":10}`) nil
-gson.MarshalString(sonic.ConfigDefault, testcase)
+gson.MarshalStringBy(sonic.ConfigDefault, testcase)
 // {"name":"test","age":10}`, nil
 gson.UnmarshalBy[testStruct](sonic.ConfigDefault, `{"name":"test","age":10}`)
 // testStruct{Name: "test", Age: 10}, nil
@@ -600,7 +600,7 @@ import jsoniter "github.com/json-iterator/go"
 
 gson.MarshalBy(jsoniter.ConfigDefault, testcase)
 // []byte(`{"name":"test","age":10}`) nil
-gson.MarshalString(jsoniter.ConfigDefault, testcase)
+gson.MarshalStringBy(jsoniter.ConfigDefault, testcase)
 // {"name":"test","age":10}`, nil
 gson.UnmarshalBy[testStruct](jsoniter.ConfigDefault, `{"name":"test","age":10}`)
 // testStruct{Name: "test", Age: 10}, nil
