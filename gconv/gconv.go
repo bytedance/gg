@@ -120,31 +120,31 @@ func ToE[T convertible, V any](v V) (T, error) {
 	case bool:
 		return assertT[T](toBool(v))
 	case int:
-		return assertT[T](toNumber[int](v))
+		return assertT[T](toNumber[int](v, strconv.IntSize))
 	case int8:
-		return assertT[T](toNumber[int8](v))
+		return assertT[T](toNumber[int8](v, 8))
 	case int16:
-		return assertT[T](toNumber[int16](v))
+		return assertT[T](toNumber[int16](v, 16))
 	case int32:
-		return assertT[T](toNumber[int32](v))
+		return assertT[T](toNumber[int32](v, 32))
 	case int64:
-		return assertT[T](toNumber[int64](v))
+		return assertT[T](toNumber[int64](v, 64))
 	case uint:
-		return assertT[T](toNumber[uint](v))
+		return assertT[T](toNumber[uint](v, strconv.IntSize))
 	case uint8:
-		return assertT[T](toNumber[uint8](v))
+		return assertT[T](toNumber[uint8](v, 8))
 	case uint16:
-		return assertT[T](toNumber[uint16](v))
+		return assertT[T](toNumber[uint16](v, 16))
 	case uint32:
-		return assertT[T](toNumber[uint32](v))
+		return assertT[T](toNumber[uint32](v, 32))
 	case uint64:
-		return assertT[T](toNumber[uint64](v))
+		return assertT[T](toNumber[uint64](v, 64))
 	case uintptr:
-		return assertT[T](toNumber[uintptr](v))
+		return assertT[T](toNumber[uintptr](v, strconv.IntSize))
 	case float32:
-		return assertT[T](toNumber[float32](v))
+		return assertT[T](toNumber[float32](v, 32))
 	case float64:
-		return assertT[T](toNumber[float64](v))
+		return assertT[T](toNumber[float64](v, 64))
 	case string:
 		return assertT[T](toString(v))
 	default:
@@ -152,11 +152,11 @@ func ToE[T convertible, V any](v V) (T, error) {
 		case reflect.Bool:
 			return convertT[T](toBool(v))
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return convertT[T](toNumber[int64](v))
+			return convertT[T](toNumber[int64](v, reflect.TypeOf(t).Bits()))
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-			return convertT[T](toNumber[uint64](v))
+			return convertT[T](toNumber[uint64](v, reflect.TypeOf(t).Bits()))
 		case reflect.Float32, reflect.Float64:
-			return convertT[T](toNumber[float64](v))
+			return convertT[T](toNumber[float64](v, reflect.TypeOf(t).Bits()))
 		case reflect.String:
 			return convertT[T](toString(v))
 		default:
@@ -245,7 +245,7 @@ type number interface {
 	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | uintptr | float32 | float64
 }
 
-func toNumber[T number](a any) (T, error) {
+func toNumber[T number](a any, bitSize int) (T, error) {
 	a = indirect(a)
 	switch v := a.(type) {
 	case bool:
@@ -279,9 +279,9 @@ func toNumber[T number](a any) (T, error) {
 	case float64:
 		return T(v), nil
 	case string:
-		return parseNumber[T](v)
+		return parseNumber[T](v, bitSize)
 	case []byte:
-		return parseNumber[T](string(v))
+		return parseNumber[T](string(v), bitSize)
 	default:
 		rt := reflect.TypeOf(a)
 		switch rt.Kind() {
@@ -294,10 +294,10 @@ func toNumber[T number](a any) (T, error) {
 		case reflect.Float32, reflect.Float64:
 			return T(reflect.ValueOf(a).Float()), nil
 		case reflect.String:
-			return parseNumber[T](reflect.ValueOf(a).String())
+			return parseNumber[T](reflect.ValueOf(a).String(), bitSize)
 		case reflect.Slice:
 			if rt.Elem().Kind() == reflect.Uint8 {
-				return parseNumber[T](string(reflect.ValueOf(a).Bytes()))
+				return parseNumber[T](string(reflect.ValueOf(a).Bytes()), bitSize)
 			}
 			return 0, errUnsupported
 		default:
@@ -306,18 +306,27 @@ func toNumber[T number](a any) (T, error) {
 	}
 }
 
-func parseNumber[T number](s string) (T, error) {
+func parseNumber[T number](s string, bitSize int) (T, error) {
 	t := gvalue.Zero[T]()
 	switch any(t).(type) {
 	case int, int8, int16, int32, int64:
-		tt, err := strconv.ParseInt(formatDecimalString(s), 10, 64)
-		return T(tt), err
+		tt, err := strconv.ParseInt(formatDecimalString(s), 10, bitSize)
+		if err != nil {
+			return 0, err
+		}
+		return T(tt), nil
 	case uint, uint8, uint16, uint32, uint64, uintptr:
-		tt, err := strconv.ParseUint(formatDecimalString(s), 10, 64)
-		return T(tt), err
+		tt, err := strconv.ParseUint(formatDecimalString(s), 10, bitSize)
+		if err != nil {
+			return 0, err
+		}
+		return T(tt), nil
 	case float32, float64:
-		tt, err := strconv.ParseFloat(s, 64)
-		return T(tt), err
+		tt, err := strconv.ParseFloat(s, bitSize)
+		if err != nil {
+			return 0, err
+		}
+		return T(tt), nil
 	default:
 		return 0, errUnsupported
 	}
