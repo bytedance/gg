@@ -627,6 +627,13 @@ func (i *intersperseIter[T]) Next(n int) []T {
 	if n == 0 {
 		return nil
 	}
+	// needSep means the previous call ended after an element. A separator is
+	// only valid when another element follows; otherwise it would become a
+	// trailing separator when the iterator is consumed in chunks.
+	if i.needSep && !hasNext(i.i) {
+		i.needSep = false
+		return nil
+	}
 
 	// Elements that need to be separated.
 	var elems []T
