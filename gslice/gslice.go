@@ -1297,17 +1297,10 @@ func IndexRevBy[T any](s []T, f func(T) bool) goption.O[int] {
 // if you modify the sub-slices, the original slice is modified too.
 // Use [TakeClone] to prevent this.
 func Take[S ~[]T, I constraints.Integer, T any](s S, n I) S {
-	startIdx, endIdx := 0, int(n)
 	if n < 0 {
-		endIdx = len(s)
-		startIdx, _ = normalizeIndex(s, n)
-		if startIdx < 0 {
-			startIdx = 0
-		}
-	} else if endIdx > len(s) {
-		endIdx = len(s)
+		return s[clampIndex(s, n):]
 	}
-	return s[startIdx:endIdx]
+	return s[:clampIndex(s, n)]
 }
 
 // TakeClone is variant of [Take].
@@ -1345,22 +1338,16 @@ func TakeClone[S ~[]T, I constraints.Integer, T any](s S, n I) S {
 // [Slice Expression]: https://tip.golang.org/ref/spec#Slice_expressions
 func Slice[S ~[]T, I constraints.Integer, T any](s S, start, end I) S {
 	// Handle the negative index
-	startIdx, _ := normalizeIndex(s, start)
+	startIdx := clampIndex(s, start)
 	// Particularly, 0 in the right endpoint and the light endpoint is negative
 	// implies the 0 is equal the last slice.
 	var endIdx int
 	if start < 0 && end == 0 {
 		endIdx = len(s)
 	} else {
-		endIdx, _ = normalizeIndex(s, end)
+		endIdx = clampIndex(s, end)
 	}
 
-	if startIdx < 0 {
-		startIdx = 0
-	}
-	if endIdx > len(s) {
-		endIdx = len(s)
-	}
 	if startIdx >= endIdx {
 		return S{}
 	}
@@ -1500,12 +1487,7 @@ func Insert[S ~[]T, T any, I constraints.Integer](s S, pos I, vs ...T) S {
 	if len(vs) == 0 {
 		return Clone(s)
 	}
-	index, _ := normalizeIndex(s, pos)
-	if index >= len(s) {
-		index = len(s)
-	} else if index < 0 {
-		index = 0
-	}
+	index := clampIndex(s, pos)
 
 	dst := make(S, len(s)+len(vs))
 	copy(dst, s[:index])
@@ -1525,12 +1507,9 @@ func insertInplace[T any, I constraints.Integer](s []T, pos I, vs ...T) []T {
 	if len(vs) == 0 {
 		return s
 	}
-	index, _ := normalizeIndex(s, pos)
-	if index >= len(s) {
+	index := clampIndex(s, pos)
+	if index == len(s) {
 		return append(s, vs...)
-	}
-	if index < 0 {
-		index = 0
 	}
 
 	// Extend capacity to l, see https://silverrainz.me/notes/go/slice-expr.html#extend-capacity
@@ -1540,14 +1519,39 @@ func insertInplace[T any, I constraints.Integer](s []T, pos I, vs ...T) []T {
 	return s
 }
 
-// normalizeIndex normalizes possible [Negative index] to positive index.
-// the returned bool indicate whether the normalized index is in range [0, len(s)).
+// normalizeIndex normalizes a possible [Negative index] without converting it
+// to int until its range has been validated. This matters when I is wider than
+// int: converting uint64(math.MaxUint64) directly to int would turn it into -1.
 func normalizeIndex[T any, I constraints.Integer](s []T, n I) (int, bool) {
-	m := int(n)
-	if m < 0 {
-		m += len(s)
+	if n < 0 {
+		m := int64(n) // n is a signed integer in this branch.
+		if m < -int64(len(s)) {
+			return 0, false
+		}
+		return len(s) + int(m), true
 	}
-	return m, m >= 0 && m < len(s)
+	m := uint64(n)
+	if m >= uint64(len(s)) {
+		return 0, false
+	}
+	return int(m), true
+}
+
+// clampIndex normalizes a possible negative index and clamps out-of-range
+// values to the nearest slice boundary.
+func clampIndex[T any, I constraints.Integer](s []T, n I) int {
+	if n < 0 {
+		m := int64(n) // n is a signed integer in this branch.
+		if m < -int64(len(s)) {
+			return 0
+		}
+		return len(s) + int(m)
+	}
+	m := uint64(n)
+	if m > uint64(len(s)) {
+		return len(s)
+	}
+	return int(m)
 }
 
 // Of creates a slice from variadic arguments.
@@ -1617,7 +1621,7 @@ func Range[I constraints.Number](start, stop I) []I {
 //
 // 💡 AKA: DeleteIndex
 func RemoveIndex[S ~[]T, I constraints.Integer, T any](s S, index I) S {
-	idx, ok := normalizeIndex(s, int(index)) // conventionalize Index
+	idx, ok := normalizeIndex(s, index)
 	if !ok {
 		return Clone(s) // fast path, not valid index. return the original slice
 	}
