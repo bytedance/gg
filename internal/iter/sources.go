@@ -176,32 +176,46 @@ func FromChan[T any](ctx context.Context, ch <-chan T) Iter[T] {
 }
 
 type rangeIter[T constraints.Number] struct {
-	cur  T
-	stop T
-	step T
+	cur       T
+	stop      T
+	step      T
+	exhausted bool
 }
 
 func (i *rangeIter[T]) Next(n int) (r []T) {
-	intervalLen := math.Abs(float64(i.stop - i.cur))
-	step := math.Abs(float64(i.step))
-	l := int(math.Ceil(intervalLen / step))
-
-	if n == 0 || l == 0 {
-		return
+	if n == 0 || i.exhausted {
+		return nil
 	}
-
-	if n == ALL || n > l {
-		n = l
+	// Estimate capacity only after converting the operands to float64. Doing
+	// the subtraction in T first is exactly what caused integer ranges that
+	// cross zero to overflow. Cap the estimate to avoid a huge speculative
+	// allocation for a short or precision-limited range.
+	const maxRangePrealloc = 1 << 20
+	capacity := int(math.Ceil(math.Abs(float64(i.stop)-float64(i.cur)) / math.Abs(float64(i.step))))
+	if capacity < 0 || capacity > maxRangePrealloc {
+		capacity = maxRangePrealloc
 	}
-
-	j := 0
-	r = make([]T, n)
-	for j < n {
-		r[j] = i.cur
-		i.cur += i.step
-		j++
+	if n != ALL && n < capacity {
+		capacity = n
 	}
-	return
+	r = make([]T, 0, capacity)
+	for n == ALL || len(r) < n {
+		if (i.step > 0 && i.cur >= i.stop) || (i.step < 0 && i.cur <= i.stop) {
+			i.exhausted = true
+			break
+		}
+		r = append(r, i.cur)
+		next := i.cur + i.step
+		// The addition must move strictly toward stop. Otherwise an integer
+		// overflow or floating-point precision loss would make the iterator
+		// wrap around or repeat the same value forever.
+		if (i.step > 0 && next <= i.cur) || (i.step < 0 && next >= i.cur) {
+			i.exhausted = true
+			break
+		}
+		i.cur = next
+	}
+	return r
 }
 
 // Range is a variant of RangeWithStep, with predefined step 1.
@@ -213,10 +227,13 @@ func Range[T constraints.Number](start, stop T) Iter[T] {
 // by step.
 // If the interval does not exist, RangeWithStep returns an emptyIter.
 func RangeWithStep[T constraints.Number](start, stop, step T) Iter[T] {
-	if step == 0 || (step > 0 && start >= stop) || (step < 0 && start <= stop) {
+	// A NaN compares unequal to itself. Reject it explicitly; otherwise all
+	// direction and termination comparisons would remain false forever.
+	if start != start || stop != stop || step != step || step == 0 ||
+		(step > 0 && start >= stop) || (step < 0 && start <= stop) {
 		return emptyIter[T]{}
 	}
-	return &rangeIter[T]{start, stop, step}
+	return &rangeIter[T]{cur: start, stop: stop, step: step}
 }
 
 type repeatIter[T any] struct {
