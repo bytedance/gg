@@ -29,6 +29,7 @@ go get github.com/bytedance/gg
 
 ## 🔎 目录
 
+- [Go 1.27+ 方法链](#-go-127-方法链)
 - [泛型函数式编程](#-泛型函数式编程)
   - [goption](#goption)：选项类型，简化 `(T, bool)` 返回值的处理
   - [gresult](#gresult)：结果类型，简化 `(T, error)` 返回值的处理
@@ -49,6 +50,74 @@ go get github.com/bytedance/gg
   - [list](#list)：双向链表的实现
   - [skipset](#skipset)：基于 skiplist 实现的高性能并发集合，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~15 倍
   - [skipmap](#skipmap)：基于 skiplist 实现的高性能并发散列表，在 Go 1.24 以下版本比标准库 `sync.Map` 快 ~10 倍
+
+## ⚡ Go 1.27+ 方法链
+
+[Go 1.27 的泛型方法](https://go.dev/doc/go1.27)允许方法声明自己的类型参数。在此之前，
+`gg` 只能把操作暴露成包级函数 —— 因为像 `Map` 这样会改变类型的操作，需要一个方法无法声明的类型参数：
+
+```go
+// 包级函数（Go 1.18 起可用）
+gslice.Map(gslice.Filter(s, isOdd), strconv.Itoa)
+```
+
+现在同样的操作也提供了方法形式，可以链式书写：
+
+```go
+// 方法链（Go 1.27+）
+gslice.Wrap(s).Filter(isOdd).Map(strconv.Itoa).Unwrap()
+```
+
+💡 **包级函数不会被弃用。** 两种写法是同一批操作，方法只是**额外**提供的一种写法，
+按你的喜好选用即可。
+
+⚠️ 方法需要 Go 1.27+。它们位于 `//go:build go1.27` 约束的文件中，旧版本工具链根本不会编译这些文件，
+因此不受任何影响，也无需迁移。
+
+### 速查表
+
+| 包 | 包级函数 | 方法链 |
+| --- | --- | --- |
+| goption | `goption.Map(OK(1), strconv.Itoa)` | `goption.OK(1).Map(strconv.Itoa)` |
+| gresult | `gresult.Map(Of(strconv.Atoi("1")), strconv.Itoa)` | `gresult.Of(strconv.Atoi("1")).Map(strconv.Itoa)` |
+| gslice | `gslice.Map(s, strconv.Itoa)` | `gslice.Wrap(s).Map(strconv.Itoa)` |
+| gmap | `gmap.MapValues(m, strconv.Itoa)` | `gmap.Wrap(m).MapValues(strconv.Itoa)` |
+| gptr | `gptr.Map(&i, strconv.Itoa)` | `gptr.Wrap(&i).Map(strconv.Itoa)` |
+| gvalue | `gvalue.TypeAssert[int](v)` | `gvalue.Of(v).Cast[int]()` |
+| gconv | `gconv.To[int]("1")` | `gconv.Of("1").To[int]()` |
+| gson | `gson.ToString(v)` | `gson.Of(v).ToString()` |
+| gfunc | — | `gfunc.Partial2(add).Partial(1).Compose(strconv.Itoa)` |
+| set | — | `set.New(1, 2).Map(strconv.Itoa)` |
+| list | — | `list.New[int]().Map(strconv.Itoa)` |
+| tuple | — | `tuple.Make2(1, "a").Swap()` |
+
+### 元素约束
+
+方法无法为接收者的类型参数追加约束，因此需要对元素施加约束的操作分布在独立的包装类型上：
+
+| 包 | 包装类型 |
+| --- | --- |
+| gslice | `S[T any]` · `C[T comparable]` · `O[T constraints.Ordered]` · `N[T constraints.Number]` |
+| gmap | `M[K, V]` · `MK`（键有序）· `MV`（值可比较）· `MO`（值有序）· `MN`（值为数值） |
+
+带约束的包装类型可以转回默认类型，因此链式调用不会被打断：
+
+```go
+gslice.WrapC([]int{1, 2, 2, 3}). // C：元素可比较
+    Uniq().                       // [1, 2, 3]
+    S().                          // 转回 S
+    Filter(isOdd).
+    Map(strconv.Itoa).
+    Unwrap()                      // ["1", "3"]
+
+gmap.WrapMV(map[string]int{"a": 1}). // MV：值可比较
+    Invert().                        // {1: "a"}，值类型变成 string
+    M().                             // 转回 M
+    MapValues(func(s string) string { return s + "!" }).
+    Unwrap()                         // {1: "a!"}
+```
+
+执行 `go doc gslice` 或 `go doc gmap` 可以查看包装类型及其操作的完整列表。
 
 ## ✨ 泛型函数式编程
 
