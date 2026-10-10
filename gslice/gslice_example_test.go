@@ -32,14 +32,15 @@ func Example() {
 	fmt.Println(All([]int{1, 2, 3, 4, 5}, isEven))                     // false
 
 	// CRUD operation
-	fmt.Println(Contains([]int{1, 2, 3, 4, 5}, 2))          // true
-	fmt.Println(ContainsAny([]int{1, 2, 3, 4, 5}, 2, 6))    // true
-	fmt.Println(ContainsAll([]int{1, 2, 3, 4, 5}, 2, 6))    // false
-	fmt.Println(Index([]int{1, 2, 3, 4, 5}, 3).Value())     // 2
-	fmt.Println(Find([]int{1, 2, 3, 4, 5}, isEven).Value()) // 2
-	fmt.Println(First([]int{1, 2, 3, 4, 5}).Value())        // 1
-	fmt.Println(Get([]int{1, 2, 3, 4, 5}, 1).Value())       // 2
-	fmt.Println(Get([]int{1, 2, 3, 4, 5}, -1).Value())      //  5
+	fmt.Println(Contains([]int{1, 2, 3, 4, 5}, 2))                                    // true
+	fmt.Println(ContainsBy([]int{1, 2, 3, 4, 5}, func(v int) bool { return v == 2 })) // true
+	fmt.Println(ContainsAny([]int{1, 2, 3, 4, 5}, 2, 6))                              // true
+	fmt.Println(ContainsAll([]int{1, 2, 3, 4, 5}, 2, 6))                              // false
+	fmt.Println(Index([]int{1, 2, 3, 4, 5}, 3).Value())                               // 2
+	fmt.Println(Find([]int{1, 2, 3, 4, 5}, isEven).Value())                           // 2
+	fmt.Println(First([]int{1, 2, 3, 4, 5}).Value())                                  // 1
+	fmt.Println(Get([]int{1, 2, 3, 4, 5}, 1).Value())                                 // 2
+	fmt.Println(Get([]int{1, 2, 3, 4, 5}, -1).Value())                                //  5
 
 	// Partion operation
 	fmt.Println(Range(1, 5))                             // [1, 2, 3, 4]
@@ -96,6 +97,7 @@ func Example() {
 	// 15
 	// true
 	// false
+	// true
 	// true
 	// true
 	// false
