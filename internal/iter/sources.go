@@ -159,11 +159,11 @@ func (i *chanIter[T]) Next(n int) (r []T) {
 		case <-i.ctx.Done():
 			return
 		case v, ok := <-i.ch:
-				if !ok {
-					return
-				}
-				r = append(r, v)
+			if !ok {
+				return
 			}
+			r = append(r, v)
+		}
 	}
 	return
 }
