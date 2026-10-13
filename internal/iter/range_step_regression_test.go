@@ -1,17 +1,3 @@
-// Copyright 2025 Bytedance Ltd.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package iter
 
 import (
@@ -20,12 +6,11 @@ import (
 )
 
 // Regression for review feedback on bytedance/gg#45: a NaN produced by the
-// iteration itself (e.g. -Inf + +Inf) must terminate the iterator instead of
-// appending NaN forever. Take is bounded, so even if this guard regresses the
-// test cannot hang or OOM the runner.
+// iteration itself (e.g. -Inf + +Inf) must terminate instead of appending NaN
+// forever. Take is bounded, so this can never hang or OOM the runner.
 func TestRangeWithStepNaNMidIterationTerminates(t *testing.T) {
 	it := RangeWithStep(math.Inf(-1), 0.0, math.Inf(1))
-	got := Take(3, it)
+	got := ToSlice(Take(3, it))
 	if len(got) != 1 || !math.IsInf(got[0], -1) || math.IsNaN(got[0]) {
 		t.Fatalf("expected exactly [-Inf] before exhaustion, got %v", got)
 	}
@@ -33,9 +18,8 @@ func TestRangeWithStepNaNMidIterationTerminates(t *testing.T) {
 		t.Fatalf("expected exhaustion after -Inf, remaining %v", rest)
 	}
 
-	// Reverse direction: +Inf start with a -Inf step.
 	it2 := RangeWithStep(math.Inf(1), 0.0, math.Inf(-1))
-	got2 := Take(3, it2)
+	got2 := ToSlice(Take(3, it2))
 	if len(got2) != 1 || !math.IsInf(got2[0], +1) || math.IsNaN(got2[0]) {
 		t.Fatalf("expected exactly [+Inf] before exhaustion, got %v", got2)
 	}

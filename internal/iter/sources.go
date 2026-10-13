@@ -107,6 +107,7 @@ func (i *mapKeyIter[K, V]) Next(n int) []K {
 // FromMapKeys constructs an Iter of map's key from map m.
 //
 // 💡 NOTE: Function follows the same iteration semantics as a range statement.
+// See https://go.dev/blog/maps#iteration-order for details.
 func FromMapKeys[K comparable, V any](m map[K]V) Iter[K] {
 	return &mapKeyIter[K, V]{newUnsafeMapIter(m)}
 }
@@ -123,6 +124,7 @@ func (i *mapValueIter[K, V]) Next(n int) []V {
 // FromMapValues constructs an Iter of map's value from map m.
 //
 // 💡 NOTE: Function follows the same iteration semantics as a range statement.
+// See https://go.dev/blog/maps#iteration-order for details.
 func FromMapValues[K comparable, V any](m map[K]V) Iter[V] {
 	return &mapValueIter[K, V]{newUnsafeMapIter(m)}
 }
@@ -157,11 +159,11 @@ func (i *chanIter[T]) Next(n int) (r []T) {
 		case <-i.ctx.Done():
 			return
 		case v, ok := <-i.ch:
-			if !ok {
-				return
+				if !ok {
+					return
+				}
+				r = append(r, v)
 			}
-			r = append(r, v)
-		}
 	}
 	return
 }
