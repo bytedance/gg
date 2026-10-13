@@ -107,7 +107,6 @@ func (i *mapKeyIter[K, V]) Next(n int) []K {
 // FromMapKeys constructs an Iter of map's key from map m.
 //
 // 💡 NOTE: Function follows the same iteration semantics as a range statement.
-// See https://go.dev/blog/maps#iteration-order for details.
 func FromMapKeys[K comparable, V any](m map[K]V) Iter[K] {
 	return &mapKeyIter[K, V]{newUnsafeMapIter(m)}
 }
@@ -124,7 +123,6 @@ func (i *mapValueIter[K, V]) Next(n int) []V {
 // FromMapValues constructs an Iter of map's value from map m.
 //
 // 💡 NOTE: Function follows the same iteration semantics as a range statement.
-// See https://go.dev/blog/maps#iteration-order for details.
 func FromMapValues[K comparable, V any](m map[K]V) Iter[V] {
 	return &mapValueIter[K, V]{newUnsafeMapIter(m)}
 }
@@ -206,6 +204,15 @@ func (i *rangeIter[T]) Next(n int) (r []T) {
 		}
 		r = append(r, i.cur)
 		next := i.cur + i.step
+		// NaN can be produced by the addition itself (e.g. -Inf + +Inf or
+		// +Inf + -Inf). A NaN compares false against every direction bound and
+		// the monotonicity check below, so without an explicit guard the
+		// iterator would append NaN forever and never terminate. Stop as soon
+		// as the next value is NaN.
+		if math.IsNaN(float64(next)) {
+			i.exhausted = true
+			break
+		}
 		// The addition must move strictly toward stop. Otherwise an integer
 		// overflow or floating-point precision loss would make the iterator
 		// wrap around or repeat the same value forever.
@@ -214,6 +221,13 @@ func (i *rangeIter[T]) Next(n int) (r []T) {
 			break
 		}
 		i.cur = next
+	}
+	// A batch that yielded nothing (e.g. the next read after a batch that
+	// consumed the range exactly) must report nil. This matches the documented
+	// Iter contract that an exhausted iterator returns nil, rather than a
+	// non-nil empty slice.
+	if len(r) == 0 {
+		return nil
 	}
 	return r
 }
