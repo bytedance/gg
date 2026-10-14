@@ -57,18 +57,30 @@ type filterMapIter[T1, T2 any] struct {
 }
 
 func (i *filterMapIter[T1, T2]) Next(n int) []T2 {
-	vs := i.i.Next(n)
-	if len(vs) == 0 {
+	if n == 0 {
 		return nil
 	}
-	next := make([]T2, 0, len(vs)/2)
-	for _, v := range vs {
-		tmp, ok := i.f(v)
-		if ok {
-			next = append(next, tmp)
+	var next []T2
+	for {
+		vs := i.i.Next(n)
+		if len(vs) == 0 {
+			// Underlying iterator is exhausted; return whatever survives.
+			return next
+		}
+		for _, v := range vs {
+			if tmp, ok := i.f(v); ok {
+				next = append(next, tmp)
+			}
+		}
+		// Stop as soon as at least one element survives so the upstream batch
+		// budget is preserved. Only when a whole batch is filtered out do we
+		// pull again, which keeps an empty result synonymous with exhaustion —
+		// previously a fully-filtered batch was reported as empty even though
+		// more accepted elements remained downstream.
+		if len(next) > 0 || n == ALL {
+			return next
 		}
 	}
-	return next
 }
 
 // FilterMap applies function f to each element of iterator i with Type T1.
@@ -800,7 +812,7 @@ func Join[T ~string](sep T, i Iter[T]) T {
 // 🚀 EXAMPLE:
 //
 //	ToSlice(TypeAssert[int](FromSlice([]any{1, 2, 3}))) ⏩ []int{1, 2, 3}
-func TypeAssert[To, From any](i Iter[From]) Iter[To] {
+func TypeAssert[To, From any](i Iter[From]) Iter[T] {
 	return Map(gvalue.TypeAssert[To, From], i)
 }
 
