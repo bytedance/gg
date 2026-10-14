@@ -328,7 +328,7 @@ func (i *dropIter[T]) Next(n int) []T {
 	return i.i.Next(n)
 }
 
-// Drop drops the first n elements of iterator i, returns the remaining part of
+// Drop drops the first n elements of iterator, returns the remaining part of
 // slice, or empty iterator if n > len(s).
 //
 // ⚠️ WARNING: Panic when n < 0.
