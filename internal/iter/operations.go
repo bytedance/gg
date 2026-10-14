@@ -1071,6 +1071,7 @@ func Dup[T comparable](i Iter[T]) Iter[T] {
 		// full
 		func() Iter[T] {
 			elems := i.Next(ALL)
+			// key not found: first meet; false: second meet now; true: duplicated
 			met := make(map[T]bool, len(elems)*100/uniqRate)
 			return Filter(func(v T) bool {
 				return dupFilter(met, v)
@@ -1093,6 +1094,7 @@ func DupBy[T any, K comparable](f func(T) K, i Iter[T]) Iter[T] {
 		// full
 		func() Iter[T] {
 			elems := i.Next(ALL)
+			// key not found: first meet; false: second meet now; true: duplicated
 			met := make(map[K]bool, len(elems)*100/uniqRate)
 			return Filter(func(v T) bool {
 				return dupFilter(met, f(v))
@@ -1172,6 +1174,7 @@ func AvgBy[T any, N constraints.Number](f func(T) N, i Iter[T]) float64 {
 // extend extends slice s with elements elems, if slice s is empty, just use
 // the given elems as new slice.
 func extend[T any](s *[]T, elems []T) {
+	// Nothing to do
 	if len(elems) == 0 {
 		return
 	}
@@ -1249,8 +1252,8 @@ func Chunk[T any](n int, i Iter[T]) Iter[[]T] {
 // 💡 HINT: If you want to splits list into length-n chunks, use function [Chunk].
 func Divide[T any](n int, i Iter[T]) Iter[[]T] {
 	elems := i.Next(ALL)
-	k := len(elems) / n
-	m := len(elems) % n
+	k := len(elems) / n // Every chunk have at least k elements
+	m := len(elems) % n // The first m chunks have an extra element
 	next := make([][]T, n)
 	for i := 0; i < n; i++ {
 		next[i] = elems[i*k+gvalue.Min(i, m) : (i+1)*k+gvalue.Min(i+1, m)]
@@ -1291,14 +1294,16 @@ func (i *compactIter[T]) Next(n int) []T {
 		for j < len(next) {
 			for k := 0; k < len(todo); k++ {
 				if todo[k] != i.zero {
-					next[ptr] = todo[k]
+					next[ptr] = todo[k] // Move element
 					ptr++
 				}
 			}
 
+			// If the iterator is empty, or we have get enough(n) elements, leave the read loop
 			if empty || ptr == n {
 				break
 			}
+			// We need to return n element total, so read from iterator again.
 			todo = i.i.Next(n - ptr)
 			empty = len(todo) < n-ptr
 		}
