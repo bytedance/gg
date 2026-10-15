@@ -102,3 +102,18 @@ func TestIntersperseFilterMapChunkedMatchesAllAtOnce(t *testing.T) {
 		}
 	}
 }
+
+// TestIntersperseOverFilterMapExactReviewRepro locks the exact sequence reported
+// in review: FilterMap over [1,2,3] keeping odds, wrapped in Intersperse(9).
+// After a first Next(1) the second Next(ALL) must yield [9 3] (separator plus
+// the next accepted element), not [] (the old fully-filtered-batch-exhaustion bug).
+func TestIntersperseOverFilterMapExactReviewRepro(t *testing.T) {
+	src := FilterMap(func(v int) (int, bool) { return v, v%2 == 1 }, FromSlice([]int{1, 2, 3}))
+	i := Intersperse(9, src)
+	if got := i.Next(1); !sameSeq(got, []int{1}) {
+		t.Fatalf("first Next(1) = %v, want [1]", got)
+	}
+	if got := i.Next(ALL); !sameSeq(got, []int{9, 3}) {
+		t.Fatalf("second Next(ALL) = %v, want [9 3]", got)
+	}
+}
