@@ -47,8 +47,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-
-	"github.com/bytedance/gg/gvalue"
 )
 
 // O represents a generic optional value: Every O is a value T([OK]),
@@ -107,11 +105,11 @@ func (o O[T]) ValueOr(v T) T {
 //
 // 💡 HINT: Refer to function [github.com/bytedance/gg/gvalue.Zero]
 // for explanation of zero value.
-func (o O[T]) ValueOrZero() T {
+func (o O[T]) ValueOrZero() (v T) {
 	if o.ok {
 		return o.val
 	}
-	return gvalue.Zero[T]()
+	return v
 }
 
 // Ptr returns a pointer that points to the internal value of optional value O[T].
@@ -158,7 +156,8 @@ func (o O[T]) IfNil(f func()) {
 
 // typ returns the string representation of type of optional value.
 func (o O[T]) typ() string {
-	typ := reflect.TypeOf(gvalue.Zero[T]())
+	var v T
+	typ := reflect.TypeOf(v)
 	if typ == nil {
 		return "any"
 	}

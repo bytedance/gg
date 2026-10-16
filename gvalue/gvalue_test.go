@@ -21,6 +21,7 @@ import (
 	"testing"
 	"unsafe"
 
+	"github.com/bytedance/gg/goption"
 	"github.com/bytedance/gg/internal/assert"
 )
 
@@ -40,6 +41,15 @@ func TestOr(t *testing.T) {
 	assert.Equal(t, 0, Or(0, 0, 0))
 	assert.Equal(t, "", Or("", "", ""))
 	assert.Equal(t, 0, Or[int]())
+}
+
+func TestOrO(t *testing.T) {
+	assert.Equal(t, goption.OK(true), OrO(false, false, true))
+	assert.Equal(t, goption.OK(1), OrO(0, 1, 2))
+	assert.Equal(t, goption.OK("1"), OrO("", "1", "2"))
+	assert.Equal(t, goption.Nil[int](), OrO(0, 0, 0))
+	assert.Equal(t, goption.Nil[string](), OrO("", "", ""))
+	assert.Equal(t, goption.Nil[int](), OrO[int]())
 }
 
 func TestMin(t *testing.T) {
