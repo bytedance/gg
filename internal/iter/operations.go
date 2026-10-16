@@ -57,18 +57,30 @@ type filterMapIter[T1, T2 any] struct {
 }
 
 func (i *filterMapIter[T1, T2]) Next(n int) []T2 {
-	vs := i.i.Next(n)
-	if len(vs) == 0 {
+	if n == 0 {
 		return nil
 	}
-	next := make([]T2, 0, len(vs)/2)
-	for _, v := range vs {
-		tmp, ok := i.f(v)
-		if ok {
-			next = append(next, tmp)
+	var next []T2
+	for {
+		vs := i.i.Next(n)
+		if len(vs) == 0 {
+			// Underlying iterator is exhausted; return whatever survives.
+			return next
+		}
+		for _, v := range vs {
+			if tmp, ok := i.f(v); ok {
+				next = append(next, tmp)
+			}
+		}
+		// Stop as soon as at least one element survives so the upstream batch
+		// budget is preserved. Only when a whole batch is filtered out do we
+		// pull again, which keeps an empty result synonymous with exhaustion —
+		// previously a fully-filtered batch was reported as empty even though
+		// more accepted elements remained downstream.
+		if len(next) > 0 || n == ALL {
+			return next
 		}
 	}
-	return next
 }
 
 // FilterMap applies function f to each element of iterator i with Type T1.
@@ -625,6 +637,13 @@ type intersperseIter[T any] struct {
 
 func (i *intersperseIter[T]) Next(n int) []T {
 	if n == 0 {
+		return nil
+	}
+	// needSep means the previous call ended after an element. A separator is
+	// only valid when another element follows; otherwise it would become a
+	// trailing separator when the iterator is consumed in chunks.
+	if i.needSep && !hasNext(i.i) {
+		i.needSep = false
 		return nil
 	}
 
