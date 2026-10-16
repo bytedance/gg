@@ -29,6 +29,7 @@ go get github.com/bytedance/gg
 
 ## 🔎 Table of contents
 
+- [Go 1.27+ Method Chaining](#-go-127-method-chaining)
 - [Generic Functional Programming](#-generic-functional-programming)
   - [goption](#goption)：Option type, simplifying the processing of `(T, bool)`
   - [gresult](#gresult)：Result type, simplifying the processing of `(T, error)`
@@ -49,6 +50,81 @@ go get github.com/bytedance/gg
   - [list](#list)：Implementation of doubly linked list
   - [skipset](#skipset)：High-performance, scalable, concurrent-safe set based on skip-list, up to 15x faster than the built-in `sync.Map` below Go 1.24
   - [skipmap](#skipmap)：High-performance, scalable, concurrent-safe map based on skip-list, up to 10x faster than the built-in `sync.Map` below Go 1.24
+
+## ⚡ Go 1.27+ Method Chaining
+
+[Go 1.27 generic methods](https://go.dev/doc/go1.27) allow a method to declare
+its own type parameters. Before that, `gg` could only expose operations as
+package-level functions, because operations that change the type (such as `Map`)
+need a type parameter that a method was not allowed to declare:
+
+```go
+// Package-level functions (available since Go 1.18).
+gslice.Map(gslice.Filter(s, isOdd), strconv.Itoa)
+```
+
+Now the same operations are available as methods, so they can be chained:
+
+```go
+// Method chaining (Go 1.27+).
+gslice.Wrap(s).Filter(isOdd).Map(strconv.Itoa).Unwrap()
+```
+
+💡 **The package-level functions are NOT deprecated.** Both styles are the same
+operations, the methods are an *additional* way to write them — use whatever you
+prefer.
+
+⚠️ The methods require Go 1.27+. They live in files guarded by `//go:build
+go1.27`, so older tool chains simply do not compile them: nothing changes for
+them, and no migration is needed.
+
+### Cheat sheet
+
+| Package | Package-level function | Method chaining |
+| --- | --- | --- |
+| goption | `goption.Map(OK(1), strconv.Itoa)` | `goption.OK(1).Map(strconv.Itoa)` |
+| gresult | `gresult.Map(Of(strconv.Atoi("1")), strconv.Itoa)` | `gresult.Of(strconv.Atoi("1")).Map(strconv.Itoa)` |
+| gslice | `gslice.Map(s, strconv.Itoa)` | `gslice.Wrap(s).Map(strconv.Itoa)` |
+| gmap | `gmap.MapValues(m, strconv.Itoa)` | `gmap.Wrap(m).MapValues(strconv.Itoa)` |
+| gptr | `gptr.Map(&i, strconv.Itoa)` | `gptr.Wrap(&i).Map(strconv.Itoa)` |
+| gvalue | `gvalue.TypeAssert[int](v)` | `gvalue.Of(v).Cast[int]()` |
+| gconv | `gconv.To[int]("1")` | `gconv.Of("1").To[int]()` |
+| gson | `gson.ToString(v)` | `gson.Of(v).ToString()` |
+| gfunc | — | `gfunc.Partial2(add).Partial(1).Compose(strconv.Itoa)` |
+| set | — | `set.New(1, 2).Map(strconv.Itoa)` |
+| list | — | `list.New[int]().Map(strconv.Itoa)` |
+| tuple | — | `tuple.Make2(1, "a").Swap()` |
+
+### Element constraints
+
+A method can not add constraints on the type parameters of its receiver, so the
+operations that need a constraint on the element live on separate wrapper types:
+
+| Package | Wrapper types |
+| --- | --- |
+| gslice | `S[T any]` · `C[T comparable]` · `O[T constraints.Ordered]` · `N[T constraints.Number]` |
+| gmap | `M[K, V]` · `MK` (ordered key) · `MV` (comparable value) · `MO` (ordered value) · `MN` (number value) |
+
+The constrained wrappers are converted back to the default one, so the chain can
+keep going:
+
+```go
+gslice.WrapC([]int{1, 2, 2, 3}). // C: comparable elements
+    Uniq().                       // [1, 2, 3]
+    S().                          // back to S
+    Filter(isOdd).
+    Map(strconv.Itoa).
+    Unwrap()                      // ["1", "3"]
+
+gmap.WrapMV(map[string]int{"a": 1}). // MV: comparable values
+    Invert().                        // {1: "a"}, the value type is now string
+    M().                             // back to M
+    MapValues(func(s string) string { return s + "!" }).
+    Unwrap()                         // {1: "a!"}
+```
+
+Run `go doc gslice` or `go doc gmap` for the full list of the wrapper types and
+their operations.
 
 ## ✨ Generic Functional Programming
 
