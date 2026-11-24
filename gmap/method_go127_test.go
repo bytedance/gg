@@ -164,6 +164,18 @@ func TestMMath(t *testing.T) {
 	assert.Equal(t, 3, max)
 }
 
+func TestNewCapacity(t *testing.T) {
+	m := New[string, int](4)
+	assert.Equal(t, 0, m.Len())
+
+	// A negative capacity is treated as zero instead of panicking.
+	neg := New[string, int](-1)
+	assert.Equal(t, 0, neg.Len())
+
+	neg["a"] = 1
+	assert.Equal(t, 1, neg.Len())
+}
+
 func TestMFilterMapFamily(t *testing.T) {
 	m := Wrap(map[int]int{1: 2, 2: 3})
 

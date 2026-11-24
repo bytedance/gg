@@ -139,6 +139,8 @@ func (c C[T]) Compact() C[T] {
 
 // Union returns the union of the slice and the given ones.
 //
+// 💡 NOTE: If the result is empty, an empty map is returned instead of nil.
+//
 // 🚀 EXAMPLE:
 //
 //	WrapC([]int{1, 2}).Union(WrapC([]int{2, 3})).Unwrap()  ⏩ [1, 2, 3]
@@ -147,6 +149,8 @@ func (c C[T]) Union(ss ...C[T]) C[T] {
 }
 
 // Diff returns the elements of the slice that are not in the given ones.
+//
+// 💡 NOTE: If the result is empty, an empty map is returned instead of nil.
 //
 // 🚀 EXAMPLE:
 //
@@ -157,6 +161,8 @@ func (c C[T]) Diff(againsts ...C[T]) C[T] {
 
 // Intersect returns the elements that are both in the slice and in all of the
 // given ones.
+//
+// 💡 NOTE: If the result is empty, an empty map is returned instead of nil.
 //
 // 🚀 EXAMPLE:
 //

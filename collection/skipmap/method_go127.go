@@ -20,6 +20,11 @@
 // Before Go 1.27, a method can not declare its own type parameters, so the
 // operations that were not tied to the type parameters of the container were
 // still missing as methods.
+//
+// The operations below range over the container, so they stay safe to call
+// concurrently with writers. The result is a best-effort snapshot though: it
+// may mix items observed at different points in time, so it should be used for
+// statistics rather than for making decisions that need an atomic view.
 package skipmap
 
 import "github.com/bytedance/gg/goption"

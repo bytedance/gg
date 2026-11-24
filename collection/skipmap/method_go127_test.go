@@ -23,6 +23,14 @@ import (
 	"github.com/bytedance/gg/internal/assert"
 )
 
+func TestNonNegative(t *testing.T) {
+	// Len of a concurrent map can be negative, the capacity hint must not be.
+	assert.Equal(t, 0, nonNegative(-1))
+	assert.Equal(t, 0, nonNegative(-100))
+	assert.Equal(t, 0, nonNegative(0))
+	assert.Equal(t, 5, nonNegative(5))
+}
+
 func TestGo127KeysValuesConcurrent(t *testing.T) {
 	// Len of a concurrent map is a best-effort value and can even be negative
 	// in a short window, so it must not be passed to make as a capacity.

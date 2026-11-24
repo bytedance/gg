@@ -66,13 +66,18 @@ func Wrap[K comparable, V any](m map[K]V) M[K, V] {
 	return M[K, V](m)
 }
 
-// New creates an empty map with the given capacity.
+// New creates an empty map with the given capacity hint.
+//
+// A negative capacity is treated as zero.
 //
 // 🚀 EXAMPLE:
 //
 //	New[string, int](4)["a"] = 1
-func New[K comparable, V any](cap int) M[K, V] {
-	return M[K, V](make(map[K]V, cap))
+func New[K comparable, V any](capacity int) M[K, V] {
+	if capacity < 0 {
+		capacity = 0
+	}
+	return M[K, V](make(map[K]V, capacity))
 }
 
 // Unwrap returns the wrapped map of M.
@@ -232,16 +237,25 @@ func (m M[K, V]) RejectValues(f func(V) bool) M[K, V] {
 }
 
 // Keys returns the keys of the map.
+//
+// ⚠️ WARNING: The order of the result is indeterminate, since it is
+// collected by ranging over the map.
 func (m M[K, V]) Keys() []K {
 	return Keys(m)
 }
 
 // Values returns the values of the map.
+//
+// ⚠️ WARNING: The order of the result is indeterminate, since it is
+// collected by ranging over the map.
 func (m M[K, V]) Values() []V {
 	return Values(m)
 }
 
 // Items returns the items (key-value pairs) of the map.
+//
+// ⚠️ WARNING: The order of the result is indeterminate, since it is
+// collected by ranging over the map.
 func (m M[K, V]) Items() tuple.S2[K, V] {
 	return Items(m)
 }
@@ -270,6 +284,8 @@ func (m M[K, V]) UnionBy(ms []M[K, V], onConflict ConflictFunc[K, V]) M[K, V] {
 
 // Diff returns the items of the map whose key is not in the given ones.
 //
+// 💡 NOTE: If the result is empty, an empty map is returned instead of nil.
+//
 // 🚀 EXAMPLE:
 //
 //	Wrap(map[int]int{1: 2, 2: 3}).Diff(Wrap(map[int]int{2: 4})).Unwrap()  ⏩ {1: 2}
@@ -279,6 +295,8 @@ func (m M[K, V]) Diff(againsts ...M[K, V]) M[K, V] {
 
 // Intersect returns the items whose key is both in the map and in all of the
 // given ones.
+//
+// 💡 NOTE: If the result is empty, an empty map is returned instead of nil.
 //
 // 🚀 EXAMPLE:
 //
@@ -304,12 +322,16 @@ func (m M[K, V]) Load(k K) goption.O[V] {
 
 // LoadOrStore returns the value of the given key, stores and returns defaultV
 // when the key is not present.
+//
+// ⚠️ WARNING: Panic when a nil map is given.
 func (m M[K, V]) LoadOrStore(k K, defaultV V) (V, bool) {
 	return LoadOrStore(m, k, defaultV)
 }
 
 // LoadOrStoreLazy is variant of [M.LoadOrStore], the default value is lazily
 // evaluated by function f.
+//
+// ⚠️ WARNING: Panic when a nil map is given.
 func (m M[K, V]) LoadOrStoreLazy(k K, f func() V) (V, bool) {
 	return LoadOrStoreLazy(m, k, f)
 }
@@ -372,17 +394,23 @@ func (m M[K, V]) EqualBy(m2 map[K]V, eq func(V, V) bool) bool {
 }
 
 // MaxBy returns the maximum value of the map, compared by function less.
+//
+// 💡 NOTE: If the map is empty, [goption.Nil] is returned.
 func (m M[K, V]) MaxBy(less func(V, V) bool) goption.O[V] {
 	return MaxBy(m, less)
 }
 
 // MinBy returns the minimum value of the map, compared by function less.
+//
+// 💡 NOTE: If the map is empty, [goption.Nil] is returned.
 func (m M[K, V]) MinBy(less func(V, V) bool) goption.O[V] {
 	return MinBy(m, less)
 }
 
 // MinMaxBy returns the minimum and maximum value of the map, compared by
 // function less.
+//
+// 💡 NOTE: If the map is empty, [goption.Nil] is returned.
 func (m M[K, V]) MinMaxBy(less func(V, V) bool) goption.O[tuple.T2[V, V]] {
 	return MinMaxBy(m, less)
 }
@@ -398,11 +426,17 @@ func (m M[K, V]) AvgBy[N constraints.Number](f func(V) N) float64 {
 }
 
 // Chunk splits the map into chunks of the given size.
+//
+// ⚠️ WARNING: The order of the result is indeterminate, since it is
+// collected by ranging over the map.
 func (m M[K, V]) Chunk(size int) []M[K, V] {
 	return Chunk(m, size)
 }
 
 // Divide splits the map into n chunks as evenly as possible.
+//
+// ⚠️ WARNING: The order of the result is indeterminate, since it is
+// collected by ranging over the map.
 func (m M[K, V]) Divide(n int) []M[K, V] {
 	return Divide(m, n)
 }

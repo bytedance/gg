@@ -255,6 +255,8 @@ func (s S[T]) CountBy(f func(T) bool) int {
 
 // Chunk splits the slice into chunks of the given size.
 //
+// ⚠️ WARNING: Panic when size < 1.
+//
 // 🚀 EXAMPLE:
 //
 //	Wrap([]int{1, 2, 3, 4, 5}).Chunk(2)  ⏩ [[1, 2], [3, 4], [5]]
@@ -263,11 +265,15 @@ func (s S[T]) Chunk(size int) []S[T] {
 }
 
 // ChunkClone is variant of [S.Chunk], the chunks are copies of the elements.
+//
+// ⚠️ WARNING: Panic when size < 1.
 func (s S[T]) ChunkClone(size int) []S[T] {
 	return ChunkClone(s, size)
 }
 
 // Divide splits the slice into n chunks as evenly as possible.
+//
+// ⚠️ WARNING: Panic when n < 1.
 //
 // 🚀 EXAMPLE:
 //
@@ -277,6 +283,8 @@ func (s S[T]) Divide(n int) []S[T] {
 }
 
 // DivideClone is variant of [S.Divide], the chunks are copies of the elements.
+//
+// ⚠️ WARNING: Panic when n < 1.
 func (s S[T]) DivideClone(n int) []S[T] {
 	return DivideClone(s, n)
 }
@@ -309,17 +317,23 @@ func (s S[T]) CountValuesBy[K comparable](f func(T) K) map[K]int {
 }
 
 // MaxBy returns the maximum element of the slice, compared by function less.
+//
+// 💡 NOTE: If the slice is empty, [goption.Nil] is returned.
 func (s S[T]) MaxBy(less func(T, T) bool) goption.O[T] {
 	return MaxBy(s, less)
 }
 
 // MinBy returns the minimum element of the slice, compared by function less.
+//
+// 💡 NOTE: If the slice is empty, [goption.Nil] is returned.
 func (s S[T]) MinBy(less func(T, T) bool) goption.O[T] {
 	return MinBy(s, less)
 }
 
 // MinMaxBy returns the minimum and maximum element of the slice,
 // compared by function less.
+//
+// 💡 NOTE: If the slice is empty, [goption.Nil] is returned.
 func (s S[T]) MinMaxBy(less func(T, T) bool) goption.O[tuple.T2[T, T]] {
 	return MinMaxBy(s, less)
 }
@@ -450,11 +464,17 @@ func (s S[T]) DropClone(n int) S[T] {
 }
 
 // RemoveIndex removes the element at the given index.
+//
+// 💡 NOTE: A negative index is counted from the end. An index out of range is
+// ignored, a copy of the original slice is returned, it never panics.
 func (s S[T]) RemoveIndex[I constraints.Integer](index I) S[T] {
 	return RemoveIndex(s, index)
 }
 
 // Insert inserts the values vs at the given position.
+//
+// 💡 NOTE: A negative position is counted from the end, and a position out
+// of range is clamped, it never panics.
 func (s S[T]) Insert[I constraints.Integer](pos I, vs ...T) S[T] {
 	return Insert(s, pos, vs...)
 }

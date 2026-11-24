@@ -95,6 +95,29 @@ func TestSGet(t *testing.T) {
 	assert.Equal(t, 2, s.CountBy(func(i int) bool { return i > 1 }))
 }
 
+func TestChunkPanics(t *testing.T) {
+	// The documented panic contracts, they mirror the package-level functions.
+	assert.Panic(t, func() { Wrap([]int{1, 2}).Chunk(0) })
+	assert.Panic(t, func() { Wrap([]int{1, 2}).ChunkClone(-1) })
+	assert.Panic(t, func() { Wrap([]int{1, 2}).Divide(0) })
+	assert.Panic(t, func() { Wrap([]int{1, 2}).DivideClone(-1) })
+
+	// Drop drops nothing for n == 0 and rejects only negative arguments.
+	assert.Equal(t, []int{1, 2}, Wrap([]int{1, 2}).Drop(0).Unwrap())
+	assert.Panic(t, func() { Wrap([]int{1, 2}).Drop(-1) })
+	assert.Panic(t, func() { Wrap([]int{1, 2}).DropClone(-1) })
+}
+
+func TestInsertRemoveIndexBounds(t *testing.T) {
+	// Both clamp out-of-range arguments instead of panicking.
+	assert.Equal(t, []int{9, 1, 2}, Wrap([]int{1, 2}).Insert(-5, 9).Unwrap())
+	assert.Equal(t, []int{1, 2, 9}, Wrap([]int{1, 2}).Insert(100, 9).Unwrap())
+	assert.Equal(t, []int{1, 9, 2}, Wrap([]int{1, 2}).Insert(-1, 9).Unwrap())
+	assert.Equal(t, []int{1, 2}, Wrap([]int{1, 2}).RemoveIndex(100).Unwrap())
+	assert.Equal(t, []int{1, 2}, Wrap([]int{1, 2}).RemoveIndex(-100).Unwrap())
+	assert.Equal(t, []int{1}, Wrap([]int{1, 2}).RemoveIndex(-1).Unwrap())
+}
+
 func TestSChunk(t *testing.T) {
 	chunks := Wrap([]int{1, 2, 3, 4, 5}).Chunk(2)
 	assert.Equal(t, 3, len(chunks))

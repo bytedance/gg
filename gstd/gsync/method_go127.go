@@ -21,6 +21,9 @@
 package gsync
 
 // Len returns the number of the items of the map.
+//
+// 💡 NOTE: [sync.Map] has no size, so it is counted by ranging over the map,
+// the complexity is O(N).
 func (sm *Map[K, V]) Len() int {
 	length := 0
 	sm.Range(func(K, V) bool {
@@ -31,38 +34,47 @@ func (sm *Map[K, V]) Len() int {
 }
 
 // Keys returns the keys of the map.
+//
+// ⚠️ WARNING: The keys will be in an indeterminate order, since they are
+// collected by ranging over the map.
 func (sm *Map[K, V]) Keys() []K {
-	m := sm.ToMap()
-	keys := make([]K, 0, len(m))
-	for k := range m {
+	var keys []K
+	sm.Range(func(k K, v V) bool {
 		keys = append(keys, k)
-	}
+		return true
+	})
 	return keys
 }
 
 // Values returns the values of the map.
+//
+// ⚠️ WARNING: The values will be in an indeterminate order, since they are
+// collected by ranging over the map.
 func (sm *Map[K, V]) Values() []V {
-	m := sm.ToMap()
-	values := make([]V, 0, len(m))
-	for _, v := range m {
+	var values []V
+	sm.Range(func(k K, v V) bool {
 		values = append(values, v)
-	}
+		return true
+	})
 	return values
 }
 
 // ToSlice converts the map to a slice, the element of the slice is produced by
 // function f.
 //
+// ⚠️ WARNING: The returned slice will be in an indeterminate order, since it is
+// collected by ranging over the map.
+//
 // 🚀 EXAMPLE:
 //
 //	sm.ToSlice(func(k string, v int) string { return k + strconv.Itoa(v) })
-//	// ["a1", "b2"]
+//	// possible result: ["a1", "b2"]
 func (sm *Map[K, V]) ToSlice[R any](f func(K, V) R) []R {
-	m := sm.ToMap()
-	r := make([]R, 0, len(m))
-	for k, v := range m {
+	var r []R
+	sm.Range(func(k K, v V) bool {
 		r = append(r, f(k, v))
-	}
+		return true
+	})
 	return r
 }
 

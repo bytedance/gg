@@ -86,6 +86,9 @@ func (m MV[K, V]) Count(v V) int {
 
 // Invert swaps the keys and the values of the map.
 //
+// ⚠️ WARNING: The order of the result is indeterminate, since it is
+// collected by ranging over the map.
+//
 // 🚀 EXAMPLE:
 //
 //	WrapMV(map[string]int{"a": 1}).Invert().Unwrap()  ⏩ {1: "a"}
@@ -95,12 +98,18 @@ func (m MV[K, V]) Invert() MV[V, K] {
 
 // InvertBy is variant of [MV.Invert], the conflict is resolved by function
 // onConflict.
+//
+// ⚠️ WARNING: The iteration order of the map is indeterminate, so the order
+// in which the conflicts are resolved is indeterminate as well.
 func (m MV[K, V]) InvertBy(onConflict ConflictFunc[V, K]) MV[V, K] {
 	return InvertBy(m, onConflict)
 }
 
 // InvertGroup swaps the keys and the values of the map, the keys with the same
 // value are grouped into a slice.
+//
+// ⚠️ WARNING: The order of the result is indeterminate, since it is
+// collected by ranging over the map.
 //
 // 🚀 EXAMPLE:
 //
@@ -148,6 +157,8 @@ func (m MO[K, V]) MV() MV[K, V] {
 
 // Max returns the maximum value of the map.
 //
+// 💡 NOTE: If the map is empty, [goption.Nil] is returned.
+//
 // 🚀 EXAMPLE:
 //
 //	WrapMO(map[string]int{"a": 1, "b": 2}).Max().Value()  ⏩ 2
@@ -157,6 +168,8 @@ func (m MO[K, V]) Max() goption.O[V] {
 
 // Min returns the minimum value of the map.
 //
+// 💡 NOTE: If the map is empty, [goption.Nil] is returned.
+//
 // 🚀 EXAMPLE:
 //
 //	WrapMO(map[string]int{"a": 1, "b": 2}).Min().Value()  ⏩ 1
@@ -165,6 +178,8 @@ func (m MO[K, V]) Min() goption.O[V] {
 }
 
 // MinMax returns the minimum and maximum value of the map.
+//
+// 💡 NOTE: If the map is empty, [goption.Nil] is returned.
 //
 // 🚀 EXAMPLE:
 //
