@@ -17,6 +17,7 @@
 package gslice
 
 import (
+	"encoding/json"
 	"errors"
 	"strconv"
 	"testing"
@@ -29,6 +30,17 @@ func TestWrap(t *testing.T) {
 	assert.Equal(t, []int{1, 2, 3}, Wrap([]int{1, 2, 3}).Unwrap())
 	assert.Equal(t, 3, Wrap([]int{1, 2, 3}).Len())
 	assert.Equal(t, []int{1, 2}, New(1, 2).Unwrap())
+
+	// New keeps the "never nil" contract of Of, so the JSON encodings agree.
+	assert.NotNil(t, New[int]().Unwrap())
+	assert.NotNil(t, Of[int]())
+	assert.Equal(t, 0, len(New[int]().Unwrap()))
+
+	bNew, err := json.Marshal(New[int]().Unwrap())
+	assert.Nil(t, err)
+	bOf, err := json.Marshal(Of[int]())
+	assert.Nil(t, err)
+	assert.Equal(t, string(bOf), string(bNew))
 	assert.Equal(t, []int{1, 2, 3, 4}, Wrap(Range(1, 5)).Unwrap())
 	assert.Equal(t, []int{5, 3}, Wrap(RangeWithStep(5, 1, -2)).Unwrap())
 }

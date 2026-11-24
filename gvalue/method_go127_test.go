@@ -114,3 +114,22 @@ func TestNum(t *testing.T) {
 	assert.Equal(t, 1, NumericOf(1).Get())
 	assert.Equal(t, "1", NumericOf(1).String())
 }
+
+func TestVIsZeroAgreesWithIsZero(t *testing.T) {
+	// V.IsZero checks the zero value of the static type T, so it agrees with
+	// the package-level IsZero even when T is an interface: a non-nil interface
+	// holding a zero value is NOT zero.
+	var x any = 0
+	assert.False(t, IsZero(x))
+	assert.False(t, Of(x).IsZero())
+
+	var nilAny any
+	assert.True(t, IsZero(nilAny))
+	assert.True(t, Of(nilAny).IsZero())
+
+	// Common non-interface cases still behave as before.
+	assert.True(t, Of(0).IsZero())
+	assert.False(t, Of(1).IsZero())
+	assert.True(t, Of([]int(nil)).IsZero())
+	assert.False(t, Of([]int{}).IsZero())
+}

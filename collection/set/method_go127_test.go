@@ -17,6 +17,7 @@
 package set
 
 import (
+	"math"
 	"strconv"
 	"testing"
 
@@ -74,6 +75,16 @@ func TestGo127SetGroupBy(t *testing.T) {
 	assert.Equal(t, 2, len(grouped))
 	assert.Equal(t, 2, grouped["1"].Len())
 	assert.Equal(t, 1, grouped["0"].Len())
+}
+
+func TestGo127SetGroupByNaN(t *testing.T) {
+	// A key that is not equal to itself (such as NaN) can not be looked up even
+	// right after the assignment, so the group must not be fetched again.
+	// The group count is unspecified for such keys, only the absence of the
+	// nil-pointer panic is asserted here.
+	assert.NotPanic(t, func() {
+		New(1, 2, 3).GroupBy(func(int) float64 { return math.NaN() })
+	})
 }
 
 func TestGo127SetForEach(t *testing.T) {

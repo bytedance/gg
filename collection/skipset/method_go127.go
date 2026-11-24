@@ -26,7 +26,7 @@ import "github.com/bytedance/gg/goption"
 
 // Any returns whether any element of the set satisfies f.
 //
-// 💡 NOTE: The set is traversed in ascending order.
+// 💡 NOTE: The set is traversed in the order defined by the less function.
 func (s *FuncSet[T]) Any(f func(T) bool) bool {
 	found := false
 	s.Range(func(v T) bool {
@@ -56,8 +56,8 @@ func (s *FuncSet[T]) All(f func(T) bool) bool {
 
 // Find returns the first element of the set that satisfies f.
 //
-// 💡 NOTE: The set is traversed in ascending order, so the first element is
-// the smallest one that satisfies f.
+// 💡 NOTE: The set is traversed in the order defined by the less function, so
+// the first element is the first one in that order that satisfies f.
 func (s *FuncSet[T]) Find(f func(T) bool) goption.O[T] {
 	var (
 		found T
@@ -182,7 +182,7 @@ func (s *OrderedSet[T]) Reduce(f func(T, T) T) goption.O[T] {
 
 // Any returns whether any element of the set satisfies f.
 //
-// 💡 NOTE: The set is traversed in ascending order.
+// 💡 NOTE: The set is traversed in descending order.
 func (s *OrderedSetDesc[T]) Any(f func(T) bool) bool {
 	found := false
 	s.Range(func(v T) bool {
@@ -212,8 +212,8 @@ func (s *OrderedSetDesc[T]) All(f func(T) bool) bool {
 
 // Find returns the first element of the set that satisfies f.
 //
-// 💡 NOTE: The set is traversed in ascending order, so the first element is
-// the smallest one that satisfies f.
+// 💡 NOTE: The set is traversed in descending order, so the first element is
+// the largest one that satisfies f.
 func (s *OrderedSetDesc[T]) Find(f func(T) bool) goption.O[T] {
 	var (
 		found T

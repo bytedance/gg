@@ -82,8 +82,13 @@ func Wrap[T any](s []T) S[T] {
 // 🚀 EXAMPLE:
 //
 //	New(1, 2, 3).Len()  ⏩ 3
+//
+// 💡 NOTE: It never returns a nil slice, the same contract as [Of]:
+//
+//	New[int]().Unwrap()  ⏩ []int{}
+//	Of[int]()            ⏩ []int{}
 func New[T any](vs ...T) S[T] {
-	return S[T](vs)
+	return S[T](Of(vs...))
 }
 
 // Unwrap returns the wrapped slice of S.
@@ -420,12 +425,26 @@ func (s S[T]) SliceClone[I constraints.Integer](start, end I) S[T] {
 	return SliceClone(s, start, end)
 }
 
-// Drop removes the first n elements of the slice, negative n drops from the end.
+// Drop drops the first n elements of the slice, returns the remaining part of
+// the slice, or empty slice if n > len(s).
+//
+// ⚠️ WARNING: Panic when n < 0.
+//
+// 💡 NOTE: It returns a sub-slice of the original slice, use [S.DropClone] to
+// prevent the modification of the original slice.
+//
+// 🚀 EXAMPLE:
+//
+//	Wrap([]int{1, 2, 3}).Drop(0).Unwrap()   ⏩ [1, 2, 3]
+//	Wrap([]int{1, 2, 3}).Drop(1).Unwrap()   ⏩ [2, 3]
+//	Wrap([]int{1, 2, 3}).Drop(10).Unwrap()  ⏩ []
 func (s S[T]) Drop(n int) S[T] {
 	return Drop(s, n)
 }
 
 // DropClone is variant of [S.Drop], it returns a new slice.
+//
+// ⚠️ WARNING: Panic when n < 0.
 func (s S[T]) DropClone(n int) S[T] {
 	return DropClone(s, n)
 }

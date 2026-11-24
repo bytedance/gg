@@ -17,10 +17,57 @@
 package skipmap
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/bytedance/gg/internal/assert"
 )
+
+func TestGo127KeysValuesConcurrent(t *testing.T) {
+	// Len of a concurrent map is a best-effort value and can even be negative
+	// in a short window, so it must not be passed to make as a capacity.
+	m := New[int, int]()
+
+	var wg sync.WaitGroup
+	for id := 0; id < 8; id++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			for j := 0; j < 500; j++ {
+				k := (id*500 + j) % 32
+				m.Store(k, j)
+				m.Delete(k)
+				_ = m.Keys()
+				_ = m.Values()
+			}
+		}(id)
+	}
+	wg.Wait()
+
+	// Same for the other two variants.
+	fm := NewFunc[string, int](func(a, b string) bool { return a < b })
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		for j := 0; j < 500; j++ {
+			fm.Store("k", j)
+			fm.Delete("k")
+			_ = fm.Keys()
+			_ = fm.Values()
+		}
+	}()
+	dm := NewDesc[int, int]()
+	go func() {
+		defer wg.Done()
+		for j := 0; j < 500; j++ {
+			dm.Store(j%32, j)
+			dm.Delete(j % 32)
+			_ = dm.Keys()
+			_ = dm.Values()
+		}
+	}()
+	wg.Wait()
+}
 
 func TestGo127OrderedMap(t *testing.T) {
 	m := New[string, int]()

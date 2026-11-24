@@ -24,9 +24,23 @@ package skipmap
 
 import "github.com/bytedance/gg/goption"
 
+// nonNegative clamps n to be non-negative.
+//
+// Len of a concurrent map is a best-effort value: the counter is updated after
+// the node is linked (insert) or unlinked (delete), so a reader may observe a
+// value that is temporarily off, including a negative one. The value is only
+// used as a capacity hint, so it must be clamped instead of being passed to
+// make directly, which would panic with "makeslice: cap out of range".
+func nonNegative(n int) int {
+	if n < 0 {
+		return 0
+	}
+	return n
+}
+
 // Keys returns the keys of the map.
 func (s *FuncMap[keyT, valueT]) Keys() []keyT {
-	keys := make([]keyT, 0, s.Len())
+	keys := make([]keyT, 0, nonNegative(s.Len()))
 	s.Range(func(key keyT, value valueT) bool {
 		keys = append(keys, key)
 		return true
@@ -36,7 +50,7 @@ func (s *FuncMap[keyT, valueT]) Keys() []keyT {
 
 // Values returns the values of the map.
 func (s *FuncMap[keyT, valueT]) Values() []valueT {
-	values := make([]valueT, 0, s.Len())
+	values := make([]valueT, 0, nonNegative(s.Len()))
 	s.Range(func(key keyT, value valueT) bool {
 		values = append(values, value)
 		return true
@@ -114,7 +128,7 @@ func (s *FuncMap[keyT, valueT]) ForEach(f func(keyT, valueT)) {
 
 // Keys returns the keys of the map.
 func (s *OrderedMap[keyT, valueT]) Keys() []keyT {
-	keys := make([]keyT, 0, s.Len())
+	keys := make([]keyT, 0, nonNegative(s.Len()))
 	s.Range(func(key keyT, value valueT) bool {
 		keys = append(keys, key)
 		return true
@@ -124,7 +138,7 @@ func (s *OrderedMap[keyT, valueT]) Keys() []keyT {
 
 // Values returns the values of the map.
 func (s *OrderedMap[keyT, valueT]) Values() []valueT {
-	values := make([]valueT, 0, s.Len())
+	values := make([]valueT, 0, nonNegative(s.Len()))
 	s.Range(func(key keyT, value valueT) bool {
 		values = append(values, value)
 		return true
@@ -202,7 +216,7 @@ func (s *OrderedMap[keyT, valueT]) ForEach(f func(keyT, valueT)) {
 
 // Keys returns the keys of the map.
 func (s *OrderedMapDesc[keyT, valueT]) Keys() []keyT {
-	keys := make([]keyT, 0, s.Len())
+	keys := make([]keyT, 0, nonNegative(s.Len()))
 	s.Range(func(key keyT, value valueT) bool {
 		keys = append(keys, key)
 		return true
@@ -212,7 +226,7 @@ func (s *OrderedMapDesc[keyT, valueT]) Keys() []keyT {
 
 // Values returns the values of the map.
 func (s *OrderedMapDesc[keyT, valueT]) Values() []valueT {
-	values := make([]valueT, 0, s.Len())
+	values := make([]valueT, 0, nonNegative(s.Len()))
 	s.Range(func(key keyT, value valueT) bool {
 		values = append(values, value)
 		return true

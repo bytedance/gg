@@ -81,17 +81,23 @@ func (v V[T]) IsNotNil() bool {
 // It is a variant of function [IsZero] without the comparable constraint:
 // non-comparable values (such as slice) are checked by reflection.
 //
+// 💡 NOTE: The zero value of the static type T is checked, NOT the dynamic value
+// inside an interface, so it agrees with [IsZero]:
+//
+//	var x any = 0
+//	IsZero(x)          ⏩ false // x is a non-nil interface
+//	Of(x).IsZero()     ⏩ false
+//
 // 🚀 EXAMPLE:
 //
 //	Of(0).IsZero()          ⏩ true
 //	Of([]int(nil)).IsZero() ⏩ true
 //	Of([]int{}).IsZero()    ⏩ false
 func (v V[T]) IsZero() bool {
-	av := any(v.v)
-	if av == nil {
-		return true
-	}
-	return reflect.ValueOf(av).IsZero()
+	// Taking the address of the field keeps the static type T: reflect.ValueOf
+	// on the value itself would unwrap T and inspect the dynamic type instead,
+	// which makes an interface holding a zero value look like a zero value.
+	return reflect.ValueOf(&v.v).Elem().IsZero()
 }
 
 // IsNotZero is negation of [V.IsZero].

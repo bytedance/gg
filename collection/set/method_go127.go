@@ -220,10 +220,15 @@ func (s *Set[T]) GroupBy[K comparable](f func(T) K) map[K]*Set[T] {
 	}
 	for v := range s.m {
 		k := f(v)
-		if _, ok := m[k]; !ok {
-			m[k] = New[T]()
+		// Keep the group in a local variable: for a key that is not equal to
+		// itself (such as NaN) the lookup returns nothing even right after the
+		// assignment, and a second lookup would return a nil set.
+		group, ok := m[k]
+		if !ok {
+			group = New[T]()
+			m[k] = group
 		}
-		m[k].Add(v)
+		group.Add(v)
 	}
 	return m
 }
