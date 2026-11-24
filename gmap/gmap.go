@@ -1400,6 +1400,9 @@ func MinMaxBy[K comparable, V any](m map[K]V, less func(V, V) bool) goption.O[tu
 //
 // The last chunk will be shorter if n does not evenly divide the length of the map.
 //
+// 💡 NOTE: It does not panic for a non-positive size: a size of 0 returns no
+// chunk, and a negative size returns the whole map as a single chunk.
+//
 // ⚠️ WARNING: The values in chunks will be in an indeterminate order.
 func Chunk[M ~map[K]V, K comparable, V any](m M, size int) []M {
 	return iter.ToSlice(
@@ -1412,6 +1415,8 @@ func Chunk[M ~map[K]V, K comparable, V any](m M, size int) []M {
 //
 // The length of chunks will be different if n does not evenly divide the length
 // of the slice.
+//
+// ⚠️ WARNING: Panic when n < 1.
 //
 // ⚠️ WARNING: The values in chunks will be in an indeterminate order.
 func Divide[M ~map[K]V, K comparable, V any](m M, n int) []M {

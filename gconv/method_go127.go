@@ -69,6 +69,11 @@ func (v V[T]) Get() T {
 //	Of("true").To[bool]()  ⏩ true
 //	Of(1).To[string]()     ⏩ "1"
 //	Of("x").To[int]()      ⏩ 0
+//
+// ⚠️ WARNING: byte is an alias for uint8, rune is an alias for int32:
+//
+//	Of('a').To[string]()   ⏩ "97"
+//	Of('中').To[string]()  ⏩ "20013"
 func (v V[T]) To[R convertible]() R {
 	return To[R](v.v)
 }
@@ -82,6 +87,11 @@ func (v V[T]) To[R convertible]() R {
 //
 //	Of("1").ToPtr[int]()  ⏩ (*int)(1)
 //	Of("x").ToPtr[int]()  ⏩ (*int)(nil)
+//
+// ⚠️ WARNING: byte is an alias for uint8, rune is an alias for int32:
+//
+//	Of('a').To[string]()   ⏩ "97"
+//	Of('中').To[string]()  ⏩ "20013"
 func (v V[T]) ToPtr[R convertible]() *R {
 	return ToPtr[R](v.v)
 }
@@ -95,6 +105,11 @@ func (v V[T]) ToPtr[R convertible]() *R {
 //
 //	Of("1").ToR[int]().Value()  ⏩ 1
 //	Of("x").ToR[int]().IsErr()  ⏩ true
+//
+// ⚠️ WARNING: byte is an alias for uint8, rune is an alias for int32:
+//
+//	Of('a').To[string]()   ⏩ "97"
+//	Of('中').To[string]()  ⏩ "20013"
 func (v V[T]) ToR[R convertible]() gresult.R[R] {
 	return ToR[R](v.v)
 }
@@ -108,6 +123,11 @@ func (v V[T]) ToR[R convertible]() gresult.R[R] {
 //
 //	Of("1").ToE[int]()  ⏩ 1 nil
 //	Of("x").ToE[int]()  ⏩ 0 strconv.ParseInt: parsing "x": invalid syntax
+//
+// ⚠️ WARNING: byte is an alias for uint8, rune is an alias for int32:
+//
+//	Of('a').To[string]()   ⏩ "97"
+//	Of('中').To[string]()  ⏩ "20013"
 func (v V[T]) ToE[R convertible]() (R, error) {
 	return ToE[R](v.v)
 }

@@ -30,6 +30,13 @@ func TestVTo(t *testing.T) {
 	assert.Equal(t, "1", Of("1").Get())
 }
 
+func TestVByteRuneAlias(t *testing.T) {
+	// byte is an alias for uint8 and rune for int32, so a character converts to
+	// its numeric value rather than to a one-character string.
+	assert.Equal(t, "97", Of('a').To[string]())
+	assert.Equal(t, "20013", Of('中').To[string]())
+}
+
 func TestVToPtr(t *testing.T) {
 	assert.Equal(t, 1, *Of("1").ToPtr[int]())
 	assert.Nil(t, Of("x").ToPtr[int]())

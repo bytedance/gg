@@ -141,6 +141,19 @@ func TestMSetOp(t *testing.T) {
 	assert.Equal(t, map[int]int{1: 2, 2: 4}, m.Merge(Wrap(map[int]int{2: 4})).Unwrap())
 }
 
+func TestMChunkAndDivideBounds(t *testing.T) {
+	m := Wrap(map[int]int{1: 2, 2: 3})
+
+	// A non-positive size is not an error for Chunk: 0 yields no chunk and a
+	// negative size yields the whole map as a single chunk.
+	assert.Equal(t, 0, len(m.Chunk(0)))
+	assert.Equal(t, 1, len(m.Chunk(-1)))
+
+	// Divide rejects them, like the package-level function.
+	assert.Panic(t, func() { m.Divide(0) })
+	assert.Panic(t, func() { m.Divide(-1) })
+}
+
 func TestMChunk(t *testing.T) {
 	chunks := Wrap(map[int]int{1: 2, 2: 3, 3: 4, 4: 5, 5: 6}).Chunk(2)
 	assert.Equal(t, 3, len(chunks))

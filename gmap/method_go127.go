@@ -427,6 +427,9 @@ func (m M[K, V]) AvgBy[N constraints.Number](f func(V) N) float64 {
 
 // Chunk splits the map into chunks of the given size.
 //
+// 💡 NOTE: It does not panic for a non-positive size: a size of 0 returns no
+// chunk, and a negative size returns the whole map as a single chunk.
+//
 // ⚠️ WARNING: The order of the result is indeterminate, since it is
 // collected by ranging over the map.
 func (m M[K, V]) Chunk(size int) []M[K, V] {
@@ -434,6 +437,8 @@ func (m M[K, V]) Chunk(size int) []M[K, V] {
 }
 
 // Divide splits the map into n chunks as evenly as possible.
+//
+// ⚠️ WARNING: Panic when n < 1.
 //
 // ⚠️ WARNING: The order of the result is indeterminate, since it is
 // collected by ranging over the map.
