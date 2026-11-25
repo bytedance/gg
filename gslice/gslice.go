@@ -432,6 +432,8 @@ func Remove[S ~[]T, T comparable](s S, v T) S {
 //
 // The last chunk will be shorter if n does not evenly divide the length of the list.
 //
+// ⚠️ WARNING: Panic when size < 1.
+//
 // 🚀 EXAMPLE:
 //
 //	Chunk([]int{0, 1, 2, 3, 4}, 2) ⏩ [][]int{{0, 1}, {2, 3}, {4}}
@@ -456,6 +458,8 @@ func Chunk[S ~[]T, T any](s S, size int) []S {
 
 // ChunkClone is variant of function [Chunk].
 // It clones the original slice before chunking it.
+//
+// ⚠️ WARNING: Panic when size < 1.
 func ChunkClone[S ~[]T, T any](s S, size int) []S {
 	rtassert.MustLessThan(size, 1)
 	ret := make([]S, 0, (len(s)+size-1)/size)
@@ -469,6 +473,8 @@ func ChunkClone[S ~[]T, T any](s S, size int) []S {
 //
 // The length of chunks will be different if n does not evenly divide the length
 // of the slice.
+//
+// ⚠️ WARNING: Panic when n < 1.
 //
 // 🚀 EXAMPLE:
 //
@@ -499,6 +505,8 @@ func Divide[S ~[]T, T any](s S, n int) []S {
 
 // DivideClone is variant of function Divide.
 // It clones the original slice before dividing it.
+//
+// ⚠️ WARNING: Panic when n < 1.
 func DivideClone[S ~[]T, T any](s S, n int) []S {
 	rtassert.MustLessThan(n, 1)
 	k := len(s) / n // Every chunk have at least k elements
