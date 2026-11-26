@@ -129,6 +129,7 @@ func (i *flatMapIter[T1, T2]) Next(n int) []T2 {
 		if len(i.s) != 0 {
 			elemss = append(elemss, i.s)
 			nNext += len(i.s)
+			i.s = nil
 		}
 		for _, e := range elems {
 			v := i.f(e)
