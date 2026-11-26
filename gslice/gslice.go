@@ -319,6 +319,20 @@ func Contains[T comparable](s []T, v T) bool {
 	return false
 }
 
+// ContainsBy returns whether any element of the slice s satisfies the predicate f.
+//
+// 🚀 EXAMPLE:
+//
+//	ContainsBy([]int{1, 2, 3}, func(x int) bool { return x > 2 })) ⏩ true
+//	ContainsBy([]int{1, 2, 3}, func(x int) bool { return x > 3 })) ⏩ false
+//	ContainsBy([]int{1, 2, 3}, gvalue.IsZero[int]))                ⏩ false
+//	ContainsBy([]int{1, 2, 3}, gvalue.IsNotZero[int]))             ⏩ true
+//
+// 💡 AKA: Any
+func ContainsBy[T any](s []T, f func(T) bool) bool {
+	return Any(s, f)
+}
+
 // ContainsAny returns whether any of given elements occur in slice.
 //
 // 🚀 EXAMPLE:

@@ -51,8 +51,6 @@ import (
 	"reflect"
 
 	"github.com/bytedance/gg/goption"
-	"github.com/bytedance/gg/gptr"
-	"github.com/bytedance/gg/gvalue"
 )
 
 // R represents a generic result: Every result is a value,
@@ -87,7 +85,7 @@ func OK[T any](v T) R[T] {
 //
 // ⚠️ WARNING: Passing a nil error will cause ❌PANIC❌!
 func Err[T any](e error) R[T] {
-	if gvalue.IsNil(e) {
+	if reflect.ValueOf(e).IsNil() {
 		panic(fmt.Errorf("expected a non-nil error, but found nil error with type %T", e))
 	}
 	return R[T]{err: e}
@@ -112,11 +110,11 @@ func (r R[T]) ValueOr(v T) T {
 //
 // 💡 HINT: Refer to function [github.com/bytedance/gg/gvalue.Zero]
 // for explanation of zero value.
-func (r R[T]) ValueOrZero() T {
+func (r R[T]) ValueOrZero() (v T) {
 	if r.err == nil {
 		return r.val
 	}
-	return gvalue.Zero[T]()
+	return v
 }
 
 // Err returns the internal error of R.
@@ -154,14 +152,15 @@ func (r R[T]) IfErr(f func(error)) {
 }
 
 func checkErr(e error) {
-	if e != nil && gvalue.IsNil(e) {
+	if e != nil && reflect.ValueOf(e).IsNil() {
 		panic(fmt.Errorf("error with type %T is nil", e))
 	}
 }
 
 // typ returns the string representation of type of optional value.
 func (r R[T]) typ() string {
-	typ := reflect.TypeOf(gvalue.Zero[T]())
+	var v T
+	typ := reflect.TypeOf(v)
 	if typ == nil {
 		return "any"
 	}
@@ -187,7 +186,8 @@ type jsonR[T any] struct {
 func (r R[T]) MarshalJSON() ([]byte, error) {
 	jr := jsonR[T]{}
 	if r.err != nil {
-		jr.Err = gptr.Of(r.err.Error())
+		msg := r.err.Error()
+		jr.Err = &msg
 	} else {
 		jr.Val = &r.val
 	}
@@ -216,14 +216,10 @@ func (r *R[T]) UnmarshalJSON(data []byte) error {
 	}
 
 	if jr.Err == nil && jr.Val == nil {
-		r.val = gvalue.Zero[T]()
-		r.err = nil
 	} else if jr.Err != nil {
-		r.val = gvalue.Zero[T]()
 		r.err = errors.New(*jr.Err)
 	} else {
 		r.val = *jr.Val
-		r.err = nil
 	}
 
 	return nil

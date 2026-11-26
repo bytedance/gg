@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"github.com/bytedance/gg/goption"
-	"github.com/bytedance/gg/gvalue"
 	"github.com/bytedance/gg/internal/assert"
 )
 
@@ -170,12 +169,12 @@ func TestJSON(t *testing.T) {
 		var after1 R[int]
 		err = json.Unmarshal(bs, &after1)
 		assert.NotNil(t, err)
-		assert.Equal(t, gvalue.Zero[R[int]](), after1)
+		assert.Equal(t, OK(0), after1)
 
 		var after2 R[float64]
 		err = json.Unmarshal(bs, &after2)
 		assert.NotNil(t, err)
-		assert.Equal(t, gvalue.Zero[R[float64]](), after2)
+		assert.Equal(t, OK(0.0), after2)
 
 		var after3 R[string]
 		err = json.Unmarshal(bs, &after3)
@@ -205,13 +204,13 @@ func TestJSON(t *testing.T) {
 		var r R[string]
 		err := json.Unmarshal([]byte(`{}`), &r)
 		assert.Nil(t, err)
-		assert.Equal(t, gvalue.Zero[R[string]](), r)
+		assert.Equal(t, OK(""), r)
 	}
 	{ // Unmarshal empty: `null`
 		var r R[string]
 		err := json.Unmarshal([]byte(`null`), &r)
 		assert.Nil(t, err)
-		assert.Equal(t, gvalue.Zero[R[string]](), r)
+		assert.Equal(t, OK(""), r)
 	}
 	{ // Unmarshal error
 		var r R[string]
@@ -224,7 +223,7 @@ func TestJSON(t *testing.T) {
 		err := json.Unmarshal([]byte(`{"value":"test","error":"test"}`), &r)
 		assert.NotNil(t, err)
 		t.Log(err)
-		assert.Equal(t, gvalue.Zero[R[string]](), r)
+		assert.Equal(t, OK(""), r)
 	}
 
 	{
@@ -234,7 +233,7 @@ func TestJSON(t *testing.T) {
 		var r R[bool]
 		err := json.Unmarshal([]byte(`false`), &r)
 		assert.NotNil(t, err)
-		assert.Equal(t, gvalue.Zero[R[bool]](), r)
+		assert.Equal(t, OK(false), r)
 	}
 	{
 		// Unmarshal illegal: ``
@@ -243,7 +242,7 @@ func TestJSON(t *testing.T) {
 		var r R[string]
 		err := json.Unmarshal([]byte(``), &r)
 		assert.NotNil(t, err)
-		assert.Equal(t, gvalue.Zero[R[string]](), r)
+		assert.Equal(t, OK(""), r)
 	}
 	// Struct field
 	{
